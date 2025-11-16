@@ -1,12 +1,759 @@
 ---
 title: "Testing"
-description: "Documentation for Testing"
+description: "Comprehensive testing strategy, tools, and best practices for the eBay MCP Server"
 ---
 
 # Testing
 
-Documentation for this section is coming soon.
+The eBay MCP Server maintains high code quality through comprehensive testing with 870+ tests achieving 99%+ function coverage and 85%+ line coverage. This guide explains the testing strategy, tools, and how to write effective tests.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Testing Overview
+
+### Test Statistics
+
+<CardGroup cols={3}>
+  <Card title="Total Tests" icon="flask">
+    **870+ tests**
+
+    Comprehensive test suite
+  </Card>
+
+  <Card title="Function Coverage" icon="check-circle">
+    **99%+ coverage**
+
+    Nearly all functions tested
+  </Card>
+
+  <Card title="Line Coverage" icon="chart-line">
+    **85%+ coverage**
+
+    High code coverage
+  </Card>
+</CardGroup>
+
+### Testing Philosophy
+
+1. **Test Behavior, Not Implementation** - Tests should verify outcomes, not internal details
+2. **Fast Feedback** - Tests should run quickly to enable rapid development
+3. **Isolated Tests** - Each test should be independent and not rely on others
+4. **Clear Assertions** - Test failures should clearly indicate what went wrong
+5. **Realistic Scenarios** - Tests should reflect real-world usage patterns
+
+## Test Framework
+
+The project uses [Vitest](https://vitest.dev/) as the test framework, chosen for its:
+
+- Native TypeScript support
+- Fast execution with parallel testing
+- Jest-compatible API
+- Built-in coverage reporting
+- Watch mode for development
+
+### Configuration
+
+The test configuration is defined in `vitest.config.ts`:
+
+```typescript
+import { defineConfig } from "vitest/config";
+import path from "path";
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  test: {
+    globals: true,
+    environment: "node",
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
+      exclude: [
+        "node_modules/**",
+        "build/**",
+        "dist/**",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "**/types/**",
+        "tests/**",
+        "src/utils/**",  // Schema definitions
+        "src/index.ts",  // Server entry points
+        "src/server-http.ts",
+      ],
+      include: ["src/**/*.ts"],
+      thresholds: {
+        lines: 83,
+        functions: 91,
+        branches: 71,
+        statements: 82,
+      },
+    },
+    include: ["tests/**/*.test.ts"],
+    exclude: ["node_modules", "build", "dist"],
+    testTimeout: 10000,
+    hookTimeout: 10000,
+  },
+});
+```
+
+## Test Structure
+
+### Directory Organization
+
+```
+tests/
+├── unit/                   # Unit tests
+│   ├── api/               # API implementation tests
+│   ├── auth/              # OAuth and token management tests
+│   ├── config/            # Configuration tests
+│   ├── tools/             # Tool definition tests
+│   └── types/             # Type validation tests
+├── integration/           # Integration tests
+│   ├── api/               # End-to-end API tests
+│   ├── tools/             # Tool execution tests
+│   └── mcp-server/        # MCP server integration tests
+└── helpers/               # Test utilities and mocks
+    ├── mock-client.ts     # Mock HTTP client
+    ├── mock-data.ts       # Test data generators
+    └── test-utils.ts      # Common test utilities
+```
+
+### Test Types
+
+#### 1. Unit Tests
+
+Unit tests verify individual functions and classes in isolation.
+
+**Example:** Testing the OAuth client
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { EbayOAuthClient } from '@/auth/oauth.js';
+
+describe('EbayOAuthClient', () => {
+  let oauthClient: EbayOAuthClient;
+
+  beforeEach(() => {
+    oauthClient = new EbayOAuthClient({
+      clientId: 'test_client_id',
+      clientSecret: 'test_client_secret',
+      environment: 'sandbox',
+      redirectUri: 'https://example.com/callback',
+    });
+  });
+
+  describe('getAccessToken', () => {
+    it('should return valid user access token', async () => {
+      // Set up user tokens
+      oauthClient.setUserTokens(
+        'access_token_123',
+        'refresh_token_456'
+      );
+
+      const token = await oauthClient.getAccessToken();
+
+      expect(token).toBe('access_token_123');
+    });
+
+    it('should refresh expired access token', async () => {
+      // Mock expired token
+      vi.spyOn(oauthClient as any, 'isUserAccessTokenExpired')
+        .mockReturnValue(true);
+
+      vi.spyOn(oauthClient as any, 'refreshUserToken')
+        .mockResolvedValue(undefined);
+
+      await oauthClient.getAccessToken();
+
+      expect(oauthClient['refreshUserToken']).toHaveBeenCalled();
+    });
+
+    it('should fallback to app token when user token unavailable', async () => {
+      const token = await oauthClient.getAccessToken();
+
+      expect(token).toBeDefined();
+      expect(typeof token).toBe('string');
+    });
+  });
+});
+```
+
+#### 2. Integration Tests
+
+Integration tests verify that components work together correctly.
+
+**Example:** Testing inventory API integration
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest';
+import { EbayInventoryApi } from '@/api/listing-management/inventory.js';
+import { createMockClient } from 'tests/helpers/mock-client.js';
+
+describe('EbayInventoryApi Integration', () => {
+  let inventoryApi: EbayInventoryApi;
+  let mockClient: ReturnType<typeof createMockClient>;
+
+  beforeEach(() => {
+    mockClient = createMockClient();
+    inventoryApi = new EbayInventoryApi(mockClient);
+  });
+
+  describe('getInventoryItem', () => {
+    it('should fetch inventory item with correct API call', async () => {
+      const sku = 'TEST-SKU-001';
+      const mockItem = {
+        sku,
+        condition: 'NEW',
+        product: {
+          title: 'Test Product',
+          description: 'Test Description',
+        },
+      };
+
+      mockClient.get.mockResolvedValue(mockItem);
+
+      const result = await inventoryApi.getInventoryItem(sku);
+
+      expect(result).toEqual(mockItem);
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `/sell/inventory/v1/inventory_item/${sku}`
+      );
+    });
+
+    it('should handle API errors gracefully', async () => {
+      mockClient.get.mockRejectedValue(
+        new Error('eBay API Error: Invalid SKU format')
+      );
+
+      await expect(
+        inventoryApi.getInventoryItem('invalid sku')
+      ).rejects.toThrow('eBay API Error: Invalid SKU format');
+    });
+  });
+});
+```
+
+#### 3. MCP Server Tests
+
+End-to-end tests verify the entire MCP server functionality.
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { executeTool } from '@/tools/index.js';
+import { createMockApi } from 'tests/helpers/mock-api.js';
+
+describe('MCP Tool Execution', () => {
+  it('should execute inventory tool successfully', async () => {
+    const mockApi = createMockApi();
+    const result = await executeTool(
+      mockApi,
+      'ebay_get_inventory_item',
+      { sku: 'TEST-SKU-001' }
+    );
+
+    expect(result).toBeDefined();
+    expect(result.sku).toBe('TEST-SKU-001');
+  });
+
+  it('should validate tool input parameters', async () => {
+    const mockApi = createMockApi();
+
+    await expect(
+      executeTool(mockApi, 'ebay_get_inventory_item', { sku: '' })
+    ).rejects.toThrow('Validation failed');
+  });
+});
+```
+
+## Running Tests
+
+### Basic Commands
+
+```bash
+# Run all tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests with UI dashboard
+npm run test:ui
+```
+
+### Watch Mode
+
+Watch mode automatically re-runs tests when files change:
+
+```bash
+npm run test:watch
+```
+
+**Features:**
+- Automatic test re-execution on file changes
+- Filter tests by filename or pattern
+- Run only failed tests
+- Interactive menu for test control
+
+### Coverage Reporting
+
+Generate detailed coverage reports:
+
+```bash
+npm run test:coverage
+```
+
+**Output:**
+```
+ % Coverage report from v8
+-----------------------|---------|----------|---------|---------|-------------------
+File                   | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-----------------------|---------|----------|---------|---------|-------------------
+All files              |   85.23 |    71.45 |   99.12 |   83.67 |
+ api                   |   92.15 |    78.34 |  100.00 |   91.23 |
+  client.ts            |   95.67 |    82.14 |  100.00 |   94.32 | 145-152
+  index.ts             |   88.45 |    74.23 |  100.00 |   87.91 | 78-85,102
+ auth                  |   96.78 |    85.12 |  100.00 |   95.45 |
+  oauth.ts             |   96.78 |    85.12 |  100.00 |   95.45 | 203-207
+```
+
+**Coverage Files:**
+- `coverage/index.html` - Interactive HTML report
+- `coverage/lcov.info` - LCOV format for CI tools
+- `coverage/coverage-final.json` - JSON format
+
+### Test UI Dashboard
+
+Launch an interactive test dashboard:
+
+```bash
+npm run test:ui
+```
+
+**Features:**
+- Visual test runner
+- Real-time test execution
+- Coverage visualization
+- Test file browser
+- Interactive filtering
+
+## Writing Tests
+
+### Test Naming Conventions
+
+```typescript
+describe('ComponentName', () => {
+  describe('methodName', () => {
+    it('should do something when condition is met', () => {
+      // Test implementation
+    });
+
+    it('should handle edge case appropriately', () => {
+      // Test implementation
+    });
+
+    it('should throw error when input is invalid', () => {
+      // Test implementation
+    });
+  });
+});
+```
+
+**Guidelines:**
+- Use `describe` for grouping related tests
+- Use `it` for individual test cases
+- Start test descriptions with "should"
+- Be specific about what is being tested
+- Include the condition or scenario
+
+### Test Structure (AAA Pattern)
+
+Follow the Arrange-Act-Assert pattern:
+
+```typescript
+it('should create inventory item successfully', async () => {
+  // Arrange: Set up test data and mocks
+  const sku = 'TEST-SKU-001';
+  const item = {
+    condition: 'NEW',
+    product: {
+      title: 'Test Product',
+    },
+  };
+  mockClient.put.mockResolvedValue(undefined);
+
+  // Act: Execute the code under test
+  await inventoryApi.createOrReplaceInventoryItem(sku, item);
+
+  // Assert: Verify the outcome
+  expect(mockClient.put).toHaveBeenCalledWith(
+    `/sell/inventory/v1/inventory_item/${sku}`,
+    item
+  );
+});
+```
+
+### Mocking
+
+#### Mocking External Dependencies
+
+```typescript
+import { vi } from 'vitest';
+
+// Mock axios
+vi.mock('axios');
+
+// Mock specific function
+const mockGet = vi.fn();
+mockClient.get = mockGet;
+
+// Mock implementation
+mockGet.mockResolvedValue({ data: 'test' });
+
+// Verify mock was called
+expect(mockGet).toHaveBeenCalledWith('/endpoint');
+expect(mockGet).toHaveBeenCalledTimes(1);
+```
+
+#### Mocking Time
+
+```typescript
+import { vi } from 'vitest';
+
+// Mock current time
+vi.setSystemTime(new Date('2025-11-16'));
+
+// Advance time
+vi.advanceTimersByTime(1000); // 1 second
+
+// Clear timers
+vi.clearAllTimers();
+```
+
+#### Mocking Environment Variables
+
+```typescript
+beforeEach(() => {
+  process.env.EBAY_CLIENT_ID = 'test_client_id';
+  process.env.EBAY_CLIENT_SECRET = 'test_client_secret';
+  process.env.EBAY_ENVIRONMENT = 'sandbox';
+});
+
+afterEach(() => {
+  delete process.env.EBAY_CLIENT_ID;
+  delete process.env.EBAY_CLIENT_SECRET;
+  delete process.env.EBAY_ENVIRONMENT;
+});
+```
+
+### Testing Async Code
+
+```typescript
+// Using async/await
+it('should fetch data asynchronously', async () => {
+  const result = await api.getData();
+  expect(result).toBeDefined();
+});
+
+// Testing promises
+it('should resolve promise', () => {
+  return expect(api.getData()).resolves.toBeDefined();
+});
+
+// Testing rejections
+it('should reject with error', () => {
+  return expect(api.getInvalidData()).rejects.toThrow('Error message');
+});
+```
+
+### Testing Error Handling
+
+```typescript
+it('should throw validation error for invalid input', () => {
+  expect(() => {
+    validateInput({ invalid: 'data' });
+  }).toThrow('Validation failed');
+});
+
+it('should handle API errors gracefully', async () => {
+  mockClient.get.mockRejectedValue(
+    new Error('eBay API Error: Not found')
+  );
+
+  await expect(
+    inventoryApi.getInventoryItem('nonexistent')
+  ).rejects.toThrow('eBay API Error: Not found');
+});
+```
+
+## Testing Best Practices
+
+### 1. Test One Thing
+
+<Check>
+Each test should verify one specific behavior
+</Check>
+
+```typescript
+// ✅ Good: Tests one specific behavior
+it('should return user access token when available', async () => {
+  oauthClient.setUserTokens('access_token', 'refresh_token');
+  const token = await oauthClient.getAccessToken();
+  expect(token).toBe('access_token');
+});
+
+// ❌ Bad: Tests multiple behaviors
+it('should handle tokens', async () => {
+  oauthClient.setUserTokens('access_token', 'refresh_token');
+  expect(await oauthClient.getAccessToken()).toBe('access_token');
+  expect(oauthClient.hasUserTokens()).toBe(true);
+  // ... more assertions
+});
+```
+
+### 2. Use Descriptive Names
+
+<Check>
+Test names should clearly describe what is being tested
+</Check>
+
+```typescript
+// ✅ Good: Clear and descriptive
+it('should refresh access token when expired', async () => {});
+
+// ❌ Bad: Vague or unclear
+it('should work', async () => {});
+it('test token refresh', async () => {});
+```
+
+### 3. Avoid Test Interdependence
+
+<Check>
+Tests should not depend on each other
+</Check>
+
+```typescript
+// ✅ Good: Independent tests
+describe('InventoryApi', () => {
+  beforeEach(() => {
+    // Set up fresh state for each test
+    mockClient = createMockClient();
+    inventoryApi = new EbayInventoryApi(mockClient);
+  });
+
+  it('should create item', async () => {
+    // Test in isolation
+  });
+
+  it('should get item', async () => {
+    // Test in isolation
+  });
+});
+
+// ❌ Bad: Tests depend on each other
+let createdSku;
+
+it('should create item', async () => {
+  createdSku = await createItem();
+});
+
+it('should get created item', async () => {
+  await getItem(createdSku); // Depends on previous test
+});
+```
+
+### 4. Keep Tests Simple
+
+<Check>
+Tests should be easy to read and understand
+</Check>
+
+```typescript
+// ✅ Good: Simple and clear
+it('should validate SKU format', () => {
+  expect(validateSKU('TEST-SKU-001')).toBe(true);
+  expect(validateSKU('invalid sku')).toBe(false);
+});
+
+// ❌ Bad: Complex and hard to follow
+it('should validate various inputs', () => {
+  const testCases = [/* 50 test cases */];
+  testCases.forEach(tc => {
+    // Complex logic
+  });
+});
+```
+
+### 5. Use Test Fixtures
+
+<Check>
+Reuse common test data through fixtures
+</Check>
+
+```typescript
+// tests/helpers/fixtures.ts
+export const validInventoryItem = {
+  sku: 'TEST-SKU-001',
+  condition: 'NEW',
+  product: {
+    title: 'Test Product',
+    description: 'Test Description',
+  },
+};
+
+// Test file
+import { validInventoryItem } from 'tests/helpers/fixtures.js';
+
+it('should create inventory item', async () => {
+  await inventoryApi.createOrReplaceInventoryItem(
+    validInventoryItem.sku,
+    validInventoryItem
+  );
+});
+```
+
+## Coverage Requirements
+
+### Thresholds
+
+The project enforces minimum coverage thresholds:
+
+| Metric | Threshold | Current |
+|--------|-----------|---------|
+| Lines | 83% | 85%+ |
+| Functions | 91% | 99%+ |
+| Branches | 71% | 71%+ |
+| Statements | 82% | 85%+ |
+
+### Excluded Files
+
+Some files are excluded from coverage:
+- Type definitions (`**/*.d.ts`)
+- Configuration files (`**/*.config.*`)
+- Build output (`build/`, `dist/`)
+- Test files (`tests/**`)
+- Schema definitions (`src/utils/**`)
+- Server entry points (`src/index.ts`, `src/server-http.ts`)
+
+### Viewing Coverage
+
+```bash
+# Generate coverage report
+npm run test:coverage
+
+# Open HTML report in browser
+open coverage/index.html
+```
+
+## Continuous Integration
+
+Tests run automatically on every commit via GitHub Actions.
+
+### CI Workflow
+
+```yaml
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:coverage
+
+      - name: Check coverage thresholds
+        run: npm run test:coverage -- --run
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+```
+
+## Debugging Tests
+
+### Enable Debug Output
+
+```bash
+# Run tests with debug output
+DEBUG=* npm run test
+
+# Run specific test file
+npm run test -- tests/unit/auth/oauth.test.ts
+
+# Run tests matching pattern
+npm run test -- -t "should refresh token"
+```
+
+### Using Debugger
+
+```typescript
+import { describe, it } from 'vitest';
+
+describe('MyTest', () => {
+  it('should debug this', () => {
+    debugger; // Execution will pause here
+    const result = somethingToDebug();
+    expect(result).toBe(expected);
+  });
+});
+```
+
+Run with debugger:
+```bash
+node --inspect-brk ./node_modules/vitest/vitest.mjs run
+```
+
+### VSCode Debugging
+
+`.vscode/launch.json`:
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Tests",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "test"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}
+```
+
+## Related Topics
+
+<CardGroup cols={2}>
+  <Card title="Contributing" icon="code-pull-request" href="/advanced/contributing">
+    Contribution guidelines and setup
+  </Card>
+
+  <Card title="Architecture" icon="sitemap" href="/advanced/architecture">
+    Understand the system architecture
+  </Card>
+
+  <Card title="Error Handling" icon="triangle-exclamation" href="/advanced/error-handling">
+    Error handling strategies
+  </Card>
+
+  <Card title="GitHub Repository" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server">
+    View the source code and tests
+  </Card>
+</CardGroup>
