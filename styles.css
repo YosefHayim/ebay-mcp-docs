@@ -222,9 +222,54 @@ a:hover {
 }
 
 /* Search Bar Styling */
-.search-input:focus {
+/* Target all possible search input selectors used by Mintlify */
+.search-input,
+input[type="search"],
+[role="search"] input,
+[class*="search"] input,
+[data-search-input] {
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+/* Hover state - ensures full width coverage */
+.search-input:hover,
+input[type="search"]:hover,
+[role="search"] input:hover,
+[class*="search"] input:hover,
+[data-search-input]:hover {
+  border-color: var(--ebay-blue);
+  box-shadow: 0 0 0 3px rgba(0, 100, 210, 0.08);
+  background-color: rgba(0, 100, 210, 0.02);
+}
+
+.dark .search-input:hover,
+.dark input[type="search"]:hover,
+.dark [role="search"] input:hover,
+.dark [class*="search"] input:hover,
+.dark [data-search-input]:hover {
+  border-color: var(--ebay-yellow);
+  box-shadow: 0 0 0 3px rgba(245, 175, 2, 0.08);
+  background-color: rgba(245, 175, 2, 0.02);
+}
+
+/* Focus state */
+.search-input:focus,
+input[type="search"]:focus,
+[role="search"] input:focus,
+[class*="search"] input:focus,
+[data-search-input]:focus {
   border-color: var(--ebay-blue);
   box-shadow: 0 0 0 3px rgba(0, 100, 210, 0.1);
+}
+
+.dark .search-input:focus,
+.dark input[type="search"]:focus,
+.dark [role="search"] input:focus,
+.dark [class*="search"] input:focus,
+.dark [data-search-input]:focus {
+  border-color: var(--ebay-yellow);
+  box-shadow: 0 0 0 3px rgba(245, 175, 2, 0.1);
 }
 
 /* Footer Styling */
