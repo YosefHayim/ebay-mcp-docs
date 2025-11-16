@@ -1,12 +1,704 @@
 ---
-title: "Analytics Reporting"
-description: "Documentation for Analytics Reporting"
+title: "Analytics & Reporting"
+description: "Track performance, analyze traffic, and optimize your eBay business with AI-powered analytics and insights"
 ---
 
-# Analytics Reporting
+# Analytics & Reporting
 
-Documentation for this section is coming soon.
+Make data-driven decisions with comprehensive analytics and reporting. The eBay MCP Server provides **20+ tools** to track traffic, monitor seller performance, analyze customer behavior, and optimize your eBay business strategy.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## What You Can Do
+
+<CardGroup cols={2}>
+  <Card title="Traffic Analytics" icon="chart-line" color="#E53238">
+    Monitor listing views, impressions, clicks, and buyer engagement
+  </Card>
+  <Card title="Seller Standards" icon="star" color="#0064D2">
+    Track performance metrics to maintain Top Rated Seller status
+  </Card>
+  <Card title="Sales Performance" icon="dollar-sign" color="#F5AF02">
+    Analyze conversion rates, revenue trends, and sales patterns
+  </Card>
+  <Card title="Customer Insights" icon="users" color="#86B817">
+    Understand buyer behavior, return rates, and customer service metrics
+  </Card>
+</CardGroup>
+
+## Key Capabilities
+
+### Traffic Reports
+
+**Analyze Listing Performance**
+
+Track how buyers discover and interact with your listings:
+
+```typescript
+// Ask your AI assistant:
+"Show me traffic data for my listings in the last 30 days"
+
+// The AI will execute:
+const report = await mcp.useTool('analytics_getTrafficReport', {
+  dimension: 'LISTING',
+  metric_keys: ['CLICK_THROUGH_RATE', 'LISTING_IMPRESSION', 'LISTING_VIEWS', 'SALES_CONVERSION_RATE'],
+  start_date: '2024-01-01',
+  end_date: '2024-01-31',
+  sort: '-listing_views' // Sort by views descending
+});
+
+// Analyze top performers
+report.records.forEach(listing => {
+  console.log(`
+📊 ${listing.title}
+   Impressions: ${listing.listing_impression.toLocaleString()}
+   Views: ${listing.listing_views.toLocaleString()}
+   CTR: ${listing.click_through_rate}%
+   Conversion: ${listing.sales_conversion_rate}%
+   Sales: ${listing.transaction}
+  `);
+});
+```
+
+<Note>
+**Available Dimensions:**
+- `LISTING` - Individual listing performance
+- `DAY` - Daily traffic trends
+- `LISTING_FORMAT` - Auction vs. Fixed Price comparison
+- `MARKETPLACE` - Performance by marketplace (US, UK, etc.)
+</Note>
+
+**Traffic Metrics**
+
+<Tabs>
+  <Tab title="Impressions & Views">
+    ```typescript
+    "Compare impressions vs views for my top 10 listings"
+
+    const report = await mcp.useTool('analytics_getTrafficReport', {
+      dimension: 'LISTING',
+      metric_keys: ['LISTING_IMPRESSION', 'LISTING_VIEWS'],
+      start_date: '2024-01-01',
+      end_date: '2024-01-31',
+      limit: 10,
+      sort: '-listing_impression'
+    });
+
+    // Calculate click-through rate manually
+    report.records.forEach(listing => {
+      const ctr = (listing.listing_views / listing.listing_impression * 100).toFixed(2);
+      console.log(`${listing.title}: ${ctr}% CTR`);
+    });
+    ```
+
+    **Interpretation:**
+    - High impressions, low views = Poor title/main image
+    - High views, low sales = Price or description issues
+    - Low impressions = SEO/category problems
+  </Tab>
+
+  <Tab title="Conversion Rates">
+    ```typescript
+    "Show me conversion rates by category"
+
+    const report = await mcp.useTool('analytics_getTrafficReport', {
+      dimension: 'CATEGORY',
+      metric_keys: ['SALES_CONVERSION_RATE', 'TRANSACTION', 'LISTING_VIEWS'],
+      start_date: '2024-01-01',
+      end_date: '2024-01-31'
+    });
+
+    // Find best converting categories
+    const topCategories = report.records
+      .sort((a, b) => b.sales_conversion_rate - a.sales_conversion_rate)
+      .slice(0, 5);
+
+    console.log('🏆 Top Converting Categories:');
+    topCategories.forEach(cat => {
+      console.log(`   ${cat.category_name}: ${cat.sales_conversion_rate}%`);
+    });
+    ```
+  </Tab>
+
+  <Tab title="Daily Trends">
+    ```typescript
+    "Show daily traffic trends for the past week"
+
+    const report = await mcp.useTool('analytics_getTrafficReport', {
+      dimension: 'DAY',
+      metric_keys: ['LISTING_VIEWS', 'TRANSACTION', 'SALES_CONVERSION_RATE'],
+      start_date: '2024-01-24',
+      end_date: '2024-01-31',
+      sort: 'day'
+    });
+
+    // Visualize trends
+    report.records.forEach(day => {
+      const bar = '█'.repeat(Math.floor(day.listing_views / 100));
+      console.log(`${day.day}: ${bar} ${day.listing_views} views, ${day.transaction} sales`);
+    });
+    ```
+
+    **Use cases:**
+    - Identify peak traffic days (weekends vs. weekdays)
+    - Schedule promotions during high-traffic periods
+    - Optimize listing timing
+  </Tab>
+</Tabs>
+
+### Seller Standards
+
+**Monitor Performance Metrics**
+
+Maintain Top Rated Seller status by tracking key performance indicators:
+
+```typescript
+"Check my seller standards profile"
+
+const standards = await mcp.useTool('analytics_getSellerStandardsProfile', {
+  marketplace_id: 'EBAY_US'
+});
+
+console.log(`
+⭐ Seller Standards Report:
+   Account Status: ${standards.standardsLevel} // STANDARD, ABOVE_STANDARD, TOP_RATED
+
+   📦 Defect Rate: ${standards.metrics.transactionDefectRate}%
+      (Target: < 2% for Top Rated)
+
+   🚚 Late Shipment Rate: ${standards.metrics.lateShipmentRate}%
+      (Target: < 3% for Top Rated)
+
+   📞 Cases Without Resolution: ${standards.metrics.casesClosedWithoutResolution}%
+      (Target: < 0.5% for Top Rated)
+
+   ⏱️  Valid Tracking Upload: ${standards.metrics.validTrackingUploadRate}%
+      (Target: > 95% for Top Rated)
+`);
+
+// Alert if metrics are at risk
+if (standards.metrics.transactionDefectRate > 1.5) {
+  console.log('⚠️  Warning: Approaching defect rate limit!');
+}
+```
+
+<Warning>
+**Top Rated Seller Requirements:**
+- Transaction defect rate: **< 2%**
+- Late shipment rate: **< 3%**
+- Cases closed without resolution: **< 0.5%**
+- Valid tracking upload: **> 95%**
+- Minimum 100 transactions in last 12 months
+- 90+ days as active seller
+</Warning>
+
+**Customer Service Metrics**
+
+```typescript
+"Show my customer service scorecard"
+
+const scorecard = await mcp.useTool('analytics_getCustomerServiceMetrics', {
+  marketplace_id: 'EBAY_US'
+});
+
+console.log(`
+📞 Customer Service Metrics:
+   Return Rate: ${scorecard.returnRate}%
+   Item Not As Described: ${scorecard.inadRate}%
+   Item Not Received: ${scorecard.inrRate}%
+
+   Average Response Time: ${scorecard.avgResponseTime} hours
+   Messages Answered: ${scorecard.messagesAnsweredRate}%
+
+   Positive Feedback: ${scorecard.positiveFeedbackRate}%
+   Neutral Feedback: ${scorecard.neutralFeedbackRate}%
+   Negative Feedback: ${scorecard.negativeFeedbackRate}%
+`);
+```
+
+### Sales Analytics
+
+**Revenue and Profit Analysis**
+
+Track sales performance and identify trends:
+
+```typescript
+"Analyze my sales performance for Q1 2024"
+
+async function quarterlySalesAnalysis() {
+  const report = await mcp.useTool('analytics_getTrafficReport', {
+    dimension: 'DAY',
+    metric_keys: ['TRANSACTION', 'TRANSACTION_AMOUNT'],
+    start_date: '2024-01-01',
+    end_date: '2024-03-31',
+    sort: 'day'
+  });
+
+  // Calculate totals
+  let totalSales = 0;
+  let totalRevenue = 0;
+
+  report.records.forEach(day => {
+    totalSales += day.transaction || 0;
+    totalRevenue += parseFloat(day.transaction_amount?.value || 0);
+  });
+
+  const avgOrderValue = totalRevenue / totalSales;
+  const dailyAvgSales = totalSales / 90; // 90 days in Q1
+
+  console.log(`
+💰 Q1 2024 Sales Report:
+   Total Sales: ${totalSales.toLocaleString()} orders
+   Total Revenue: $${totalRevenue.toLocaleString()}
+
+   Average Order Value: $${avgOrderValue.toFixed(2)}
+   Daily Average: ${dailyAvgSales.toFixed(1)} orders
+
+   Best Day: ${findBestDay(report.records)}
+   Worst Day: ${findWorstDay(report.records)}
+  `);
+
+  return { totalSales, totalRevenue, avgOrderValue };
+}
+```
+
+## Real-World Use Cases
+
+### Use Case 1: Listing Optimization
+
+**Problem:** Some listings get lots of views but don't convert to sales.
+
+**Solution:** AI-powered listing analysis and optimization recommendations.
+
+```typescript
+"Analyze my listings and identify those with high views but low conversion"
+
+async function identifyUnderperformers() {
+  const report = await mcp.useTool('analytics_getTrafficReport', {
+    dimension: 'LISTING',
+    metric_keys: ['LISTING_VIEWS', 'SALES_CONVERSION_RATE', 'TRANSACTION'],
+    start_date: '2024-01-01',
+    end_date: '2024-01-31',
+    filter: 'listing_views:>100' // Only listings with 100+ views
+  });
+
+  // Find high-traffic, low-conversion listings
+  const underperformers = report.records
+    .filter(listing => listing.sales_conversion_rate < 2.0) // < 2% conversion
+    .sort((a, b) => b.listing_views - a.listing_views)
+    .slice(0, 10);
+
+  console.log('⚠️  Underperforming Listings (High Views, Low Sales):');
+
+  for (const listing of underperformers) {
+    console.log(`
+📉 ${listing.title}
+   Views: ${listing.listing_views}
+   Sales: ${listing.transaction}
+   Conversion: ${listing.sales_conversion_rate}%
+
+   Recommendations:
+   - Check pricing vs. competitors
+   - Improve product description
+   - Add more/better images
+   - Offer free shipping or promotions
+   - Review item specifics accuracy
+    `);
+  }
+
+  return underperformers;
+}
+```
+
+<Tip>
+Target conversion rate benchmarks by category:
+- Electronics: 2-3%
+- Fashion: 1.5-2.5%
+- Collectibles: 1-2%
+- Home & Garden: 2-4%
+</Tip>
+
+### Use Case 2: Inventory Planning
+
+**Problem:** Need to know which products to restock based on sales velocity.
+
+**Solution:** Data-driven inventory forecasting.
+
+```typescript
+"Analyze product performance and recommend restocking priorities"
+
+async function inventoryForecast() {
+  // Get sales data
+  const salesReport = await mcp.useTool('analytics_getTrafficReport', {
+    dimension: 'LISTING',
+    metric_keys: ['TRANSACTION', 'LISTING_VIEWS', 'SALES_CONVERSION_RATE'],
+    start_date: '2024-01-01',
+    end_date: '2024-01-31'
+  });
+
+  // Get current inventory
+  const inventory = await mcp.useTool('inventory_getInventoryItems', {
+    limit: 200
+  });
+
+  // Match sales to inventory
+  const restockPriorities = [];
+
+  for (const item of inventory.inventoryItems) {
+    const salesData = salesReport.records.find(r => r.sku === item.sku);
+
+    if (salesData) {
+      const monthlySales = salesData.transaction;
+      const currentQty = item.availability.quantity;
+      const daysOfStock = (currentQty / monthlySales) * 30;
+
+      restockPriorities.push({
+        sku: item.sku,
+        title: item.product.title,
+        currentQty,
+        monthlySales,
+        daysOfStock,
+        priority: daysOfStock < 15 ? 'HIGH' : daysOfStock < 30 ? 'MEDIUM' : 'LOW'
+      });
+    }
+  }
+
+  // Sort by urgency
+  restockPriorities
+    .sort((a, b) => a.daysOfStock - b.daysOfStock)
+    .forEach(item => {
+      if (item.priority === 'HIGH') {
+        console.log(`
+🔴 ${item.title}
+   Current Stock: ${item.currentQty}
+   Monthly Sales: ${item.monthlySales}
+   Days Remaining: ${item.daysOfStock.toFixed(0)}
+   Action: RESTOCK NOW
+        `);
+      }
+    });
+
+  return restockPriorities;
+}
+```
+
+### Use Case 3: Marketing ROI Dashboard
+
+**Problem:** Need to correlate marketing campaigns with sales and traffic increases.
+
+**Solution:** Unified analytics dashboard combining traffic, sales, and marketing data.
+
+```typescript
+"Create a comprehensive marketing ROI report"
+
+async function marketingROIDashboard() {
+  // Get traffic data
+  const traffic = await mcp.useTool('analytics_getTrafficReport', {
+    dimension: 'DAY',
+    metric_keys: ['LISTING_VIEWS', 'TRANSACTION', 'TRANSACTION_AMOUNT'],
+    start_date: '2024-01-01',
+    end_date: '2024-01-31'
+  });
+
+  // Get marketing campaign performance
+  const campaigns = await mcp.useTool('marketing_getCampaigns', {
+    marketplace_id: 'EBAY_US'
+  });
+
+  let totalAdSpend = 0;
+  let totalAdRevenue = 0;
+
+  for (const campaign of campaigns.campaigns) {
+    const report = await mcp.useTool('marketing_getCampaignReport', {
+      campaign_id: campaign.campaignId,
+      metric_keys: ['AD_SPEND', 'AD_REVENUE', 'IMPRESSION', 'CLICK', 'SALE']
+    });
+
+    totalAdSpend += parseFloat(report.metrics.adSpend?.value || 0);
+    totalAdRevenue += parseFloat(report.metrics.adRevenue?.value || 0);
+  }
+
+  // Calculate overall revenue
+  const organicRevenue = traffic.records.reduce((sum, day) => {
+    return sum + parseFloat(day.transaction_amount?.value || 0);
+  }, 0);
+
+  const totalRevenue = organicRevenue;
+  const adROI = totalAdRevenue / totalAdSpend;
+
+  console.log(`
+📊 Marketing ROI Dashboard - January 2024
+
+💰 Revenue:
+   Total Revenue: $${totalRevenue.toLocaleString()}
+   Organic Revenue: $${organicRevenue.toLocaleString()}
+   Ad Revenue: $${totalAdRevenue.toLocaleString()}
+
+📢 Advertising:
+   Total Ad Spend: $${totalAdSpend.toLocaleString()}
+   ROAS: ${adROI.toFixed(2)}x
+   Ad Revenue %: ${(totalAdRevenue / totalRevenue * 100).toFixed(1)}%
+
+📈 Efficiency:
+   Cost per Sale: $${(totalAdSpend / traffic.records.reduce((s, d) => s + d.transaction, 0)).toFixed(2)}
+   Profit Margin: ${((totalRevenue - totalAdSpend) / totalRevenue * 100).toFixed(1)}%
+  `);
+
+  return { totalRevenue, totalAdSpend, adROI };
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Daily Monitoring" icon="calendar-check">
+    **Track key metrics daily:**
+
+    ```typescript
+    // Daily morning report
+    async function dailyPerformanceReport() {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const dateStr = yesterday.toISOString().split('T')[0];
+
+      const traffic = await mcp.useTool('analytics_getTrafficReport', {
+        dimension: 'DAY',
+        metric_keys: ['LISTING_VIEWS', 'TRANSACTION', 'TRANSACTION_AMOUNT'],
+        start_date: dateStr,
+        end_date: dateStr
+      });
+
+      const record = traffic.records[0];
+
+      console.log(`
+📆 Yesterday's Performance (${dateStr}):
+   Views: ${record.listing_views}
+   Sales: ${record.transaction}
+   Revenue: $${record.transaction_amount.value}
+   Conversion: ${(record.transaction / record.listing_views * 100).toFixed(2)}%
+      `);
+    }
+
+    // Schedule for 8am daily
+    ```
+
+    **Key metrics to monitor:**
+    - Views vs. yesterday
+    - Conversion rate trends
+    - Seller standards status
+    - New feedback/returns
+  </Accordion>
+
+  <Accordion title="Weekly Analysis" icon="chart-column">
+    **Deep dive into performance weekly:**
+
+    1. **Traffic analysis** - Top/bottom performers
+    2. **Category performance** - Which categories sell best
+    3. **Pricing optimization** - Compare to competitors
+    4. **Marketing effectiveness** - Campaign ROI review
+    5. **Inventory planning** - Restock recommendations
+
+    ```typescript
+    "Generate my weekly performance report"
+
+    // AI creates comprehensive report with:
+    // - Week-over-week growth
+    // - Best/worst listings
+    // - Category breakdown
+    // - Recommendations for next week
+    ```
+  </Accordion>
+
+  <Accordion title="A/B Testing" icon="flask">
+    **Test and optimize systematically:**
+
+    ```typescript
+    // Test different pricing strategies
+    const priceTest = {
+      variant_A: { price: 29.99, sales: 45, views: 823 },
+      variant_B: { price: 27.99, sales: 62, views: 891 }
+    };
+
+    const conversionA = (priceTest.variant_A.sales / priceTest.variant_A.views * 100);
+    const conversionB = (priceTest.variant_B.sales / priceTest.variant_B.views * 100);
+    const revenueA = priceTest.variant_A.price * priceTest.variant_A.sales;
+    const revenueB = priceTest.variant_B.price * priceTest.variant_B.sales;
+
+    console.log(`
+🧪 Pricing A/B Test Results:
+   Variant A ($29.99): ${conversionA.toFixed(2)}% conversion, $${revenueA} revenue
+   Variant B ($27.99): ${conversionB.toFixed(2)}% conversion, $${revenueB} revenue
+
+   Winner: Variant ${revenueB > revenueA ? 'B' : 'A'} (${Math.abs(revenueB - revenueA).toFixed(2)} more revenue)
+    `);
+    ```
+
+    **What to test:**
+    - Pricing levels
+    - Title formats
+    - Image styles
+    - Description layouts
+    - Shipping options
+  </Accordion>
+
+  <Accordion title="Competitive Benchmarking" icon="trophy">
+    **Compare your performance to category averages:**
+
+    ```typescript
+    "How do my metrics compare to category averages?"
+
+    async function competitiveBenchmark() {
+      const myMetrics = await mcp.useTool('analytics_getTrafficReport', {
+        dimension: 'LISTING',
+        metric_keys: ['SALES_CONVERSION_RATE', 'LISTING_VIEWS'],
+        start_date: '2024-01-01',
+        end_date: '2024-01-31'
+      });
+
+      // Calculate your averages
+      const avgConversion = myMetrics.records.reduce((sum, r) =>
+        sum + r.sales_conversion_rate, 0) / myMetrics.records.length;
+
+      console.log(`
+📊 Competitive Benchmark:
+   Your Avg Conversion: ${avgConversion.toFixed(2)}%
+   Category Average: 2.5% (Electronics)
+
+   Performance: ${avgConversion > 2.5 ? 'ABOVE' : 'BELOW'} average
+   Gap: ${Math.abs(avgConversion - 2.5).toFixed(2)}%
+      `);
+
+      // Recommendations based on performance
+      if (avgConversion < 2.5) {
+        console.log('💡 Improvement opportunities:');
+        console.log('   - Review pricing strategy');
+        console.log('   - Enhance product images');
+        console.log('   - Offer competitive shipping');
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Analytics Dashboard
+
+**Create a Custom Dashboard**
+
+```typescript
+"Show me my complete analytics dashboard"
+
+async function comprehensiveDashboard() {
+  const last30Days = {
+    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    end: new Date().toISOString().split('T')[0]
+  };
+
+  // Traffic metrics
+  const traffic = await mcp.useTool('analytics_getTrafficReport', {
+    dimension: 'DAY',
+    metric_keys: ['LISTING_IMPRESSION', 'LISTING_VIEWS', 'TRANSACTION', 'TRANSACTION_AMOUNT'],
+    start_date: last30Days.start,
+    end_date: last30Days.end
+  });
+
+  // Seller standards
+  const standards = await mcp.useTool('analytics_getSellerStandardsProfile', {
+    marketplace_id: 'EBAY_US'
+  });
+
+  // Calculate totals
+  const totals = traffic.records.reduce((acc, day) => ({
+    impressions: acc.impressions + (day.listing_impression || 0),
+    views: acc.views + (day.listing_views || 0),
+    sales: acc.sales + (day.transaction || 0),
+    revenue: acc.revenue + parseFloat(day.transaction_amount?.value || 0)
+  }), { impressions: 0, views: 0, sales: 0, revenue: 0 });
+
+  const ctr = (totals.views / totals.impressions * 100).toFixed(2);
+  const conversionRate = (totals.sales / totals.views * 100).toFixed(2);
+  const avgOrderValue = (totals.revenue / totals.sales).toFixed(2);
+
+  console.log(`
+╔══════════════════════════════════════════════════════════════╗
+║                 eBay Analytics Dashboard                      ║
+║                   Last 30 Days Performance                    ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  📊 TRAFFIC METRICS                                          ║
+║  ├─ Impressions:        ${totals.impressions.toLocaleString().padEnd(35)}║
+║  ├─ Views:              ${totals.views.toLocaleString().padEnd(35)}║
+║  └─ Click-Through Rate: ${ctr}%${' '.repeat(32 - ctr.length)}║
+║                                                              ║
+║  💰 SALES METRICS                                            ║
+║  ├─ Total Sales:        ${totals.sales.toLocaleString()} orders${' '.repeat(25)}║
+║  ├─ Total Revenue:      $${totals.revenue.toLocaleString()}${' '.repeat(25)}║
+║  ├─ Conversion Rate:    ${conversionRate}%${' '.repeat(32 - conversionRate.length)}║
+║  └─ Avg Order Value:    $${avgOrderValue}${' '.repeat(30)}║
+║                                                              ║
+║  ⭐ SELLER STANDARDS                                          ║
+║  ├─ Status:             ${standards.standardsLevel}${' '.repeat(35 - standards.standardsLevel.length)}║
+║  ├─ Defect Rate:        ${standards.metrics.transactionDefectRate}%${' '.repeat(30)}║
+║  ├─ Late Shipment:      ${standards.metrics.lateShipmentRate}%${' '.repeat(30)}║
+║  └─ Valid Tracking:     ${standards.metrics.validTrackingUploadRate}%${' '.repeat(30)}║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+  `);
+
+  return { totals, standards };
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="No data in analytics reports">
+    **Cause:** Insufficient permissions or recent account setup.
+
+    **Solution:**
+    - Verify user token has analytics permissions
+    - Wait 24-48 hours for new accounts to populate data
+    - Check date range isn't in the future
+    - Ensure you have active listings during the period
+  </Accordion>
+
+  <Accordion title="Metrics don't match Seller Hub">
+    **Cause:** Different calculation methods or timezone differences.
+
+    **Solution:**
+    - Analytics API uses UTC timezone
+    - Seller Hub may use different attribution windows
+    - Check that date ranges exactly match
+    - Some metrics update with a 24-48 hour delay
+  </Accordion>
+
+  <Accordion title="Traffic report returns empty">
+    **Cause:** No traffic during the specified period or invalid filters.
+
+    **Solution:**
+    - Verify listings were active during date range
+    - Check filter syntax (e.g., `listing_views:>100`)
+    - Ensure dimension and metrics are compatible
+    - Try broader date range
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Best Practices Guide" icon="lightbulb" href="/guides/best-practices">
+    Learn optimization strategies based on analytics insights
+  </Card>
+  <Card title="Analytics API Reference" icon="code" href="/api-reference/analytics/overview">
+    Complete API documentation with all 20+ analytics tools
+  </Card>
+  <Card title="Marketing Integration" icon="chart-line" href="/features/marketing-campaigns">
+    Use analytics to optimize your marketing campaigns
+  </Card>
+  <Card title="Inventory Optimization" icon="box" href="/features/inventory-management">
+    Apply analytics insights to inventory decisions
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Analytics API Documentation](https://developer.ebay.com/api-docs/sell/analytics/overview.html)
+- [Seller Performance Standards](https://www.ebay.com/help/selling/seller-levels-performance-standards/seller-performance-standards)
+- [Traffic Reports Guide](https://www.ebay.com/help/selling/listings/creating-managing-listings/viewing-listing-views)

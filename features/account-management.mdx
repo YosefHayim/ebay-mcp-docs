@@ -1,12 +1,938 @@
 ---
 title: "Account Management"
-description: "Documentation for Account Management"
+description: "Configure policies, manage programs, and optimize account settings with AI-powered automation"
 ---
 
 # Account Management
 
-Documentation for this section is coming soon.
+Streamline your eBay account configuration with intelligent automation. The eBay MCP Server provides **25+ tools** to manage return policies, payment policies, fulfillment policies, seller programs, and account settings.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## What You Can Do
+
+<CardGroup cols={2}>
+  <Card title="Policy Management" icon="file-contract" color="#E53238">
+    Create and manage return, payment, and fulfillment policies for your listings
+  </Card>
+  <Card title="Program Enrollment" icon="award" color="#0064D2">
+    Enroll in eBay seller programs and fulfillment services automatically
+  </Card>
+  <Card title="Sales Tax Configuration" icon="receipt" color="#F5AF02">
+    Manage sales tax tables for different jurisdictions and marketplaces
+  </Card>
+  <Card title="Business Settings" icon="building" color="#86B817">
+    Configure account preferences, notification settings, and seller details
+  </Card>
+</CardGroup>
+
+## Key Capabilities
+
+### Return Policies
+
+**Customer-Friendly Returns Increase Sales**
+
+Create return policies that build buyer confidence:
+
+```typescript
+// Ask your AI assistant:
+"Create a 60-day return policy with free return shipping"
+
+// The AI will execute:
+const returnPolicy = await mcp.useTool('account_createReturnPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Easy Returns - 60 Days Free Shipping',
+  description: 'We accept returns within 60 days with free return shipping',
+  return_period: {
+    value: 60,
+    unit: 'DAY'
+  },
+  returns_accepted: true,
+  refund_method: 'MONEY_BACK',
+  return_shipping_cost_payer: 'SELLER', // Free returns
+  restocking_fee_percentage: '0'
+});
+
+console.log(`✅ Return policy created: ${returnPolicy.returnPolicyId}`);
+```
+
+<Note>
+**Industry Standards:**
+- **30-day returns:** Minimum recommended
+- **60-day returns:** Competitive standard
+- **Free return shipping:** Increases conversion by 10-15%
+- **No restocking fees:** Improves buyer trust
+</Note>
+
+**Return Policy Templates**
+
+<Tabs>
+  <Tab title="Standard Returns">
+    ```typescript
+    "Create a standard 30-day return policy"
+
+    await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'Standard 30-Day Returns',
+      return_period: { value: 30, unit: 'DAY' },
+      returns_accepted: true,
+      refund_method: 'MONEY_BACK',
+      return_shipping_cost_payer: 'BUYER'
+    });
+    ```
+  </Tab>
+
+  <Tab title="Premium Returns">
+    ```typescript
+    "Create a premium return policy for high-value items"
+
+    await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'Premium Returns - 90 Days Free',
+      return_period: { value: 90, unit: 'DAY' },
+      returns_accepted: true,
+      refund_method: 'MONEY_BACK',
+      return_shipping_cost_payer: 'SELLER',
+      extended_holiday_returns: true // Holiday returns extended
+    });
+    ```
+  </Tab>
+
+  <Tab title="No Returns">
+    ```typescript
+    "Create a no-returns policy for final sale items"
+
+    await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'No Returns - Final Sale',
+      description: 'All sales are final - no returns accepted',
+      returns_accepted: false
+    });
+    ```
+
+    <Warning>
+    No-returns policies may reduce conversion rates and limit eBay buyer protection eligibility.
+    </Warning>
+  </Tab>
+</Tabs>
+
+### Payment Policies
+
+**Configure Payment Methods**
+
+Set up payment policies for eBay Managed Payments:
+
+```typescript
+"Create a payment policy with immediate payment required"
+
+const paymentPolicy = await mcp.useTool('account_createPaymentPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Immediate Payment Required',
+  payment_methods: [
+    { paymentMethodType: 'CREDIT_CARD' },
+    { paymentMethodType: 'PAYPAL' },
+    { paymentMethodType: 'APPLE_PAY' },
+    { paymentMethodType: 'GOOGLE_PAY' }
+  ],
+  immediate_pay: true, // Require immediate payment
+  payment_instructions: 'Payment is required immediately upon purchase'
+});
+
+console.log(`✅ Payment policy created: ${paymentPolicy.paymentPolicyId}`);
+```
+
+<Tip>
+**Immediate Payment Benefits:**
+- Reduces unpaid item cases by 95%
+- Faster order processing
+- Better cash flow
+- Eligible for promoted listings discounts
+</Tip>
+
+### Fulfillment Policies
+
+**Shipping and Handling Configuration**
+
+Create comprehensive shipping policies:
+
+```typescript
+"Create a fulfillment policy with multiple shipping options"
+
+const fulfillmentPolicy = await mcp.useTool('account_createFulfillmentPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Fast Shipping - Multiple Options',
+  category_types: [
+    { name: 'ALL_EXCLUDING_MOTORS_VEHICLES', default: true }
+  ],
+  handling_time: {
+    value: 1,
+    unit: 'BUSINESS_DAY'
+  },
+  shipping_options: [
+    {
+      option_type: 'DOMESTIC',
+      cost_type: 'FLAT_RATE',
+      shipping_services: [
+        {
+          // Standard shipping
+          shipping_carrier_code: 'USPS',
+          shipping_service_code: 'USPSPriority',
+          ship_to_locations: {
+            region_included: [
+              { region_name: 'US', region_type: 'COUNTRY' }
+            ]
+          },
+          shipping_cost: {
+            value: '8.99',
+            currency: 'USD'
+          },
+          additional_shipping_cost: {
+            value: '2.00',
+            currency: 'USD'
+          },
+          free_shipping: false
+        },
+        {
+          // Expedited shipping
+          shipping_carrier_code: 'USPS',
+          shipping_service_code: 'USPSPriorityMailExpress',
+          ship_to_locations: {
+            region_included: [
+              { region_name: 'US', region_type: 'COUNTRY' }
+            ]
+          },
+          shipping_cost: {
+            value: '24.99',
+            currency: 'USD'
+          },
+          surcharge: {
+            value: '5.00',
+            currency: 'USD'
+          }
+        }
+      ]
+    },
+    {
+      option_type: 'INTERNATIONAL',
+      cost_type: 'CALCULATED',
+      shipping_services: [
+        {
+          shipping_carrier_code: 'USPS',
+          shipping_service_code: 'USPSPriorityMailInternational',
+          ship_to_locations: {
+            region_included: [
+              { region_name: 'Worldwide', region_type: 'WORLDWIDE' }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  global_shipping: false,
+  pickup_drop_off: false
+});
+
+console.log(`✅ Fulfillment policy created: ${fulfillmentPolicy.fulfillmentPolicyId}`);
+```
+
+<AccordionGroup>
+  <Accordion title="Free Shipping Strategy">
+    ```typescript
+    "Create a free shipping policy for orders over $50"
+
+    await mcp.useTool('account_createFulfillmentPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'Free Shipping Over $50',
+      handling_time: { value: 1, unit: 'BUSINESS_DAY' },
+      shipping_options: [
+        {
+          option_type: 'DOMESTIC',
+          cost_type: 'FLAT_RATE',
+          shipping_services: [
+            {
+              shipping_carrier_code: 'USPS',
+              shipping_service_code: 'USPSPriority',
+              free_shipping: true, // Free shipping
+              shipping_cost: {
+                value: '0.00',
+                currency: 'USD'
+              }
+            }
+          ]
+        }
+      ],
+      freight_shipping: false
+    });
+    ```
+
+    **Benefits:**
+    - 20-30% increase in conversion rate
+    - Higher average order value
+    - Better search ranking
+    - Top Rated Seller Plus eligibility
+  </Accordion>
+
+  <Accordion title="Calculated Shipping">
+    ```typescript
+    "Use calculated shipping for large or heavy items"
+
+    await mcp.useTool('account_createFulfillmentPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'Calculated Shipping - Heavy Items',
+      handling_time: { value: 2, unit: 'BUSINESS_DAY' },
+      shipping_options: [
+        {
+          option_type: 'DOMESTIC',
+          cost_type: 'CALCULATED',
+          shipping_services: [
+            {
+              shipping_carrier_code: 'USPS',
+              shipping_service_code: 'USPSParcel',
+              // Costs calculated based on package weight/dimensions
+              package_handling_cost: {
+                value: '2.50',
+                currency: 'USD'
+              }
+            }
+          ]
+        }
+      ]
+    });
+    ```
+
+    **When to use:**
+    - Items over 1 lb
+    - Large dimensions
+    - Variable shipping costs
+    - Multi-item discounts
+  </Accordion>
+
+  <Accordion title="Local Pickup">
+    ```typescript
+    "Offer local pickup option"
+
+    await mcp.useTool('account_createFulfillmentPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'Shipping + Local Pickup',
+      handling_time: { value: 0, unit: 'BUSINESS_DAY' },
+      shipping_options: [
+        {
+          option_type: 'DOMESTIC',
+          cost_type: 'FLAT_RATE',
+          shipping_services: [
+            {
+              shipping_carrier_code: 'USPS',
+              shipping_service_code: 'USPSPriority',
+              shipping_cost: { value: '12.99', currency: 'USD' }
+            }
+          ]
+        }
+      ],
+      pickup_drop_off: true, // Enable local pickup
+      local_pickup: {
+        pickup_instructions: 'Contact seller to arrange pickup at our warehouse in Los Angeles'
+      }
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Sales Tax Configuration
+
+**Automated Tax Collection**
+
+Configure sales tax for different jurisdictions:
+
+```typescript
+"Set up sales tax for California and New York"
+
+// California (7.25% state tax)
+await mcp.useTool('account_createOrReplaceSalesTax', {
+  country_code: 'US',
+  jurisdiction_id: 'CA',
+  sales_tax_percentage: '7.25',
+  shipping_and_handling_taxed: true
+});
+
+// New York (4% state tax)
+await mcp.useTool('account_createOrReplaceSalesTax', {
+  country_code: 'US',
+  jurisdiction_id: 'NY',
+  sales_tax_percentage: '4.0',
+  shipping_and_handling_taxed: false
+});
+
+console.log('✅ Sales tax configured for CA and NY');
+```
+
+<Note>
+**eBay Managed Payments** handles sales tax collection and remittance automatically in most states. You only need to configure this for states where you have nexus.
+</Note>
+
+**Bulk Tax Configuration**
+
+```typescript
+"Configure sales tax for all US states where I have nexus"
+
+const stateTaxRates = {
+  'CA': 7.25,
+  'NY': 4.0,
+  'TX': 6.25,
+  'FL': 6.0,
+  'IL': 6.25,
+  'WA': 6.5
+};
+
+for (const [state, rate] of Object.entries(stateTaxRates)) {
+  await mcp.useTool('account_createOrReplaceSalesTax', {
+    country_code: 'US',
+    jurisdiction_id: state,
+    sales_tax_percentage: rate.toString(),
+    shipping_and_handling_taxed: true
+  });
+
+  console.log(`✅ Configured ${rate}% tax for ${state}`);
+}
+```
+
+### Seller Programs
+
+**Enroll in eBay Programs**
+
+Join programs to unlock benefits and features:
+
+```typescript
+"Show me available seller programs"
+
+const programs = await mcp.useTool('account_getPrograms', {
+  marketplace_id: 'EBAY_US'
+});
+
+programs.programs.forEach(program => {
+  console.log(`
+📋 ${program.programName}
+   Status: ${program.programStatus}
+   Eligible: ${program.eligible}
+   Description: ${program.description}
+  `);
+});
+```
+
+**Available Programs:**
+- **Out of Stock Control** - Hide sold-out listings automatically
+- **Shipping Fulfillment Program** - eBay-managed fulfillment
+- **eBay International Shipping** - Simplified international sales
+- **Authenticity Guarantee** - Third-party authentication for luxury items
+- **Vehicle Shipping** - eBay Shipping for vehicles
+
+```typescript
+"Enroll in Out of Stock Control program"
+
+await mcp.useTool('account_optInToProgram', {
+  marketplace_id: 'EBAY_US',
+  program_type: 'OUT_OF_STOCK_CONTROL'
+});
+
+console.log('✅ Enrolled in Out of Stock Control');
+```
+
+## Real-World Use Cases
+
+### Use Case 1: New Seller Account Setup
+
+**Problem:** Setting up a new eBay seller account requires creating multiple policies.
+
+**Solution:** Automated account setup with best-practice policies.
+
+```typescript
+"Set up my new seller account with optimized policies"
+
+async function setupNewSellerAccount() {
+  console.log('🚀 Setting up seller account...\n');
+
+  // 1. Create return policy
+  console.log('Creating return policy...');
+  const returnPolicy = await mcp.useTool('account_createReturnPolicy', {
+    marketplace_id: 'EBAY_US',
+    name: 'Standard 60-Day Returns',
+    return_period: { value: 60, unit: 'DAY' },
+    returns_accepted: true,
+    refund_method: 'MONEY_BACK',
+    return_shipping_cost_payer: 'SELLER'
+  });
+  console.log(`✅ Return policy: ${returnPolicy.returnPolicyId}\n`);
+
+  // 2. Create payment policy
+  console.log('Creating payment policy...');
+  const paymentPolicy = await mcp.useTool('account_createPaymentPolicy', {
+    marketplace_id: 'EBAY_US',
+    name: 'Immediate Payment',
+    payment_methods: [
+      { paymentMethodType: 'CREDIT_CARD' },
+      { paymentMethodType: 'PAYPAL' }
+    ],
+    immediate_pay: true
+  });
+  console.log(`✅ Payment policy: ${paymentPolicy.paymentPolicyId}\n`);
+
+  // 3. Create fulfillment policy
+  console.log('Creating fulfillment policy...');
+  const fulfillmentPolicy = await mcp.useTool('account_createFulfillmentPolicy', {
+    marketplace_id: 'EBAY_US',
+    name: 'Fast Shipping',
+    handling_time: { value: 1, unit: 'BUSINESS_DAY' },
+    shipping_options: [
+      {
+        option_type: 'DOMESTIC',
+        cost_type: 'FLAT_RATE',
+        shipping_services: [
+          {
+            shipping_carrier_code: 'USPS',
+            shipping_service_code: 'USPSPriority',
+            shipping_cost: { value: '8.99', currency: 'USD' },
+            free_shipping: false
+          }
+        ]
+      }
+    ]
+  });
+  console.log(`✅ Fulfillment policy: ${fulfillmentPolicy.fulfillmentPolicyId}\n`);
+
+  // 4. Enroll in programs
+  console.log('Enrolling in seller programs...');
+  await mcp.useTool('account_optInToProgram', {
+    marketplace_id: 'EBAY_US',
+    program_type: 'OUT_OF_STOCK_CONTROL'
+  });
+  console.log('✅ Enrolled in Out of Stock Control\n');
+
+  console.log('🎉 Account setup complete!');
+  console.log('\nPolicy IDs (save these for your listings):');
+  console.log(`Return: ${returnPolicy.returnPolicyId}`);
+  console.log(`Payment: ${paymentPolicy.paymentPolicyId}`);
+  console.log(`Fulfillment: ${fulfillmentPolicy.fulfillmentPolicyId}`);
+
+  return { returnPolicy, paymentPolicy, fulfillmentPolicy };
+}
+```
+
+<Tip>
+Save policy IDs in your environment variables or database for use when creating listings.
+</Tip>
+
+### Use Case 2: Policy Optimization
+
+**Problem:** Current policies are outdated and not competitive.
+
+**Solution:** AI-powered policy analysis and recommendations.
+
+```typescript
+"Analyze my current policies and suggest improvements"
+
+async function analyzePolicies() {
+  // Get current policies
+  const returnPolicies = await mcp.useTool('account_getReturnPolicies', {
+    marketplace_id: 'EBAY_US'
+  });
+
+  const paymentPolicies = await mcp.useTool('account_getPaymentPolicies', {
+    marketplace_id: 'EBAY_US'
+  });
+
+  const fulfillmentPolicies = await mcp.useTool('account_getFulfillmentPolicies', {
+    marketplace_id: 'EBAY_US'
+  });
+
+  console.log('📊 Policy Analysis:\n');
+
+  // Analyze return policies
+  returnPolicies.returnPolicies.forEach(policy => {
+    const returnDays = policy.returnPeriod?.value || 0;
+
+    console.log(`Return Policy: ${policy.name}`);
+    console.log(`  Return period: ${returnDays} days`);
+
+    if (returnDays < 30) {
+      console.log('  ⚠️  Recommendation: Increase to 30+ days for better conversion');
+    } else if (returnDays >= 60) {
+      console.log('  ✅ Competitive return window');
+    }
+
+    if (policy.returnShippingCostPayer === 'BUYER') {
+      console.log('  💡 Consider: Free return shipping for items >$50');
+    }
+    console.log('');
+  });
+
+  // Analyze fulfillment policies
+  fulfillmentPolicies.fulfillmentPolicies.forEach(policy => {
+    const handlingTime = policy.handlingTime?.value || 0;
+
+    console.log(`Fulfillment Policy: ${policy.name}`);
+    console.log(`  Handling time: ${handlingTime} business days`);
+
+    if (handlingTime > 2) {
+      console.log('  ⚠️  Recommendation: Reduce to 1-2 days for Top Rated Seller');
+    } else {
+      console.log('  ✅ Competitive handling time');
+    }
+
+    const hasFreeShipping = policy.shippingOptions?.some(opt =>
+      opt.shippingServices?.some(svc => svc.freeShipping)
+    );
+
+    if (!hasFreeShipping) {
+      console.log('  💡 Consider: Add free shipping option to boost conversion');
+    }
+    console.log('');
+  });
+}
+```
+
+### Use Case 3: Multi-Marketplace Expansion
+
+**Problem:** Expanding to UK and Canada marketplaces requires policy setup.
+
+**Solution:** Replicate policies across marketplaces.
+
+```typescript
+"Copy my US policies to UK and Canada marketplaces"
+
+async function expandToInternationalMarketplaces() {
+  const marketplaces = ['EBAY_GB', 'EBAY_CA'];
+
+  // Get US policies as template
+  const usReturnPolicy = await mcp.useTool('account_getReturnPolicies', {
+    marketplace_id: 'EBAY_US'
+  });
+
+  const usFulfillmentPolicy = await mcp.useTool('account_getFulfillmentPolicies', {
+    marketplace_id: 'EBAY_US'
+  });
+
+  // Create policies for each marketplace
+  for (const marketplace of marketplaces) {
+    console.log(`\n🌍 Setting up ${marketplace}...\n`);
+
+    // Create return policy
+    const returnPolicy = await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: marketplace,
+      name: usReturnPolicy.returnPolicies[0].name,
+      return_period: usReturnPolicy.returnPolicies[0].returnPeriod,
+      returns_accepted: true,
+      refund_method: 'MONEY_BACK',
+      return_shipping_cost_payer: 'SELLER'
+    });
+
+    console.log(`✅ Return policy created: ${returnPolicy.returnPolicyId}`);
+
+    // Create payment policy (adjust for local payment methods)
+    const paymentPolicy = await mcp.useTool('account_createPaymentPolicy', {
+      marketplace_id: marketplace,
+      name: 'Immediate Payment',
+      payment_methods: [
+        { paymentMethodType: 'CREDIT_CARD' },
+        { paymentMethodType: 'PAYPAL' }
+      ],
+      immediate_pay: true
+    });
+
+    console.log(`✅ Payment policy created: ${paymentPolicy.paymentPolicyId}`);
+
+    // Create fulfillment policy (adjust shipping services)
+    const fulfillmentPolicy = await mcp.useTool('account_createFulfillmentPolicy', {
+      marketplace_id: marketplace,
+      name: 'Standard Shipping',
+      handling_time: { value: 1, unit: 'BUSINESS_DAY' },
+      shipping_options: [
+        {
+          option_type: 'DOMESTIC',
+          cost_type: 'CALCULATED',
+          shipping_services: [
+            {
+              shipping_carrier_code: marketplace === 'EBAY_GB' ? 'ROYAL_MAIL' : 'CANADA_POST',
+              // Service codes vary by marketplace
+            }
+          ]
+        }
+      ]
+    });
+
+    console.log(`✅ Fulfillment policy created: ${fulfillmentPolicy.fulfillmentPolicyId}`);
+  }
+
+  console.log('\n🎉 International marketplace setup complete!');
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Policy Naming" icon="tag">
+    **Use descriptive, consistent names:**
+
+    ```typescript
+    // ✅ Good policy names
+    const policyNames = [
+      'Standard 30-Day Returns',
+      '60-Day Returns - Premium',
+      'Free Shipping Over $50',
+      'Fast Shipping 1-Day Handling',
+      'Immediate Payment Required'
+    ];
+
+    // ❌ Bad policy names
+    const badNames = [
+      'Policy 1',
+      'My Policy',
+      'Returns',
+      'Test'
+    ];
+    ```
+
+    **Benefits:**
+    - Easy to identify in listings
+    - Clear for buyers
+    - Simplified policy management
+    - Better reporting
+  </Accordion>
+
+  <Accordion title="Policy Versioning" icon="code-branch">
+    **Track policy changes over time:**
+
+    ```typescript
+    // Date-based versioning
+    const policyName = `Returns 60-Day - Updated ${new Date().toISOString().split('T')[0]}`;
+
+    // Create new policy instead of updating
+    const newPolicy = await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: policyName,
+      // ... policy details
+    });
+
+    // Gradually migrate listings to new policy
+    // Don't delete old policy until all listings migrated
+    ```
+
+    **Why version:**
+    - Can't modify active policies
+    - Allows A/B testing
+    - Maintains audit trail
+    - Easier rollback
+  </Accordion>
+
+  <Accordion title="Competitive Analysis" icon="chart-line">
+    **Research competitor policies:**
+
+    ```typescript
+    "Analyze top sellers in my category and recommend policy improvements"
+
+    // AI analyzes:
+    // - Return periods (30, 60, 90 days?)
+    // - Free return shipping prevalence
+    // - Handling times
+    // - Shipping costs
+    // - Free shipping thresholds
+
+    // Provides recommendations:
+    console.log(`
+📊 Competitive Policy Analysis - Electronics Category
+
+Return Policies:
+- 85% offer 60+ day returns
+- 72% offer free return shipping
+- Recommendation: Increase from 30 to 60 days
+
+Fulfillment:
+- Average handling time: 1.2 business days
+- 68% offer free shipping over $35
+- Recommendation: Lower free shipping threshold from $50 to $35
+
+Payment:
+- 95% require immediate payment
+- Recommendation: Already optimized
+    `);
+    ```
+  </Accordion>
+
+  <Accordion title="Testing & Optimization" icon="flask">
+    **A/B test policy variations:**
+
+    ```typescript
+    // Create two variants
+    const policyA = await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'Test A: 30-Day Returns',
+      return_period: { value: 30, unit: 'DAY' },
+      return_shipping_cost_payer: 'BUYER'
+    });
+
+    const policyB = await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'Test B: 60-Day Free Returns',
+      return_period: { value: 60, unit: 'DAY' },
+      return_shipping_cost_payer: 'SELLER'
+    });
+
+    // Apply to different listings
+    // Track conversion rates
+    // Compare sales performance
+
+    // After 30 days, analyze:
+    const results = {
+      policyA: { listings: 100, views: 5200, sales: 83, conversionRate: 1.60 },
+      policyB: { listings: 100, views: 5400, sales: 105, conversionRate: 1.94 }
+    };
+
+    // Policy B: 21% higher conversion rate
+    console.log('Winner: Policy B (60-day free returns)');
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Policy Management
+
+### List All Policies
+
+```typescript
+"Show me all my account policies"
+
+async function listAllPolicies() {
+  const marketplace = 'EBAY_US';
+
+  console.log('📋 Account Policies\n');
+
+  // Return policies
+  const returns = await mcp.useTool('account_getReturnPolicies', {
+    marketplace_id: marketplace
+  });
+
+  console.log('Return Policies:');
+  returns.returnPolicies.forEach(p => {
+    console.log(`  - ${p.name} (${p.returnPolicyId})`);
+    console.log(`    Period: ${p.returnPeriod?.value} ${p.returnPeriod?.unit}`);
+  });
+
+  // Payment policies
+  const payments = await mcp.useTool('account_getPaymentPolicies', {
+    marketplace_id: marketplace
+  });
+
+  console.log('\nPayment Policies:');
+  payments.paymentPolicies.forEach(p => {
+    console.log(`  - ${p.name} (${p.paymentPolicyId})`);
+    console.log(`    Immediate: ${p.immediatePay}`);
+  });
+
+  // Fulfillment policies
+  const fulfillment = await mcp.useTool('account_getFulfillmentPolicies', {
+    marketplace_id: marketplace
+  });
+
+  console.log('\nFulfillment Policies:');
+  fulfillment.fulfillmentPolicies.forEach(p => {
+    console.log(`  - ${p.name} (${p.fulfillmentPolicyId})`);
+    console.log(`    Handling: ${p.handlingTime?.value} ${p.handlingTime?.unit}`);
+  });
+}
+```
+
+### Delete Unused Policies
+
+```typescript
+"Clean up unused policies"
+
+async function cleanupPolicies() {
+  // Get all policies
+  const returnPolicies = await mcp.useTool('account_getReturnPolicies', {
+    marketplace_id: 'EBAY_US'
+  });
+
+  // Get all active listings to check which policies are in use
+  const offers = await mcp.useTool('inventory_getOffers', {
+    marketplace_id: 'EBAY_US',
+    limit: 1000
+  });
+
+  const usedPolicyIds = new Set(
+    offers.offers.map(o => o.listingPolicies?.returnPolicyId).filter(Boolean)
+  );
+
+  // Delete unused policies
+  for (const policy of returnPolicies.returnPolicies) {
+    if (!usedPolicyIds.has(policy.returnPolicyId)) {
+      await mcp.useTool('account_deleteReturnPolicy', {
+        return_policy_id: policy.returnPolicyId
+      });
+      console.log(`🗑️  Deleted unused policy: ${policy.name}`);
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Policy creation fails">
+    **Cause:** Invalid parameters or marketplace restrictions.
+
+    **Solution:**
+    - Verify marketplace_id is correct (EBAY_US, EBAY_GB, etc.)
+    - Check return period is within allowed range (14-90 days)
+    - Ensure all required fields are provided
+    - Review eBay policy guidelines for your marketplace
+  </Accordion>
+
+  <Accordion title="Cannot delete policy">
+    **Cause:** Policy is currently in use by active listings.
+
+    **Solution:**
+    - Find listings using the policy
+    - Update listings to use a different policy
+    - Wait for listings to end naturally
+    - Then delete the unused policy
+  </Accordion>
+
+  <Accordion title="Policy not applying to listings">
+    **Cause:** Policy ID mismatch or marketplace mismatch.
+
+    **Solution:**
+    - Verify policy ID is correct
+    - Ensure policy marketplace matches listing marketplace
+    - Check that policy is not deleted
+    - Re-create offer with correct policy IDs
+  </Accordion>
+
+  <Accordion title="Sales tax not collecting">
+    **Cause:** Incorrect jurisdiction setup or eBay Managed Payments handling.
+
+    **Solution:**
+    - Verify jurisdiction_id (state code) is correct
+    - Check if eBay is automatically handling sales tax
+    - Confirm your business nexus states
+    - Review eBay Managed Payments tax settings
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Learn optimization strategies for policies and account settings
+  </Card>
+  <Card title="Account API Reference" icon="code" href="/api-reference/account/overview">
+    Complete API documentation with all 25+ account tools
+  </Card>
+  <Card title="First Listing Guide" icon="rocket" href="/guides/first-listing">
+    Use your policies to create your first eBay listing
+  </Card>
+  <Card title="Inventory Management" icon="box" href="/features/inventory-management">
+    Apply policies when creating inventory and offers
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Account API Documentation](https://developer.ebay.com/api-docs/sell/account/overview.html)
+- [Business Policies Guide](https://www.ebay.com/help/selling/listings/creating-managing-listings/creating-your-listing/business-policies)
+- [Top Rated Seller Requirements](https://www.ebay.com/help/selling/seller-levels-performance-standards/top-rated-seller-requirements)
+- [Sales Tax Guide](https://www.ebay.com/help/selling/fees-credits-invoices/taxes-import-charges/sales-tax)

@@ -1,12 +1,550 @@
 ---
 title: "Inventory Management"
-description: "Documentation for Inventory Management"
+description: "Manage your eBay inventory with AI-powered automation for items, offers, locations, and bulk operations"
 ---
 
 # Inventory Management
 
-Documentation for this section is coming soon.
+Transform your eBay inventory management with AI-powered automation. The eBay MCP Server provides **80+ tools** to streamline inventory operations, from creating single listings to managing thousands of products across multiple warehouses.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## What You Can Do
+
+<CardGroup cols={2}>
+  <Card title="Product Catalog Management" icon="box" color="#E53238">
+    Create, update, and organize your entire product catalog with SKU-based inventory
+  </Card>
+  <Card title="Smart Listing Creation" icon="wand-magic-sparkles" color="#0064D2">
+    Publish optimized listings with AI-generated descriptions and pricing strategies
+  </Card>
+  <Card title="Bulk Operations" icon="layer-group" color="#F5AF02">
+    Import, update, and manage hundreds of products in minutes with batch operations
+  </Card>
+  <Card title="Multi-Location Inventory" icon="warehouse" color="#86B817">
+    Track inventory across multiple warehouses and fulfillment centers
+  </Card>
+</CardGroup>
+
+## Key Capabilities
+
+### Inventory Item Management
+
+**SKU-Based Product Catalog**
+
+Manage your products using SKUs (Stock Keeping Units) for consistent tracking across all sales channels:
+
+```typescript
+// Ask your AI assistant:
+"Create an inventory item for a blue widget with SKU WIDGET-BLUE-001,
+quantity 100, and price it at $29.99"
+
+// The AI will execute:
+await mcp.useTool('inventory_createOrReplaceInventoryItem', {
+  sku: 'WIDGET-BLUE-001',
+  product: {
+    title: 'Premium Blue Widget - Professional Grade',
+    description: 'High-quality widget perfect for professional use',
+    aspects: {
+      Brand: ['WidgetCo'],
+      Color: ['Blue'],
+      Condition: ['New']
+    },
+    imageUrls: ['https://example.com/widget-blue.jpg']
+  },
+  condition: 'NEW',
+  availability: {
+    shipToLocationAvailability: {
+      quantity: 100
+    }
+  }
+});
+```
+
+<Note>
+**Pro Tip:** Use descriptive SKUs like `CATEGORY-BRAND-MODEL-SIZE` (e.g., `SHOE-NIKE-AIR-MAX-10.5`) for easy identification and better inventory organization.
+</Note>
+
+### Offer & Listing Management
+
+**Flexible Pricing and Publishing**
+
+Transform inventory items into active eBay listings with customizable pricing, formats, and policies:
+
+<Tabs>
+  <Tab title="Fixed Price Listing">
+    ```typescript
+    "Create a fixed-price listing for SKU WIDGET-BLUE-001
+    in the US marketplace at $29.99"
+
+    // Creates offer with Good 'Til Cancelled duration
+    await mcp.useTool('inventory_createOffer', {
+      sku: 'WIDGET-BLUE-001',
+      marketplace_id: 'EBAY_US',
+      format: 'FIXED_PRICE',
+      listing_duration: 'GTC',
+      pricingSummary: {
+        price: { value: '29.99', currency: 'USD' }
+      },
+      categoryId: '12345'
+    });
+    ```
+  </Tab>
+
+  <Tab title="Auction Listing">
+    ```typescript
+    "Create a 7-day auction for my vintage camera starting at $99"
+
+    await mcp.useTool('inventory_createOffer', {
+      sku: 'CAMERA-VINTAGE-001',
+      marketplace_id: 'EBAY_US',
+      format: 'AUCTION',
+      listing_duration: 'DAYS_7',
+      pricingSummary: {
+        price: { value: '99.00', currency: 'USD' }
+      },
+      categoryId: '625'
+    });
+    ```
+  </Tab>
+
+  <Tab title="Best Offer">
+    ```typescript
+    "List this item at $199 and accept best offers above $150"
+
+    await mcp.useTool('inventory_createOffer', {
+      sku: 'ELECTRONICS-001',
+      marketplace_id: 'EBAY_US',
+      format: 'FIXED_PRICE',
+      pricingSummary: {
+        price: { value: '199.00', currency: 'USD' }
+      },
+      listing_policies: {
+        best_offer_terms: {
+          best_offer_enabled: true,
+          auto_accept_price: { value: '180.00', currency: 'USD' },
+          auto_decline_price: { value: '150.00', currency: 'USD' }
+        }
+      }
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### Variation Listings
+
+**Multi-Variation Product Groups**
+
+Sell products with multiple options (sizes, colors, etc.) in a single listing:
+
+```typescript
+// Example: T-shirt in 4 sizes × 3 colors = 12 variations
+"Create a variation listing for t-shirts in sizes S, M, L, XL
+and colors Red, Blue, Green at $19.99"
+
+// AI creates individual SKUs for each combination
+// Then groups them into one listing
+await mcp.useTool('inventory_createOrReplaceInventoryItemGroup', {
+  inventory_item_group_key: 'TSHIRT-GROUP-001',
+  title: 'Premium Cotton T-Shirt',
+  variesBy: {
+    specifications: [
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'] },
+      { name: 'Color', values: ['Red', 'Blue', 'Green'] }
+    ]
+  },
+  variantSKUs: [
+    'TSHIRT-RED-S', 'TSHIRT-RED-M', // ... all 12 variations
+  ]
+});
+```
+
+<Warning>
+Each variation needs its own inventory item created first. The AI assistant will handle this automatically when you request a variation listing.
+</Warning>
+
+### Bulk Operations
+
+**Scale Your Inventory Management**
+
+Import and update hundreds of products efficiently with bulk operations:
+
+<AccordionGroup>
+  <Accordion title="Bulk Import (25 items per batch)">
+    ```typescript
+    "Import these 100 products from my CSV file"
+
+    // AI processes in batches of 25 (API limit)
+    await mcp.useTool('inventory_bulkCreateOrReplaceInventoryItem', {
+      requests: [
+        {
+          sku: 'PROD-001',
+          product: { title: 'Product 1', /* ... */ }
+        },
+        // ... up to 25 items per batch
+      ]
+    });
+
+    // ✅ Handles pagination automatically
+    // ✅ Reports success/failure for each item
+    // ✅ Continues on individual errors
+    ```
+  </Accordion>
+
+  <Accordion title="Bulk Price & Quantity Updates">
+    ```typescript
+    "Update inventory quantities from my warehouse system"
+
+    await mcp.useTool('inventory_bulkUpdatePriceQuantity', {
+      requests: [
+        {
+          sku: 'WIDGET-001',
+          shipToLocationAvailability: { quantity: 150 }
+        },
+        {
+          sku: 'WIDGET-002',
+          pricingSummary: {
+            price: { value: '24.99', currency: 'USD' }
+          }
+        }
+        // ... update hundreds at once
+      ]
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Bulk Offer Publishing">
+    ```typescript
+    "Publish all unpublished offers for products in category Electronics"
+
+    // AI finds and publishes all matching offers
+    const offers = await mcp.useTool('inventory_getOffers', {
+      marketplace_id: 'EBAY_US',
+      format: 'FIXED_PRICE'
+    });
+
+    // Publishes each offer
+    for (const offer of offers.offers) {
+      await mcp.useTool('inventory_publishOffer', {
+        offer_id: offer.offerId
+      });
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Inventory Locations
+
+**Multi-Warehouse Management**
+
+Track inventory across multiple physical locations:
+
+```typescript
+"Add my New York warehouse as a fulfillment location"
+
+await mcp.useTool('inventory_createInventoryLocation', {
+  merchant_location_key: 'warehouse-ny-001',
+  location: {
+    address: {
+      addressLine1: '123 Warehouse St',
+      city: 'New York',
+      stateOrProvince: 'NY',
+      postalCode: '10001',
+      country: 'US'
+    }
+  },
+  location_types: ['WAREHOUSE'],
+  name: 'New York Distribution Center',
+  operating_hours: [
+    {
+      dayOfWeek: 'MONDAY',
+      intervals: [{ open: '09:00', close: '17:00' }]
+    }
+    // ... other days
+  ]
+});
+```
+
+## Real-World Use Cases
+
+### Use Case 1: Daily Inventory Sync
+
+**Problem:** Your warehouse inventory changes throughout the day, but eBay shows outdated quantities.
+
+**Solution:** Automated inventory synchronization.
+
+```typescript
+// Ask your AI: "Sync my eBay inventory with my warehouse database"
+
+async function syncInventory() {
+  // 1. Get current eBay inventory
+  const ebayItems = await mcp.useTool('inventory_getInventoryItems', {
+    limit: 100
+  });
+
+  // 2. Get warehouse quantities (from your system)
+  const warehouseData = await fetchWarehouseInventory();
+
+  // 3. Find discrepancies
+  const updates = ebayItems.inventoryItems
+    .filter(item => {
+      const warehouse = warehouseData.find(w => w.sku === item.sku);
+      return warehouse && warehouse.quantity !== item.availability.quantity;
+    })
+    .map(item => ({
+      sku: item.sku,
+      shipToLocationAvailability: {
+        quantity: warehouseData.find(w => w.sku === item.sku).quantity
+      }
+    }));
+
+  // 4. Bulk update
+  await mcp.useTool('inventory_bulkUpdatePriceQuantity', {
+    requests: updates
+  });
+
+  return `✅ Synced ${updates.length} items`;
+}
+```
+
+<Tip>
+Schedule this sync every hour using a cron job or workflow automation to prevent overselling.
+</Tip>
+
+### Use Case 2: Seasonal Price Adjustments
+
+**Problem:** Running a 20% off holiday sale across 500 products.
+
+**Solution:** AI-powered bulk price updates with original price display.
+
+```typescript
+"Apply a 20% discount to all items in category Home & Garden
+and show the original price crossed out"
+
+// AI calculates new prices and updates all offers
+const offers = await mcp.useTool('inventory_getOffers', {
+  marketplace_id: 'EBAY_US'
+  // Filter by category
+});
+
+for (const offer of offers.offers) {
+  const originalPrice = parseFloat(offer.pricingSummary.price.value);
+  const salePrice = (originalPrice * 0.8).toFixed(2);
+
+  await mcp.useTool('inventory_updateOffer', {
+    offerId: offer.offerId,
+    pricingSummary: {
+      price: { value: salePrice, currency: 'USD' },
+      // Shows crossed-out original price on eBay
+      originalRetailPrice: { value: originalPrice.toFixed(2), currency: 'USD' }
+    }
+  });
+}
+```
+
+### Use Case 3: New Product Launch
+
+**Problem:** Launching 50 new products with variations across multiple marketplaces.
+
+**Solution:** Streamlined variation listing creation.
+
+```typescript
+"Launch our new shoe collection - 10 styles, each in 8 sizes
+and 5 colors on US, UK, and Canada marketplaces"
+
+// AI creates:
+// - 400 inventory items (10 × 8 × 5)
+// - 10 variation groups
+// - 30 offers (10 groups × 3 marketplaces)
+// - Publishes all listings
+
+// Example for one style:
+await createVariationListing({
+  style: 'Running Shoe Pro',
+  sizes: ['7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5'],
+  colors: ['Black', 'White', 'Red', 'Blue', 'Grey'],
+  marketplaces: ['EBAY_US', 'EBAY_GB', 'EBAY_CA'],
+  price: 89.99
+});
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="SKU Naming Strategy" icon="tag">
+    **Use consistent, hierarchical SKUs:**
+
+    ```
+    Format: [CATEGORY]-[BRAND]-[MODEL]-[VARIANT]-[SIZE]
+
+    Examples:
+    ✅ SHOE-NIKE-AIRMAX-BLACK-10
+    ✅ TSHIRT-GENERIC-CREW-RED-L
+    ✅ ELECTRONICS-APPLE-IPHONE14-PURPLE-256GB
+
+    Avoid:
+    ❌ SKU001
+    ❌ Product_New
+    ❌ temp123
+    ```
+
+    **Benefits:**
+    - Quick product identification
+    - Easy filtering and reporting
+    - Simplified reordering
+    - Better inventory forecasting
+  </Accordion>
+
+  <Accordion title="Inventory Accuracy" icon="crosshairs">
+    **Prevent overselling:**
+
+    1. **Set safety stock levels** - Reserve 5-10% inventory buffer
+    2. **Real-time sync** - Update quantities immediately after sales
+    3. **Multi-channel coordination** - Sync across all sales channels
+    4. **Low stock alerts** - Get notified when inventory drops below threshold
+
+    ```typescript
+    "Alert me when any product has less than 10 units remaining"
+
+    // AI monitors inventory and sends alerts
+    const lowStock = ebayItems.filter(item =>
+      item.availability.quantity < 10
+    );
+    ```
+  </Accordion>
+
+  <Accordion title="Product Listing Optimization" icon="chart-line">
+    **Title optimization (80 characters max):**
+
+    ```
+    Structure: Brand + Model + Key Features + Condition
+
+    ✅ "Apple iPhone 14 Pro Max 256GB Unlocked Deep Purple NEW"
+    ✅ "Nike Air Max 90 Men's Running Shoes Size 10 Black White"
+    ❌ "Great phone for sale"
+    ❌ "Shoes"
+    ```
+
+    **Description best practices:**
+    - Use HTML formatting for readability
+    - Include detailed specifications
+    - Add warranty and return information
+    - List what's included in the box
+    - Use bullet points for key features
+
+    **Image requirements:**
+    - Minimum 500px, recommended 1600px or larger
+    - White or light background preferred
+    - Product fills 85% of frame
+    - Maximum 12 images per listing
+    - First image is most important (main thumbnail)
+  </Accordion>
+
+  <Accordion title="Bulk Operation Efficiency" icon="bolt">
+    **Optimize batch processing:**
+
+    ```typescript
+    // ✅ Good: Batch 25 items (API limit)
+    await mcp.useTool('inventory_bulkCreateOrReplaceInventoryItem', {
+      requests: items.slice(0, 25)
+    });
+
+    // ❌ Bad: Individual API calls (slow + wastes rate limits)
+    for (const item of items) {
+      await mcp.useTool('inventory_createOrReplaceInventoryItem', item);
+    }
+    ```
+
+    **Rate limit management:**
+    - User tokens: 10,000-50,000 requests/day
+    - Batch operations count as 1 request
+    - Cache frequently accessed data
+    - Use webhooks for real-time updates instead of polling
+  </Accordion>
+</AccordionGroup>
+
+## Common Workflows
+
+### Morning Inventory Check
+
+```typescript
+"Give me a daily inventory report: total items, low stock alerts,
+and items that need price updates"
+
+// AI generates comprehensive report:
+// - Total active listings
+// - Items with quantity < 10
+// - Items priced below market average
+// - Listings with no images
+// - Expired or ending soon listings
+```
+
+### Repricing Strategy
+
+```typescript
+"Analyze competitor pricing for my electronics category
+and suggest price adjustments to stay competitive"
+
+// AI uses market data and analytics to suggest optimal pricing
+```
+
+### Listing Quality Audit
+
+```typescript
+"Review all my listings and identify ones with poor titles,
+missing descriptions, or low-quality images"
+
+// AI audits listings and provides improvement suggestions
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="'SKU already exists' error">
+    **Cause:** Attempting to create an item with a SKU that already exists.
+
+    **Solution:** Use `inventory_createOrReplaceInventoryItem` instead of `inventory_createInventoryItem` to update existing items, or use a different SKU.
+  </Accordion>
+
+  <Accordion title="'Invalid category ID' error">
+    **Cause:** The category ID doesn't exist or isn't valid for the marketplace.
+
+    **Solution:** Use the Metadata API to find valid category IDs for your product type and marketplace.
+  </Accordion>
+
+  <Accordion title="'Missing required listing policies' error">
+    **Cause:** Offer creation requires payment, return, and fulfillment policy IDs.
+
+    **Solution:** Create these policies first using the Account API, or ask your AI: "Create default payment, return, and fulfillment policies for me"
+  </Accordion>
+
+  <Accordion title="Inventory sync delays">
+    **Cause:** eBay's inventory system may take a few minutes to reflect updates.
+
+    **Solution:**
+    - Wait 2-3 minutes after bulk updates
+    - Verify updates with `inventory_getInventoryItem`
+    - Check for error responses in bulk operation results
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create Your First Listing" icon="rocket" href="/guides/first-listing">
+    Step-by-step tutorial to create and publish your first eBay listing
+  </Card>
+  <Card title="Bulk Operations Guide" icon="layer-group" href="/guides/bulk-operations">
+    Learn how to import and manage hundreds of products efficiently
+  </Card>
+  <Card title="Inventory API Reference" icon="code" href="/api-reference/inventory/overview">
+    Complete API documentation with all 80+ inventory tools
+  </Card>
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Advanced tips for optimizing your inventory management
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Inventory API Documentation](https://developer.ebay.com/api-docs/sell/inventory/overview.html)
+- [eBay Category Explorer](https://www.ebay.com/sellercenter/resources/category-explorer)
+- [Item Specifics Recommendations](https://developer.ebay.com/api-docs/sell/metadata/overview.html)

@@ -1,12 +1,671 @@
 ---
 title: "Order Fulfillment"
-description: "Documentation for Order Fulfillment"
+description: "Automate order processing, shipping, tracking, and customer service with AI-powered fulfillment tools"
 ---
 
 # Order Fulfillment
 
-Documentation for this section is coming soon.
+Streamline your entire order fulfillment workflow with AI automation. The eBay MCP Server provides **50+ tools** to handle everything from order retrieval to shipping label generation, tracking updates, returns, and payment disputes.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## What You Can Do
+
+<CardGroup cols={2}>
+  <Card title="Order Processing" icon="shopping-cart" color="#E53238">
+    Retrieve, filter, and manage customer orders automatically
+  </Card>
+  <Card title="Shipping Automation" icon="truck" color="#0064D2">
+    Generate shipping labels, update tracking, and handle fulfillment in minutes
+  </Card>
+  <Card title="Returns Management" icon="rotate-left" color="#F5AF02">
+    Process returns, issue refunds, and maintain customer satisfaction
+  </Card>
+  <Card title="Payment Disputes" icon="scale-balanced" color="#86B817">
+    Handle payment disputes, cases, and customer service inquiries
+  </Card>
+</CardGroup>
+
+## Key Capabilities
+
+### Order Management
+
+**Retrieve and Filter Orders**
+
+Get orders based on status, date range, or specific criteria:
+
+```typescript
+// Ask your AI assistant:
+"Show me all unfulfilled orders from the last 24 hours"
+
+// The AI will execute:
+const orders = await mcp.useTool('fulfillment_getOrders', {
+  filter: 'orderfulfillmentstatus:{NOT_STARTED}',
+  limit: 50
+});
+
+// Process orders
+orders.orders.forEach(order => {
+  console.log(`Order ${order.orderId}:`);
+  console.log(`  Buyer: ${order.buyer.username}`);
+  console.log(`  Total: ${order.pricingSummary.total.value} ${order.pricingSummary.total.currency}`);
+  console.log(`  Items: ${order.lineItems.length}`);
+});
+```
+
+<Note>
+**Order Statuses:**
+- `NOT_STARTED` - Payment received, ready to ship
+- `IN_PROGRESS` - Partially fulfilled
+- `FULFILLED` - All items shipped
+- `CANCELLED` - Order cancelled
+</Note>
+
+**Get Specific Order Details**
+
+```typescript
+"Get full details for order 12-34567-89012"
+
+const order = await mcp.useTool('fulfillment_getOrder', {
+  order_id: '12-34567-89012'
+});
+
+// Returns complete order information:
+// - Buyer details and shipping address
+// - Line items with SKUs and quantities
+// - Payment status and pricing
+// - Fulfillment instructions
+// - Cancellation status (if applicable)
+```
+
+### Shipping Fulfillment
+
+**Create Shipping Fulfillments**
+
+Mark orders as shipped and provide tracking information:
+
+<Tabs>
+  <Tab title="Single Item Shipment">
+    ```typescript
+    "Mark order 12-34567-89012 as shipped via USPS with tracking 9400111899562941604886"
+
+    await mcp.useTool('fulfillment_createShippingFulfillment', {
+      order_id: '12-34567-89012',
+      line_items: [
+        {
+          line_item_id: 'item-001',
+          quantity: 1
+        }
+      ],
+      shipped_date: new Date().toISOString(),
+      shipping_carrier_code: 'USPS',
+      tracking_number: '9400111899562941604886'
+    });
+    ```
+  </Tab>
+
+  <Tab title="Partial Fulfillment">
+    ```typescript
+    "Ship 2 of 3 items from order 12-34567-89012 (items are backordered)"
+
+    await mcp.useTool('fulfillment_createShippingFulfillment', {
+      order_id: '12-34567-89012',
+      line_items: [
+        { line_item_id: 'item-001', quantity: 1 },
+        { line_item_id: 'item-002', quantity: 1 }
+        // item-003 not included - will ship later
+      ],
+      shipped_date: new Date().toISOString(),
+      shipping_carrier_code: 'UPS',
+      tracking_number: '1Z999AA10123456784'
+    });
+    ```
+  </Tab>
+
+  <Tab title="Multiple Packages">
+    ```typescript
+    "Order 12-34567-89012 shipped in two packages with separate tracking"
+
+    // First package
+    await mcp.useTool('fulfillment_createShippingFulfillment', {
+      order_id: '12-34567-89012',
+      line_items: [{ line_item_id: 'item-001', quantity: 1 }],
+      shipping_carrier_code: 'FEDEX',
+      tracking_number: '123456789012'
+    });
+
+    // Second package
+    await mcp.useTool('fulfillment_createShippingFulfillment', {
+      order_id: '12-34567-89012',
+      line_items: [{ line_item_id: 'item-002', quantity: 1 }],
+      shipping_carrier_code: 'FEDEX',
+      tracking_number: '123456789013'
+    });
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+Once you mark an order as shipped, eBay notifies the buyer and starts the delivery countdown. Ensure tracking numbers are valid and items are actually shipped.
+</Warning>
+
+### Shipping Label Generation
+
+**Print Shipping Labels**
+
+Generate shipping labels directly from eBay:
+
+```typescript
+"Generate a shipping label for order 12-34567-89012 using the buyer's selected service"
+
+const label = await mcp.useTool('fulfillment_createShippingLabel', {
+  order_id: '12-34567-89012',
+  shipping_service: 'USPS_PRIORITY',
+  label_size: 'LABEL_4X6'
+});
+
+// Returns:
+// - Shipping label PDF URL
+// - Tracking number
+// - Label cost
+// - Label ID for cancellation
+
+console.log(`Label URL: ${label.labelUrl}`);
+console.log(`Tracking: ${label.trackingNumber}`);
+console.log(`Cost: $${label.cost.value}`);
+```
+
+**Supported Carriers:**
+- USPS (Priority, First Class, Media Mail, Parcel Select)
+- UPS (Ground, 2nd Day Air, Next Day Air)
+- FedEx (Ground, Express, 2Day, Standard Overnight)
+- DHL Express
+
+### Returns Management
+
+**Process Return Requests**
+
+Handle buyer return requests and issue refunds:
+
+```typescript
+"Process return for order 12-34567-89012 and issue full refund"
+
+// 1. Get return request details
+const returnRequest = await mcp.useTool('fulfillment_getReturn', {
+  return_id: 'return-001'
+});
+
+// 2. Approve return
+await mcp.useTool('fulfillment_processReturnRequest', {
+  return_id: 'return-001',
+  decision: 'ACCEPT',
+  return_label_provided: true
+});
+
+// 3. Issue refund once item received
+await mcp.useTool('fulfillment_issueRefund', {
+  order_id: '12-34567-89012',
+  refund_items: [
+    {
+      line_item_id: 'item-001',
+      refund_amount: {
+        value: '29.99',
+        currency: 'USD'
+      }
+    }
+  ],
+  reason_for_refund: 'BUYER_RETURNED_ITEM'
+});
+```
+
+<AccordionGroup>
+  <Accordion title="Return Reasons">
+    **Common return reasons:**
+    - `BUYER_RETURNED_ITEM` - Item returned by buyer
+    - `ITEM_NOT_AS_DESCRIBED` - Product doesn't match listing
+    - `DEFECTIVE_ITEM` - Item is defective or damaged
+    - `WRONG_ITEM_SENT` - Incorrect item shipped
+    - `BUYER_REMORSE` - Buyer changed mind
+  </Accordion>
+
+  <Accordion title="Refund Types">
+    **Full vs. Partial Refunds:**
+
+    ```typescript
+    // Full refund (item + shipping)
+    await mcp.useTool('fulfillment_issueRefund', {
+      order_id: '12-34567-89012',
+      refund_items: [{ line_item_id: 'item-001' }],
+      reason_for_refund: 'DEFECTIVE_ITEM'
+    });
+
+    // Partial refund (restocking fee)
+    await mcp.useTool('fulfillment_issueRefund', {
+      order_id: '12-34567-89012',
+      refund_items: [
+        {
+          line_item_id: 'item-001',
+          refund_amount: { value: '24.99', currency: 'USD' } // $5 restocking
+        }
+      ],
+      reason_for_refund: 'BUYER_REMORSE'
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Order Cancellations
+
+**Cancel Orders**
+
+Handle cancellation requests from buyers or cancel orders yourself:
+
+```typescript
+"Cancel order 12-34567-89012 because item is out of stock"
+
+await mcp.useTool('fulfillment_cancelOrder', {
+  order_id: '12-34567-89012',
+  cancel_reason: 'OUT_OF_STOCK',
+  buyer_paid: true // Triggers automatic refund
+});
+```
+
+**Cancellation Reasons:**
+- `OUT_OF_STOCK` - Item no longer available
+- `BUYER_ASKED_CANCEL` - Buyer requested cancellation
+- `PRICE_ERROR` - Pricing mistake in listing
+- `FOUND_CHEAPER_PRICE` - Buyer found better deal
+- `ORDER_MISTAKE` - Buyer made a mistake
+
+<Warning>
+Frequent order cancellations can negatively impact your seller metrics. Only cancel when absolutely necessary.
+</Warning>
+
+## Real-World Use Cases
+
+### Use Case 1: Daily Order Processing
+
+**Problem:** Processing 50+ orders daily is time-consuming and error-prone.
+
+**Solution:** Automated order fulfillment workflow.
+
+```typescript
+"Process all new orders: print labels, update tracking, and send to warehouse"
+
+async function processDailyOrders() {
+  // 1. Get unfulfilled orders
+  const { orders } = await mcp.useTool('fulfillment_getOrders', {
+    filter: 'orderfulfillmentstatus:{NOT_STARTED}',
+    limit: 100
+  });
+
+  console.log(`📦 Processing ${orders.length} orders`);
+
+  for (const order of orders) {
+    // 2. Generate shipping label
+    const label = await mcp.useTool('fulfillment_createShippingLabel', {
+      order_id: order.orderId,
+      shipping_service: 'USPS_PRIORITY',
+      label_size: 'LABEL_4X6'
+    });
+
+    // 3. Print to warehouse printer
+    await printLabel(label.labelUrl);
+
+    // 4. Create packing slip
+    const packingSlip = generatePackingSlip(order);
+    await printPackingSlip(packingSlip);
+
+    // 5. Mark as in progress
+    console.log(`✅ Order ${order.orderId} ready for packing`);
+  }
+
+  // 6. Export to warehouse management system
+  await exportToWMS(orders);
+
+  return `✅ Processed ${orders.length} orders`;
+}
+```
+
+<Tip>
+Integrate with your warehouse management system (WMS) or use automation platforms like Zapier to trigger this workflow when new orders arrive.
+</Tip>
+
+### Use Case 2: Same-Day Shipping Guarantee
+
+**Problem:** Committed to same-day shipping but manual processing takes too long.
+
+**Solution:** Real-time order monitoring and instant label generation.
+
+```typescript
+"Monitor for new orders and auto-generate labels for immediate shipping"
+
+async function autogenerateLabels() {
+  const cutoffTime = '14:00'; // 2 PM cutoff for same-day shipping
+
+  setInterval(async () => {
+    const now = new Date();
+    const currentTime = now.toTimeString().substring(0, 5);
+
+    if (currentTime < cutoffTime) {
+      // Get orders from last 5 minutes
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60000).toISOString();
+
+      const { orders } = await mcp.useTool('fulfillment_getOrders', {
+        filter: `creationdate:[${fiveMinutesAgo}..]`,
+        limit: 50
+      });
+
+      for (const order of orders) {
+        // Generate label immediately
+        const label = await mcp.useTool('fulfillment_createShippingLabel', {
+          order_id: order.orderId,
+          shipping_service: determineBestService(order.shippingAddress)
+        });
+
+        // Send to fulfillment team
+        await notifyWarehouse(order, label);
+        console.log(`⚡ Auto-generated label for ${order.orderId}`);
+      }
+    }
+  }, 5 * 60000); // Check every 5 minutes
+}
+```
+
+### Use Case 3: Return Automation
+
+**Problem:** Manual return processing delays refunds and hurts customer satisfaction.
+
+**Solution:** Automated return approval and refund processing.
+
+```typescript
+"Auto-approve returns within policy and issue refunds"
+
+async function processReturns() {
+  // Get pending return requests
+  const returns = await mcp.useTool('fulfillment_getReturns', {
+    states: ['RETURN_REQUESTED']
+  });
+
+  for (const returnRequest of returns.returns) {
+    const order = await mcp.useTool('fulfillment_getOrder', {
+      order_id: returnRequest.orderId
+    });
+
+    // Check if within return window (30 days)
+    const orderDate = new Date(order.creationDate);
+    const daysSinceOrder = (Date.now() - orderDate.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (daysSinceOrder <= 30) {
+      // Auto-approve
+      await mcp.useTool('fulfillment_processReturnRequest', {
+        return_id: returnRequest.returnId,
+        decision: 'ACCEPT',
+        return_label_provided: true
+      });
+
+      // Generate return label
+      const returnLabel = await mcp.useTool('fulfillment_createReturnShippingLabel', {
+        return_id: returnRequest.returnId
+      });
+
+      // Notify buyer
+      console.log(`✅ Return approved for order ${order.orderId}`);
+    } else {
+      console.log(`⚠️ Return request outside window: ${order.orderId}`);
+    }
+  }
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Shipping Speed" icon="bolt">
+    **Fast fulfillment improves seller metrics:**
+
+    - **Same-day shipping** - Ship within 24 hours of payment
+    - **Upload tracking immediately** - Don't wait until end of day
+    - **Use faster services** - Priority Mail beats Parcel Select
+    - **Handle time accuracy** - Set realistic handling times (1-2 days ideal)
+
+    ```typescript
+    // Set aggressive handling time
+    await mcp.useTool('account_createFulfillmentPolicy', {
+      handling_time: { value: 1, unit: 'BUSINESS_DAY' },
+      // ... other policy settings
+    });
+    ```
+
+    **Benefits:**
+    - Higher search ranking
+    - Top Rated Seller eligibility
+    - Better buyer confidence
+    - More positive feedback
+  </Accordion>
+
+  <Accordion title="Tracking Updates" icon="location-dot">
+    **Always provide tracking information:**
+
+    1. **Upload within 24 hours of shipping**
+    2. **Use valid tracking numbers** - Test before submitting
+    3. **Match carrier to tracking** - USPS tracking with USPS carrier
+    4. **Update delivery status** - Mark delivered when confirmed
+
+    ```typescript
+    // Verify tracking number format
+    const isValidUSPS = /^(94|93|92|94|95)[0-9]{20}$/.test(trackingNumber);
+    const isValidUPS = /^1Z[A-Z0-9]{16}$/.test(trackingNumber);
+    const isValidFedEx = /^[0-9]{12,14}$/.test(trackingNumber);
+    ```
+
+    **Consequences of missing tracking:**
+    - Not eligible for seller protections
+    - Cannot prove delivery in disputes
+    - Late shipment defects
+    - Lower seller ratings
+  </Accordion>
+
+  <Accordion title="Communication" icon="message">
+    **Proactive buyer communication:**
+
+    ```typescript
+    "Send message to buyer of order 12-34567-89012 with shipping update"
+
+    await mcp.useTool('fulfillment_sendBuyerMessage', {
+      order_id: '12-34567-89012',
+      message: `Your order has shipped! Tracking: ${trackingNumber}.
+      Expected delivery: ${estimatedDelivery}.
+      Thank you for your purchase!`
+    });
+    ```
+
+    **When to message buyers:**
+    - Shipping delays (weather, holidays)
+    - Backorders or out of stock items
+    - Delivery confirmation
+    - Thank you after delivery
+    - Special promotions for repeat customers
+  </Accordion>
+
+  <Accordion title="Returns Policy" icon="rotate-left">
+    **Customer-friendly returns increase sales:**
+
+    - **60-day return window** - Industry standard
+    - **Free return shipping** - For high-value items ($100+)
+    - **No restocking fees** - Unless item damaged by buyer
+    - **Clear instructions** - Include return label in package
+
+    ```typescript
+    "Create a generous return policy"
+
+    await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: 'Easy Returns - 60 Days',
+      return_period: { value: 60, unit: 'DAY' },
+      returns_accepted: true,
+      refund_method: 'MONEY_BACK',
+      return_shipping_cost_payer: 'SELLER' // Free returns
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Shipping Carrier Integration
+
+### Supported Carriers
+
+<Tabs>
+  <Tab title="USPS">
+    **US Postal Service**
+
+    Services:
+    - `USPS_PRIORITY` - 1-3 day delivery
+    - `USPS_FIRST_CLASS` - 2-5 days, under 1 lb
+    - `USPS_PARCEL_SELECT` - 2-8 days, economy
+    - `USPS_PRIORITY_MAIL_EXPRESS` - Overnight
+
+    ```typescript
+    await mcp.useTool('fulfillment_createShippingLabel', {
+      order_id: orderId,
+      shipping_service: 'USPS_PRIORITY',
+      package_type: 'FLAT_RATE_ENVELOPE'
+    });
+    ```
+  </Tab>
+
+  <Tab title="UPS">
+    **United Parcel Service**
+
+    Services:
+    - `UPS_GROUND` - 1-5 business days
+    - `UPS_3_DAY_SELECT` - 3 business days
+    - `UPS_2ND_DAY_AIR` - 2 business days
+    - `UPS_NEXT_DAY_AIR` - Next business day
+
+    ```typescript
+    await mcp.useTool('fulfillment_createShippingLabel', {
+      order_id: orderId,
+      shipping_service: 'UPS_GROUND',
+      package_dimensions: {
+        length: 12,
+        width: 9,
+        height: 6,
+        unit: 'INCH'
+      },
+      weight: { value: 2.5, unit: 'POUND' }
+    });
+    ```
+  </Tab>
+
+  <Tab title="FedEx">
+    **Federal Express**
+
+    Services:
+    - `FEDEX_GROUND` - 1-5 business days
+    - `FEDEX_EXPRESS_SAVER` - 3 business days
+    - `FEDEX_2_DAY` - 2 business days
+    - `FEDEX_STANDARD_OVERNIGHT` - Next business day
+
+    ```typescript
+    await mcp.useTool('fulfillment_createShippingLabel', {
+      order_id: orderId,
+      shipping_service: 'FEDEX_GROUND'
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="'Invalid tracking number' error">
+    **Cause:** Tracking number format doesn't match the carrier.
+
+    **Solution:**
+    - USPS: 20-22 digits starting with 94, 93, or 92
+    - UPS: Starts with "1Z" followed by 16 characters
+    - FedEx: 12-14 digits
+    - Verify tracking on carrier website before submitting
+  </Accordion>
+
+  <Accordion title="'Order already fulfilled' error">
+    **Cause:** Attempting to create a shipping fulfillment for an order that's already marked as shipped.
+
+    **Solution:** Check order status first with `fulfillment_getOrder`. If you need to add another package, ensure you're using different line items.
+  </Accordion>
+
+  <Accordion title="Shipping label generation fails">
+    **Cause:** Insufficient information or invalid address.
+
+    **Solution:**
+    - Verify buyer's shipping address is complete
+    - Check package dimensions and weight are provided
+    - Ensure shipping service is available for destination
+    - Verify you have sufficient balance in eBay shipping account
+  </Accordion>
+
+  <Accordion title="Return not appearing in system">
+    **Cause:** eBay's return processing may have a delay.
+
+    **Solution:**
+    - Wait 15-30 minutes and retry
+    - Use `fulfillment_getReturns` with date filter
+    - Check if return was initiated through eBay Money Back Guarantee (different workflow)
+  </Accordion>
+</AccordionGroup>
+
+## Performance Metrics
+
+**Track your fulfillment performance:**
+
+```typescript
+"Show me my fulfillment metrics for the last 30 days"
+
+// AI analyzes your orders and calculates:
+// - Average time to ship
+// - On-time delivery rate
+// - Late shipment rate
+// - Valid tracking upload rate
+// - Cases opened by buyers
+// - Return rate
+
+const metrics = {
+  totalOrders: 523,
+  avgTimeToShip: '18 hours',
+  onTimeRate: '97.3%',
+  lateShipmentRate: '2.7%',
+  trackingUploadRate: '100%',
+  casesOpened: 4,
+  returnRate: '3.1%'
+};
+```
+
+<Check>
+**Target Metrics for Top Rated Seller:**
+- Late shipment rate: < 3%
+- Tracking upload: > 95%
+- Valid tracking: > 95%
+- Cases closed without seller resolution: < 0.5%
+</Check>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Managing Orders Guide" icon="book" href="/guides/managing-orders">
+    Complete order fulfillment tutorial with best practices
+  </Card>
+  <Card title="Fulfillment API Reference" icon="code" href="/api-reference/fulfillment/overview">
+    Complete API documentation with all 50+ fulfillment tools
+  </Card>
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Advanced fulfillment strategies and optimization tips
+  </Card>
+  <Card title="Account Policies" icon="file-contract" href="/features/account-management">
+    Set up return, payment, and shipping policies
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Fulfillment API Documentation](https://developer.ebay.com/api-docs/sell/fulfillment/overview.html)
+- [eBay Shipping Labels Guide](https://www.ebay.com/help/selling/shipping-items/setting-shipping-options/ebay-labels)
+- [Top Rated Seller Requirements](https://www.ebay.com/help/selling/seller-levels-performance-standards/top-rated-seller-requirements)

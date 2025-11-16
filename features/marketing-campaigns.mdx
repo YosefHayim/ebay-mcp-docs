@@ -1,12 +1,739 @@
 ---
 title: "Marketing Campaigns"
-description: "Documentation for Marketing Campaigns"
+description: "Boost sales with AI-powered promoted listings, promotions, and advertising campaigns on eBay"
 ---
 
 # Marketing Campaigns
 
-Documentation for this section is coming soon.
+Maximize your eBay sales with intelligent marketing automation. The eBay MCP Server provides **40+ tools** to create promoted listings campaigns, run promotions, and analyze advertising performance—all powered by AI.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## What You Can Do
+
+<CardGroup cols={2}>
+  <Card title="Promoted Listings" icon="bullhorn" color="#E53238">
+    Pay-per-sale advertising to boost listing visibility in search results
+  </Card>
+  <Card title="Sales & Promotions" icon="percent" color="#0064D2">
+    Create markdown sales, volume discounts, and special offers automatically
+  </Card>
+  <Card title="Campaign Analytics" icon="chart-line" color="#F5AF02">
+    Track ROI, impressions, clicks, and sales from your advertising campaigns
+  </Card>
+  <Card title="Smart Recommendations" icon="sparkles" color="#86B817">
+    AI-powered suggestions for optimizing ad spend and promotion strategies
+  </Card>
+</CardGroup>
+
+## Key Capabilities
+
+### Promoted Listings Campaigns
+
+**Drive Traffic with Pay-Per-Sale Advertising**
+
+Promoted Listings increase your product visibility in eBay search results. You only pay when an item sells:
+
+```typescript
+// Ask your AI assistant:
+"Create a promoted listings campaign for my electronics category with an 8% ad rate"
+
+// The AI will execute:
+const campaign = await mcp.useTool('marketing_createCampaign', {
+  campaign_name: 'Electronics - Summer Sale 2024',
+  marketplace_id: 'EBAY_US',
+  funding_strategy: 'COST_PER_SALE',
+  campaign_criterion: {
+    criterion_type: 'INVENTORY_PARTITION',
+    selection_rules: [
+      {
+        categories: [
+          { category_id: '293', category_scope: 'ALL_INCLUDING_SUBCATEGORIES' }
+        ]
+      }
+    ]
+  }
+});
+
+// Set ad rate (percentage of sale price)
+await mcp.useTool('marketing_updateAdRate', {
+  campaign_id: campaign.campaignId,
+  ad_rate: 8 // 8% of sale price
+});
+
+console.log(`✅ Campaign created: ${campaign.campaignId}`);
+```
+
+<Note>
+**Ad Rate Guidelines:**
+- **Competitive categories:** 8-12% for electronics, fashion
+- **Less competitive:** 3-5% for unique items
+- **High margin:** Can afford 10-15% for fast sales
+- eBay recommends starting at 5% and adjusting based on performance
+</Note>
+
+**Campaign Types**
+
+<Tabs>
+  <Tab title="Category-Based">
+    ```typescript
+    "Promote all items in my Home & Garden category"
+
+    await mcp.useTool('marketing_createCampaign', {
+      campaign_name: 'Home & Garden Promotion',
+      marketplace_id: 'EBAY_US',
+      funding_strategy: 'COST_PER_SALE',
+      campaign_criterion: {
+        criterion_type: 'INVENTORY_PARTITION',
+        selection_rules: [
+          {
+            categories: [
+              { category_id: '11700', category_scope: 'ALL_INCLUDING_SUBCATEGORIES' }
+            ]
+          }
+        ]
+      }
+    });
+    ```
+  </Tab>
+
+  <Tab title="SKU-Based">
+    ```typescript
+    "Promote specific products: WIDGET-001, WIDGET-002, WIDGET-003"
+
+    await mcp.useTool('marketing_createCampaign', {
+      campaign_name: 'Widget Launch Campaign',
+      marketplace_id: 'EBAY_US',
+      funding_strategy: 'COST_PER_SALE',
+      campaign_criterion: {
+        criterion_type: 'INVENTORY_PARTITION',
+        selection_rules: [
+          {
+            inventory_items: [
+              { inventory_reference_id: 'WIDGET-001', inventory_reference_type: 'INVENTORY_ITEM' },
+              { inventory_reference_id: 'WIDGET-002', inventory_reference_type: 'INVENTORY_ITEM' },
+              { inventory_reference_id: 'WIDGET-003', inventory_reference_type: 'INVENTORY_ITEM' }
+            ]
+          }
+        ]
+      }
+    });
+    ```
+  </Tab>
+
+  <Tab title="Listing ID-Based">
+    ```typescript
+    "Promote these specific listings by ID"
+
+    await mcp.useTool('marketing_createCampaign', {
+      campaign_name: 'Top Sellers Campaign',
+      marketplace_id: 'EBAY_US',
+      funding_strategy: 'COST_PER_SALE',
+      campaign_criterion: {
+        criterion_type: 'LISTING_ID',
+        listing_ids: [
+          '123456789012',
+          '123456789013',
+          '123456789014'
+        ]
+      }
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### Item Promotions
+
+**Create Sales and Discounts**
+
+Run markdown sales, volume discounts, and order-level promotions:
+
+<AccordionGroup>
+  <Accordion title="Markdown Sales (% Off)">
+    ```typescript
+    "Run a 20% off sale on all items in Clothing category for the next 7 days"
+
+    const promotion = await mcp.useTool('marketing_createItemPromotion', {
+      marketplace_id: 'EBAY_US',
+      name: 'Summer Clothing Sale - 20% Off',
+      promotion_type: 'MARKDOWN_SALE',
+      start_date: new Date().toISOString(),
+      end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      discount_rules: [
+        {
+          discount_type: 'PERCENTAGE',
+          discount_amount: '20',
+          inventory_items: [
+            // Automatically populated by AI for category
+          ]
+        }
+      ]
+    });
+
+    console.log(`✅ Promotion ID: ${promotion.promotionId}`);
+    ```
+
+    **Shows on eBay as:**
+    - ~~$49.99~~ **$39.99 (20% off)**
+    - Special sale badge on listing
+    - Highlighted in search results
+  </Accordion>
+
+  <Accordion title="Volume Discounts (Buy More, Save More)">
+    ```typescript
+    "Offer buy 2 get 10% off, buy 3 get 20% off"
+
+    await mcp.useTool('marketing_createItemPromotion', {
+      marketplace_id: 'EBAY_US',
+      name: 'Volume Discount - Buy More, Save More',
+      promotion_type: 'VOLUME_DISCOUNT',
+      start_date: new Date().toISOString(),
+      end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      discount_rules: [
+        {
+          discount_type: 'PERCENTAGE',
+          discount_amount: '10',
+          min_quantity: 2,
+          max_quantity: 2
+        },
+        {
+          discount_type: 'PERCENTAGE',
+          discount_amount: '20',
+          min_quantity: 3
+        }
+      ],
+      inventory_items: [
+        { inventory_reference_id: 'WIDGET-001', inventory_reference_type: 'INVENTORY_ITEM' }
+      ]
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Order-Level Promotions (Shipping Discounts)">
+    ```typescript
+    "Free shipping on orders over $50"
+
+    await mcp.useTool('marketing_createItemPromotion', {
+      marketplace_id: 'EBAY_US',
+      name: 'Free Shipping Over $50',
+      promotion_type: 'ORDER_DISCOUNT',
+      start_date: new Date().toISOString(),
+      end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+      discount_rules: [
+        {
+          discount_type: 'SHIPPING',
+          discount_amount: '100', // 100% shipping discount
+          min_order_value: {
+            value: '50.00',
+            currency: 'USD'
+          }
+        }
+      ]
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Threshold Discounts ($10 off $100)">
+    ```typescript
+    "Take $10 off orders over $100"
+
+    await mcp.useTool('marketing_createItemPromotion', {
+      marketplace_id: 'EBAY_US',
+      name: '$10 Off Orders Over $100',
+      promotion_type: 'ORDER_DISCOUNT',
+      start_date: new Date().toISOString(),
+      end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      discount_rules: [
+        {
+          discount_type: 'AMOUNT_OFF',
+          discount_amount: '10.00',
+          min_order_value: {
+            value: '100.00',
+            currency: 'USD'
+          }
+        }
+      ]
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+Promotions cannot be modified once started. To change a promotion, you must end it and create a new one.
+</Warning>
+
+### Campaign Performance Tracking
+
+**Measure ROI and Optimize Campaigns**
+
+Track impressions, clicks, conversions, and sales from your campaigns:
+
+```typescript
+"Show me performance for my Electronics campaign"
+
+const report = await mcp.useTool('marketing_getCampaignReport', {
+  campaign_id: 'campaign-123',
+  metric_keys: ['CLICK', 'IMPRESSION', 'SALE', 'AD_REVENUE']
+});
+
+// Analyze results
+const metrics = {
+  impressions: report.metrics.impression,
+  clicks: report.metrics.click,
+  sales: report.metrics.sale,
+  revenue: report.metrics.adRevenue.value,
+  ctr: (report.metrics.click / report.metrics.impression * 100).toFixed(2),
+  conversionRate: (report.metrics.sale / report.metrics.click * 100).toFixed(2)
+};
+
+console.log(`
+📊 Campaign Performance:
+   Impressions: ${metrics.impressions.toLocaleString()}
+   Clicks: ${metrics.clicks.toLocaleString()}
+   Sales: ${metrics.sales}
+   Ad Revenue: $${metrics.revenue}
+   CTR: ${metrics.ctr}%
+   Conversion Rate: ${metrics.conversionRate}%
+`);
+```
+
+**Available Metrics:**
+- `IMPRESSION` - Times ad was shown
+- `CLICK` - Times buyers clicked your listing
+- `SALE` - Number of sales from promoted listings
+- `AD_REVENUE` - Total sales revenue from promoted items
+- `AD_SPEND` - Total ad fees paid
+- `ROAS` - Return on ad spend (calculated)
+
+## Real-World Use Cases
+
+### Use Case 1: Seasonal Campaign Automation
+
+**Problem:** Need to run holiday promotions but don't want to manually manage timing and discounts.
+
+**Solution:** AI-scheduled seasonal campaigns with automatic start/stop.
+
+```typescript
+"Create a Black Friday campaign: 30% off all items, promoted at 10% ad rate,
+running from November 24-27"
+
+async function createBlackFridayCampaign() {
+  // 1. Create markdown sale
+  const promotion = await mcp.useTool('marketing_createItemPromotion', {
+    marketplace_id: 'EBAY_US',
+    name: 'Black Friday Mega Sale - 30% Off Everything',
+    promotion_type: 'MARKDOWN_SALE',
+    start_date: '2024-11-24T00:00:00Z',
+    end_date: '2024-11-27T23:59:59Z',
+    discount_rules: [
+      {
+        discount_type: 'PERCENTAGE',
+        discount_amount: '30',
+        apply_to_all_inventory: true
+      }
+    ]
+  });
+
+  // 2. Create promoted listings campaign
+  const campaign = await mcp.useTool('marketing_createCampaign', {
+    campaign_name: 'Black Friday Promoted Listings',
+    marketplace_id: 'EBAY_US',
+    funding_strategy: 'COST_PER_SALE',
+    campaign_criterion: {
+      criterion_type: 'INVENTORY_PARTITION',
+      selection_rules: [{ apply_to_all_inventory: true }]
+    }
+  });
+
+  await mcp.useTool('marketing_updateAdRate', {
+    campaign_id: campaign.campaignId,
+    ad_rate: 10
+  });
+
+  console.log(`✅ Black Friday campaign ready!`);
+  console.log(`   Promotion: ${promotion.promotionId}`);
+  console.log(`   Campaign: ${campaign.campaignId}`);
+
+  return { promotion, campaign };
+}
+```
+
+<Tip>
+Schedule this automation to run a week before Black Friday to ensure campaigns are approved and live on time.
+</Tip>
+
+### Use Case 2: Competitor-Based Dynamic Pricing
+
+**Problem:** Competitors constantly undercut your prices, making manual repricing impossible.
+
+**Solution:** AI-monitored competitive pricing with automatic promotion adjustments.
+
+```typescript
+"Monitor competitor prices and adjust my promotions to stay competitive"
+
+async function dynamicCompetitivePricing() {
+  // Get current active promotions
+  const promotions = await mcp.useTool('marketing_getPromotions', {
+    marketplace_id: 'EBAY_US',
+    promotion_status: 'RUNNING'
+  });
+
+  for (const promotion of promotions.promotions) {
+    // Analyze market pricing (using eBay analytics or external data)
+    const marketData = await analyzeMarketPrices(promotion);
+
+    // If competitors are offering better deals, increase discount
+    if (marketData.avgCompetitorDiscount > promotion.discountAmount) {
+      // End current promotion
+      await mcp.useTool('marketing_endPromotion', {
+        promotion_id: promotion.promotionId
+      });
+
+      // Create new one with better discount
+      const newDiscount = marketData.avgCompetitorDiscount + 5; // Beat by 5%
+
+      await mcp.useTool('marketing_createItemPromotion', {
+        marketplace_id: 'EBAY_US',
+        name: `Competitive Pricing - ${newDiscount}% Off`,
+        promotion_type: 'MARKDOWN_SALE',
+        start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        discount_rules: [
+          {
+            discount_type: 'PERCENTAGE',
+            discount_amount: newDiscount.toString(),
+            inventory_items: promotion.inventoryItems
+          }
+        ]
+      });
+
+      console.log(`🔄 Updated promotion to ${newDiscount}% off`);
+    }
+  }
+}
+
+// Run every 6 hours
+setInterval(dynamicCompetitivePricing, 6 * 60 * 60 * 1000);
+```
+
+### Use Case 3: Performance-Based Campaign Optimization
+
+**Problem:** Some products perform well with ads, others don't—wasting ad spend.
+
+**Solution:** Automated campaign optimization based on ROI.
+
+```typescript
+"Analyze my promoted listings and pause campaigns with ROI below 3x"
+
+async function optimizeCampaignsByROI() {
+  const campaigns = await mcp.useTool('marketing_getCampaigns', {
+    marketplace_id: 'EBAY_US',
+    campaign_status: 'RUNNING'
+  });
+
+  for (const campaign of campaigns.campaigns) {
+    // Get performance report
+    const report = await mcp.useTool('marketing_getCampaignReport', {
+      campaign_id: campaign.campaignId,
+      metric_keys: ['AD_REVENUE', 'AD_SPEND', 'SALE', 'IMPRESSION', 'CLICK']
+    });
+
+    // Calculate ROI
+    const adSpend = parseFloat(report.metrics.adSpend?.value || 0);
+    const adRevenue = parseFloat(report.metrics.adRevenue?.value || 0);
+    const roi = adSpend > 0 ? adRevenue / adSpend : 0;
+
+    console.log(`Campaign: ${campaign.campaignName}`);
+    console.log(`  Spend: $${adSpend.toFixed(2)}`);
+    console.log(`  Revenue: $${adRevenue.toFixed(2)}`);
+    console.log(`  ROI: ${roi.toFixed(2)}x`);
+
+    // Pause low-performing campaigns
+    if (roi < 3.0 && adSpend > 50) { // Min $50 spend for statistical significance
+      await mcp.useTool('marketing_pauseCampaign', {
+        campaign_id: campaign.campaignId
+      });
+      console.log(`  ⏸️  Paused (low ROI)`);
+    }
+
+    // Increase ad rate for high performers
+    else if (roi > 5.0) {
+      const currentRate = campaign.adRate || 5;
+      const newRate = Math.min(currentRate + 2, 15); // Cap at 15%
+
+      await mcp.useTool('marketing_updateAdRate', {
+        campaign_id: campaign.campaignId,
+        ad_rate: newRate
+      });
+      console.log(`  📈 Increased ad rate to ${newRate}%`);
+    }
+  }
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Ad Rate Optimization" icon="percentage">
+    **Start low, scale based on performance:**
+
+    1. **Initial launch:** 3-5% ad rate
+    2. **Monitor for 7 days:** Track impressions and sales
+    3. **Adjust based on results:**
+       - Low impressions? Increase by 2%
+       - Good ROI (>4x)? Increase by 1-2%
+       - Poor ROI (<2x)? Decrease or pause
+
+    ```typescript
+    // A/B test different ad rates
+    const testResults = [
+      { adRate: 5, roi: 3.2 },
+      { adRate: 8, roi: 4.1 },
+      { adRate: 12, roi: 3.8 }
+    ];
+
+    // 8% provides best ROI
+    const optimalRate = 8;
+    ```
+
+    **Category-specific rates:**
+    - Electronics: 7-10%
+    - Fashion: 10-12%
+    - Collectibles: 5-8%
+    - Automotive: 4-6%
+  </Accordion>
+
+  <Accordion title="Promotion Strategy" icon="calendar">
+    **Timing is everything:**
+
+    **Best times to run promotions:**
+    - **January:** New Year clearance (20-30% off)
+    - **February:** Valentine's Day (gifts category)
+    - **May:** Spring cleaning sales
+    - **July:** Summer clearance
+    - **November:** Black Friday/Cyber Monday
+    - **December:** Holiday season
+
+    **Promotion duration:**
+    - Flash sales: 24-48 hours (urgency)
+    - Standard sales: 7-14 days (sweet spot)
+    - Seasonal sales: 30-60 days (holidays)
+
+    **Discount levels:**
+    - 10-15%: Minor promotions
+    - 20-25%: Standard sales
+    - 30-50%: Clearance/major events
+    - 50%+: End-of-life products only
+  </Accordion>
+
+  <Accordion title="Campaign Structure" icon="sitemap">
+    **Organize campaigns logically:**
+
+    ```typescript
+    // ✅ Good: Organized by strategy
+    campaigns = [
+      'Brand Building - All Products (3% ad rate)',
+      'High Margin - Premium Items (10% ad rate)',
+      'Clearance - Slow Movers (15% ad rate)',
+      'New Arrivals - Latest Products (8% ad rate)'
+    ];
+
+    // ❌ Bad: No clear strategy
+    campaigns = [
+      'Campaign 1',
+      'Test',
+      'Random Products'
+    ];
+    ```
+
+    **Benefits:**
+    - Easy performance comparison
+    - Clear budget allocation
+    - Simplified reporting
+    - Better optimization decisions
+  </Accordion>
+
+  <Accordion title="Budget Management" icon="dollar-sign">
+    **Set and monitor budgets:**
+
+    ```typescript
+    "Create a monthly marketing budget tracker"
+
+    async function trackMonthlyAdSpend() {
+      const campaigns = await mcp.useTool('marketing_getCampaigns', {
+        marketplace_id: 'EBAY_US'
+      });
+
+      let totalSpend = 0;
+      let totalRevenue = 0;
+
+      for (const campaign of campaigns.campaigns) {
+        const report = await mcp.useTool('marketing_getCampaignReport', {
+          campaign_id: campaign.campaignId,
+          metric_keys: ['AD_SPEND', 'AD_REVENUE']
+        });
+
+        totalSpend += parseFloat(report.metrics.adSpend?.value || 0);
+        totalRevenue += parseFloat(report.metrics.adRevenue?.value || 0);
+      }
+
+      const roi = totalRevenue / totalSpend;
+      const monthlyBudget = 1000; // $1000/month
+      const budgetUsed = (totalSpend / monthlyBudget * 100).toFixed(1);
+
+      console.log(`💰 Monthly Budget: $${monthlyBudget}`);
+      console.log(`   Spent: $${totalSpend.toFixed(2)} (${budgetUsed}%)`);
+      console.log(`   Revenue: $${totalRevenue.toFixed(2)}`);
+      console.log(`   ROI: ${roi.toFixed(2)}x`);
+
+      // Alert if over budget
+      if (totalSpend > monthlyBudget) {
+        console.log(`⚠️  Over budget! Pausing low-performers...`);
+        // Auto-pause campaigns with ROI < 2x
+      }
+    }
+    ```
+
+    **Budget allocation:**
+    - **Test budget:** 20% for new campaigns
+    - **Proven winners:** 60% for high-ROI campaigns
+    - **Brand building:** 20% for awareness
+  </Accordion>
+</AccordionGroup>
+
+## Promotion Examples
+
+### Limited-Time Flash Sale
+
+```typescript
+"24-hour flash sale: 40% off all electronics"
+
+const flashSale = await mcp.useTool('marketing_createItemPromotion', {
+  marketplace_id: 'EBAY_US',
+  name: '⚡ 24-Hour Flash Sale - 40% Off Electronics',
+  promotion_type: 'MARKDOWN_SALE',
+  start_date: new Date().toISOString(),
+  end_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+  discount_rules: [
+    {
+      discount_type: 'PERCENTAGE',
+      discount_amount: '40',
+      categories: [
+        { category_id: '293', category_scope: 'ALL_INCLUDING_SUBCATEGORIES' }
+      ]
+    }
+  ],
+  priority: 'FEATURED' // Highlight promotion
+});
+```
+
+### Clearance Sale
+
+```typescript
+"Clearance sale: 50% off items with low inventory (quantity < 5)"
+
+// AI identifies low-stock items
+const lowStockItems = await identifyLowStockItems();
+
+await mcp.useTool('marketing_createItemPromotion', {
+  marketplace_id: 'EBAY_US',
+  name: 'Clearance - Final Sale 50% Off',
+  promotion_type: 'MARKDOWN_SALE',
+  start_date: new Date().toISOString(),
+  end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+  discount_rules: [
+    {
+      discount_type: 'PERCENTAGE',
+      discount_amount: '50',
+      inventory_items: lowStockItems
+    }
+  ]
+});
+```
+
+### Loyalty Rewards
+
+```typescript
+"Returning customers get 15% off their next purchase"
+
+await mcp.useTool('marketing_createItemPromotion', {
+  marketplace_id: 'EBAY_US',
+  name: 'Loyal Customer Rewards - 15% Off',
+  promotion_type: 'ORDER_DISCOUNT',
+  start_date: new Date().toISOString(),
+  end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+  discount_rules: [
+    {
+      discount_type: 'PERCENTAGE',
+      discount_amount: '15',
+      eligible_buyers: 'PREVIOUS_CUSTOMERS'
+    }
+  ]
+});
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Campaign not showing in search">
+    **Cause:** Ad rate too low or insufficient inventory.
+
+    **Solution:**
+    - Increase ad rate by 2-3%
+    - Ensure items are active and available
+    - Check that items meet eBay's promoted listings eligibility
+    - Wait 24 hours for campaign approval
+  </Accordion>
+
+  <Accordion title="Promotion not applying at checkout">
+    **Cause:** Buyer doesn't meet promotion requirements or promotion expired.
+
+    **Solution:**
+    - Verify promotion dates (start/end)
+    - Check minimum order value or quantity requirements
+    - Ensure items are included in promotion
+    - Promotions can take 1-2 hours to go live
+  </Accordion>
+
+  <Accordion title="High ad spend, low sales">
+    **Cause:** Targeting wrong products or ad rate too high.
+
+    **Solution:**
+    - Pause underperforming campaigns
+    - Analyze which products convert best
+    - Reduce ad rate and test
+    - Focus on high-margin products
+    - Improve listing quality (images, descriptions)
+  </Accordion>
+
+  <Accordion title="Cannot create promotion">
+    **Cause:** Conflicting promotions or invalid parameters.
+
+    **Solution:**
+    - Check for existing promotions on same items
+    - Verify date ranges don't overlap
+    - Ensure discount amount is within limits (0-75%)
+    - Confirm promotion type is supported in your marketplace
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Running Promotions Guide" icon="book" href="/guides/running-promotions">
+    Complete guide to creating effective promotions and campaigns
+  </Card>
+  <Card title="Marketing API Reference" icon="code" href="/api-reference/marketing/overview">
+    Complete API documentation with all 40+ marketing tools
+  </Card>
+  <Card title="Analytics Integration" icon="chart-line" href="/features/analytics-reporting">
+    Track campaign performance and optimize based on data
+  </Card>
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Advanced marketing strategies and optimization tips
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Marketing API Documentation](https://developer.ebay.com/api-docs/sell/marketing/overview.html)
+- [Promoted Listings Guide](https://www.ebay.com/help/selling/fees-credits-invoices/selling-fees/promoted-listings-fees)
+- [Promotions Manager](https://www.ebay.com/sh/mkt/promotionsmanager)
