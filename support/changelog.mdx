@@ -19,56 +19,170 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 
 ## Latest Release
 
-### Version 1.1.7 - Documentation Improvements (2025-11-12) {#v1-1-7}
+### Version 1.4.2 - Critical OAuth Fix (2025-01-16) {#v1-4-2}
 
-<Card title="📚 Enhanced Documentation & Compliance" icon="book">
-  Comprehensive documentation updates with security policies, community guidelines, and OAuth setup guides.
+<Card title="🔒 Critical OAuth Integration Fix" icon="shield-check">
+  Resolved persistent unauthorized_client errors with corrected eBay OAuth 2.0 endpoints and RuName implementation.
 </Card>
 
-#### What's New
+#### What's Fixed
 
-**Added:**
-- ✨ **SECURITY.md** - Comprehensive security documentation including:
-  - Vulnerability reporting procedures
-  - Token security best practices
-  - OAuth security guidelines
-- ✨ **CODE_OF_CONDUCT.md** - Community standards following Contributor Covenant v2.1
-- ✨ **OAUTH-SETUP.md** - Detailed OAuth token flow instructions
+**Critical Fixes:**
+- 🔧 **OAuth Endpoint Correction** - Changed from `auth.ebay.com` to `auth2.ebay.com`
+- 🔧 **Redirect URI Fix** - Implemented proper RuName identifier format (`YourName-AppName-xxxxx-xxxxxx`)
+- 🔧 **Resolved `unauthorized_client` errors** - Fixed persistent OAuth flow failures
+- 🔧 **Updated OAuth tests** - All 21 OAuth URL generation tests now validate correct endpoint and `hd` parameter
 
-**Fixed:**
-- 🔧 Documentation accuracy corrections:
-  - README now correctly states **140 tools** (not 137)
-  - CLAUDE.md updated to show **8 API categories**
-
-**Removed:**
-- 🚀 GitHub Actions linting workflow (streamlined CI/CD while maintaining local npm scripts)
+**Changed:**
+- OAuth 2.0 implementation now requires RuName from eBay Developer Portal
+- RuName represents unique application identifier per environment (sandbox vs. production)
 
 #### Project Statistics
 
 <CardGroup cols={3}>
-  <Card title="Commits" icon="code-commit">
-    **170+** total commits
+  <Card title="API Coverage" icon="chart-line">
+    **99.1%** (110/111 endpoints)
   </Card>
 
   <Card title="Tests" icon="vial">
-    **870** tests across 26 files
+    **870+** tests passing
   </Card>
 
-  <Card title="Coverage" icon="shield-check">
-    **99%+** function coverage
-    **85%+** line coverage
+  <Card title="Tools" icon="wrench">
+    **230+** eBay API tools
   </Card>
 </CardGroup>
 
 <CardGroup cols={2}>
-  <Card title="View on GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.7">
+  <Card title="View on GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.4.2">
     See full release notes
   </Card>
 
-  <Card title="Security Policy" icon="shield" href="https://github.com/YosefHayim/ebay-mcp-server/blob/main/SECURITY.md">
-    Read security guidelines
+  <Card title="OAuth Setup Guide" icon="key" href="/authentication/oauth-setup">
+    Updated OAuth configuration
   </Card>
 </CardGroup>
+
+---
+
+## Recent Releases
+
+### Version 1.4.0 - Documentation Consolidation (2025-01-15) {#v1-4-0}
+
+<AccordionGroup>
+  <Accordion title="📚 Release Notes - Comprehensive Documentation Update" icon="book">
+
+    #### Changed
+
+    **Documentation Improvements:**
+    - 📖 **Consolidated Documentation** - Merged all docs into single comprehensive README
+    - 📖 **Enhanced API Coverage** - Clearly documented 99.1% coverage (110/111 endpoints)
+    - 📖 **Improved Setup Instructions** - Better configuration and setup guidance
+    - 📖 **Updated Feature Docs** - Current capabilities and feature matrix
+
+    #### Added
+
+    - Comprehensive feature matrix in README
+    - Enhanced troubleshooting documentation
+    - Better examples for common use cases
+    - Clearer API reference documentation
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.4.0">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.3.0 - Interactive Setup Wizard (2025-01-14) {#v1-3-0}
+
+<AccordionGroup>
+  <Accordion title="🧙 Release Notes - Setup Wizard" icon="wand-magic-sparkles">
+
+    #### Added
+
+    **Interactive Setup:**
+    - ✨ **Setup Wizard** - New `npm run setup` command provides guided CLI configuration
+    - ✨ **Step-by-Step Process** - Interactive credential setup
+    - ✨ **Automatic Validation** - Validates credentials during setup
+    - ✨ **Environment Detection** - Automatically detects sandbox vs. production
+
+    #### Improved
+
+    - Developer experience for first-time setup
+    - Clearer error messages during configuration
+    - Better validation feedback
+    - Reduced setup time for new users
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.3.0">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.2.2 - eDelivery API Implementation (2025-01-12) {#v1-2-2}
+
+<AccordionGroup>
+  <Accordion title="🌍 Release Notes - International Shipping" icon="globe">
+
+    #### Added
+
+    **eDelivery API:**
+    - ✨ **24 New Endpoints** - Complete eDelivery API category coverage
+    - ✨ **International Shipping** - Cross-border trade operations
+    - ✨ **Shipping Management** - Enhanced international shipping tools
+    - ✨ **Comprehensive Tests** - Full test coverage for eDelivery endpoints
+
+    #### Impact
+
+    <CardGroup cols={2}>
+      <Card title="Global Reach" icon="earth-americas">
+        International shipping support
+      </Card>
+
+      <Card title="API Coverage" icon="chart-line">
+        Increased overall coverage
+      </Card>
+    </CardGroup>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.2.2">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Previous Releases
+
+### Version 1.1.7 - Documentation Improvements (2025-11-12) {#v1-1-7}
+
+<AccordionGroup>
+  <Accordion title="📚 Release Notes - Documentation & Compliance" icon="book">
+
+    #### Added
+
+    - ✨ **SECURITY.md** - Comprehensive security documentation
+    - ✨ **CODE_OF_CONDUCT.md** - Community standards (Contributor Covenant v2.1)
+    - ✨ **OAUTH-SETUP.md** - Detailed OAuth token flow instructions
+
+    #### Fixed
+
+    - 🔧 README now correctly states **140 tools** (not 137)
+    - 🔧 CLAUDE.md updated to show **8 API categories**
+
+    #### Removed
+
+    - GitHub Actions linting workflow (streamlined CI/CD)
+
+    <Card title="View on GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.7">
+      See full release notes
+    </Card>
+  </Accordion>
+</AccordionGroup>
 
 ---
 

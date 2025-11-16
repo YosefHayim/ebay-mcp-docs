@@ -1,0 +1,48 @@
+cff-version: 1.2.0
+message: "If you use this documentation or the eBay MCP Server in your research, please cite it as below."
+type: software
+title: "eBay MCP Server Documentation"
+abstract: "Comprehensive documentation for the eBay MCP Server - A Model Context Protocol implementation that provides AI assistants with full access to eBay's Sell APIs through 230+ tools."
+authors:
+  - family-names: "Sabag"
+    given-names: "Yosef Hayim"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/YosefHayim/ebay-mcp-docs"
+url: "https://ebaymcp.com"
+repository: "https://github.com/YosefHayim/ebay-mcp-server"
+license: Apache-2.0
+keywords:
+  - eBay
+  - MCP
+  - Model Context Protocol
+  - API
+  - AI
+  - Claude
+  - Documentation
+  - TypeScript
+  - Node.js
+  - OAuth
+  - E-commerce
+version: "1.4.2"
+date-released: "2025-01-16"
+identifiers:
+  - type: url
+    value: "https://ebaymcp.com"
+    description: "Documentation website"
+  - type: url
+    value: "https://github.com/YosefHayim/ebay-mcp-server"
+    description: "Source code repository"
+references:
+  - type: software
+    title: "eBay MCP Server"
+    authors:
+      - family-names: "Sabag"
+        given-names: "Yosef Hayim"
+    repository-code: "https://github.com/YosefHayim/ebay-mcp-server"
+    license: Apache-2.0
+  - type: standard
+    title: "Model Context Protocol Specification"
+    url: "https://modelcontextprotocol.io"
+  - type: web
+    title: "eBay Developer Program"
+    url: "https://developer.ebay.com"
