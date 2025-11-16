@@ -238,108 +238,211 @@ footer {
 }
 
 /* Sidebar Enhancements with Color-Coded Navigation */
-.sidebar {
+.sidebar,
+aside[class*="sidebar"],
+nav[class*="sidebar"],
+[data-sidebar] {
   border-right: 1px solid var(--ebay-gray-200);
 }
 
-.dark .sidebar {
+.dark .sidebar,
+.dark aside[class*="sidebar"],
+.dark nav[class*="sidebar"],
+.dark [data-sidebar] {
   border-right-color: var(--ebay-gray-800);
 }
 
-/* Sidebar Navigation Items - Base Styles */
+/* Sidebar Navigation Items - Base Styles with Enhanced Targeting */
 .sidebar nav a,
 .sidebar nav button,
+.sidebar a,
+.sidebar button,
+aside[class*="sidebar"] a,
+aside[class*="sidebar"] button,
 nav[class*="sidebar"] a,
 nav[class*="sidebar"] button,
 [class*="sidebar"] nav a,
-[class*="sidebar"] nav button {
+[class*="sidebar"] nav button,
+[data-sidebar] a,
+[data-sidebar] button,
+nav ul li a,
+nav ol li a {
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-left: 3px solid transparent;
-  padding-left: 12px;
+  padding-left: 12px !important;
   margin: 2px 0;
+  display: block;
 }
 
-/* Hover Effects - Color Rotation by Navigation Groups */
-/* Group 1: Getting Started - Red */
-.sidebar nav a:nth-of-type(4n+1):hover,
-nav[class*="sidebar"] a:nth-of-type(4n+1):hover,
-[class*="sidebar"] nav a:nth-of-type(4n+1):hover {
-  border-left-color: var(--ebay-red);
-  background: linear-gradient(90deg, rgba(229, 50, 56, 0.08) 0%, transparent 100%);
-  padding-left: 16px;
+/* Hover Effects - Colorful Rotation (Red, Blue, Yellow, Green) */
+/* Red - Every 1st in group of 4 */
+.sidebar a:nth-child(4n+1):hover,
+.sidebar button:nth-child(4n+1):hover,
+aside[class*="sidebar"] a:nth-child(4n+1):hover,
+nav[class*="sidebar"] a:nth-child(4n+1):hover,
+[data-sidebar] a:nth-child(4n+1):hover,
+nav ul li:nth-child(4n+1) a:hover,
+nav ol li:nth-child(4n+1) a:hover {
+  border-left-color: var(--ebay-red) !important;
+  background: linear-gradient(90deg, rgba(229, 50, 56, 0.12) 0%, transparent 100%) !important;
+  padding-left: 16px !important;
+  transform: translateX(2px);
 }
 
-/* Group 2: Core Features - Blue */
-.sidebar nav a:nth-of-type(4n+2):hover,
-nav[class*="sidebar"] a:nth-of-type(4n+2):hover,
-[class*="sidebar"] nav a:nth-of-type(4n+2):hover {
-  border-left-color: var(--ebay-blue);
-  background: linear-gradient(90deg, rgba(0, 100, 210, 0.08) 0%, transparent 100%);
-  padding-left: 16px;
+/* Blue - Every 2nd in group of 4 */
+.sidebar a:nth-child(4n+2):hover,
+.sidebar button:nth-child(4n+2):hover,
+aside[class*="sidebar"] a:nth-child(4n+2):hover,
+nav[class*="sidebar"] a:nth-child(4n+2):hover,
+[data-sidebar] a:nth-child(4n+2):hover,
+nav ul li:nth-child(4n+2) a:hover,
+nav ol li:nth-child(4n+2) a:hover {
+  border-left-color: var(--ebay-blue) !important;
+  background: linear-gradient(90deg, rgba(0, 100, 210, 0.12) 0%, transparent 100%) !important;
+  padding-left: 16px !important;
+  transform: translateX(2px);
 }
 
-/* Group 3: Guides & Documentation - Yellow */
-.sidebar nav a:nth-of-type(4n+3):hover,
-nav[class*="sidebar"] a:nth-of-type(4n+3):hover,
-[class*="sidebar"] nav a:nth-of-type(4n+3):hover {
-  border-left-color: var(--ebay-yellow);
-  background: linear-gradient(90deg, rgba(245, 175, 2, 0.08) 0%, transparent 100%);
-  padding-left: 16px;
+/* Yellow - Every 3rd in group of 4 */
+.sidebar a:nth-child(4n+3):hover,
+.sidebar button:nth-child(4n+3):hover,
+aside[class*="sidebar"] a:nth-child(4n+3):hover,
+nav[class*="sidebar"] a:nth-child(4n+3):hover,
+[data-sidebar] a:nth-child(4n+3):hover,
+nav ul li:nth-child(4n+3) a:hover,
+nav ol li:nth-child(4n+3) a:hover {
+  border-left-color: var(--ebay-yellow) !important;
+  background: linear-gradient(90deg, rgba(245, 175, 2, 0.12) 0%, transparent 100%) !important;
+  padding-left: 16px !important;
+  transform: translateX(2px);
 }
 
-/* Group 4: Advanced & API - Green */
-.sidebar nav a:nth-of-type(4n+4):hover,
-nav[class*="sidebar"] a:nth-of-type(4n+4):hover,
-[class*="sidebar"] nav a:nth-of-type(4n+4):hover {
-  border-left-color: var(--ebay-green);
-  background: linear-gradient(90deg, rgba(134, 184, 23, 0.08) 0%, transparent 100%);
-  padding-left: 16px;
+/* Green - Every 4th in group of 4 */
+.sidebar a:nth-child(4n+4):hover,
+.sidebar button:nth-child(4n+4):hover,
+aside[class*="sidebar"] a:nth-child(4n+4):hover,
+nav[class*="sidebar"] a:nth-child(4n+4):hover,
+[data-sidebar] a:nth-child(4n+4):hover,
+nav ul li:nth-child(4n+4) a:hover,
+nav ol li:nth-child(4n+4) a:hover {
+  border-left-color: var(--ebay-green) !important;
+  background: linear-gradient(90deg, rgba(134, 184, 23, 0.12) 0%, transparent 100%) !important;
+  padding-left: 16px !important;
+  transform: translateX(2px);
 }
 
-/* Active State - Maintains Color Scheme */
-.sidebar nav a[aria-current="page"],
+/* Active/Selected State - Colorful with Enhanced Visibility */
+.sidebar a[aria-current="page"],
+.sidebar a.active,
+.sidebar button[aria-current="page"],
+.sidebar button.active,
+aside[class*="sidebar"] a[aria-current="page"],
+aside[class*="sidebar"] a.active,
 nav[class*="sidebar"] a[aria-current="page"],
-[class*="sidebar"] nav a[aria-current="page"] {
+nav[class*="sidebar"] a.active,
+[data-sidebar] a[aria-current="page"],
+[data-sidebar] a.active,
+nav ul li a[aria-current="page"],
+nav ul li a.active {
   font-weight: 600;
 }
 
-.sidebar nav a[aria-current="page"]:nth-of-type(4n+1),
-nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+1) {
-  border-left-color: var(--ebay-red);
-  background: linear-gradient(90deg, rgba(229, 50, 56, 0.12) 0%, transparent 100%);
+/* Active Red */
+.sidebar a:nth-child(4n+1)[aria-current="page"],
+.sidebar a:nth-child(4n+1).active,
+aside[class*="sidebar"] a:nth-child(4n+1)[aria-current="page"],
+nav[class*="sidebar"] a:nth-child(4n+1)[aria-current="page"],
+[data-sidebar] a:nth-child(4n+1)[aria-current="page"],
+nav ul li:nth-child(4n+1) a[aria-current="page"],
+nav ul li:nth-child(4n+1) a.active {
+  border-left-color: var(--ebay-red) !important;
+  background: linear-gradient(90deg, rgba(229, 50, 56, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-red) !important;
+  padding-left: 16px !important;
 }
 
-.sidebar nav a[aria-current="page"]:nth-of-type(4n+2),
-nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+2) {
-  border-left-color: var(--ebay-blue);
-  background: linear-gradient(90deg, rgba(0, 100, 210, 0.12) 0%, transparent 100%);
+/* Active Blue */
+.sidebar a:nth-child(4n+2)[aria-current="page"],
+.sidebar a:nth-child(4n+2).active,
+aside[class*="sidebar"] a:nth-child(4n+2)[aria-current="page"],
+nav[class*="sidebar"] a:nth-child(4n+2)[aria-current="page"],
+[data-sidebar] a:nth-child(4n+2)[aria-current="page"],
+nav ul li:nth-child(4n+2) a[aria-current="page"],
+nav ul li:nth-child(4n+2) a.active {
+  border-left-color: var(--ebay-blue) !important;
+  background: linear-gradient(90deg, rgba(0, 100, 210, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-blue) !important;
+  padding-left: 16px !important;
 }
 
-.sidebar nav a[aria-current="page"]:nth-of-type(4n+3),
-nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+3) {
-  border-left-color: var(--ebay-yellow);
-  background: linear-gradient(90deg, rgba(245, 175, 2, 0.12) 0%, transparent 100%);
+/* Active Yellow */
+.sidebar a:nth-child(4n+3)[aria-current="page"],
+.sidebar a:nth-child(4n+3).active,
+aside[class*="sidebar"] a:nth-child(4n+3)[aria-current="page"],
+nav[class*="sidebar"] a:nth-child(4n+3)[aria-current="page"],
+[data-sidebar] a:nth-child(4n+3)[aria-current="page"],
+nav ul li:nth-child(4n+3) a[aria-current="page"],
+nav ul li:nth-child(4n+3) a.active {
+  border-left-color: var(--ebay-yellow) !important;
+  background: linear-gradient(90deg, rgba(245, 175, 2, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-yellow-dark) !important;
+  padding-left: 16px !important;
 }
 
-.sidebar nav a[aria-current="page"]:nth-of-type(4n+4),
-nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+4) {
-  border-left-color: var(--ebay-green);
-  background: linear-gradient(90deg, rgba(134, 184, 23, 0.12) 0%, transparent 100%);
+/* Active Green */
+.sidebar a:nth-child(4n+4)[aria-current="page"],
+.sidebar a:nth-child(4n+4).active,
+aside[class*="sidebar"] a:nth-child(4n+4)[aria-current="page"],
+nav[class*="sidebar"] a:nth-child(4n+4)[aria-current="page"],
+[data-sidebar] a:nth-child(4n+4)[aria-current="page"],
+nav ul li:nth-child(4n+4) a[aria-current="page"],
+nav ul li:nth-child(4n+4) a.active {
+  border-left-color: var(--ebay-green) !important;
+  background: linear-gradient(90deg, rgba(134, 184, 23, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-green-dark) !important;
+  padding-left: 16px !important;
 }
 
-/* Dark Mode Sidebar Adjustments */
-.dark .sidebar nav a:hover,
+/* Dark Mode Sidebar - Enhanced Contrast */
+.dark .sidebar a:hover,
+.dark aside[class*="sidebar"] a:hover,
 .dark nav[class*="sidebar"] a:hover,
-.dark [class*="sidebar"] nav a:hover {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+.dark [data-sidebar] a:hover,
+.dark nav ul li a:hover {
+  opacity: 0.95;
+}
+
+/* Dark Mode Active States with Better Visibility */
+.dark .sidebar a:nth-child(4n+1)[aria-current="page"],
+.dark .sidebar a:nth-child(4n+1).active {
+  color: #FF8B8F !important;
+}
+
+.dark .sidebar a:nth-child(4n+2)[aria-current="page"],
+.dark .sidebar a:nth-child(4n+2).active {
+  color: #5BA3FF !important;
+}
+
+.dark .sidebar a:nth-child(4n+3)[aria-current="page"],
+.dark .sidebar a:nth-child(4n+3).active {
+  color: #FFCA3A !important;
+}
+
+.dark .sidebar a:nth-child(4n+4)[aria-current="page"],
+.dark .sidebar a:nth-child(4n+4).active {
+  color: #A8D44D !important;
 }
 
 /* Sidebar Section Headers */
 .sidebar h3,
 .sidebar h4,
+aside[class*="sidebar"] h3,
+aside[class*="sidebar"] h4,
 [class*="sidebar"] h3,
-[class*="sidebar"] h4 {
+[class*="sidebar"] h4,
+[data-sidebar] h3,
+[data-sidebar] h4 {
   color: var(--ebay-gray-700);
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -352,8 +455,12 @@ nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+4) {
 
 .dark .sidebar h3,
 .dark .sidebar h4,
+.dark aside[class*="sidebar"] h3,
+.dark aside[class*="sidebar"] h4,
 .dark [class*="sidebar"] h3,
-.dark [class*="sidebar"] h4 {
+.dark [class*="sidebar"] h4,
+.dark [data-sidebar] h3,
+.dark [data-sidebar] h4 {
   color: var(--ebay-gray-400);
 }
 
