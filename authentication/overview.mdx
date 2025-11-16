@@ -3,13 +3,458 @@ title: "Authentication Overview"
 description: "Understanding authentication methods for the eBay MCP Server"
 ---
 
-Authentication documentation coming soon. This page will cover:
+The eBay MCP Server supports two authentication methods, each designed for different use cases and offering different levels of API access and rate limits.
 
-- User tokens vs client credentials
-- OAuth 2.0 flow
-- Token management and refresh
-- Rate limits by authentication method
+## Authentication Methods
 
-<Card title="Quickstart Guide" href="/quickstart" icon="rocket">
-  See the quickstart guide for immediate setup instructions
+<CardGroup cols={2}>
+  <Card title="User Tokens" icon="user-check" href="/authentication/token-management">
+    **Recommended for production**
+
+    Full API access with high rate limits (10,000-50,000 requests/day)
+  </Card>
+
+  <Card title="Client Credentials" icon="key" href="/authentication/client-credentials">
+    **Quick setup fallback**
+
+    Limited API access with lower rate limits (1,000 requests/day)
+  </Card>
+</CardGroup>
+
+## Quick Comparison
+
+| Feature | User Tokens | Client Credentials |
+|---------|-------------|-------------------|
+| **Rate Limit** | 10,000-50,000/day | 1,000/day |
+| **Setup Complexity** | OAuth 2.0 flow required | Simple - just ID and Secret |
+| **API Access** | Full access to all 230+ tools | Limited to public/app-level operations |
+| **User-specific Data** | ✅ Yes | ❌ No |
+| **Automatic Refresh** | ✅ Yes | N/A (always valid) |
+| **Best For** | Production, seller operations | Testing, development |
+
+<Tip>
+  **For most use cases, you'll want user tokens.** They provide full API access and significantly higher rate limits.
+</Tip>
+
+## How Authentication Works
+
+### User Tokens (OAuth 2.0)
+
+User tokens use the OAuth 2.0 authorization flow to grant your MCP server access to a seller's eBay account.
+
+<Steps>
+  <Step title="User Authorization">
+    The seller authorizes your application through eBay's OAuth interface.
+  </Step>
+
+  <Step title="Token Exchange">
+    Your application exchanges the authorization code for access and refresh tokens.
+  </Step>
+
+  <Step title="API Access">
+    The MCP server uses the access token to make API calls on behalf of the user.
+  </Step>
+
+  <Step title="Automatic Refresh">
+    When the access token expires (typically after 2 hours), the server automatically uses the refresh token to obtain a new access token.
+  </Step>
+</Steps>
+
+<Info>
+  The eBay MCP Server handles token refresh automatically - you don't need to manage token expiration manually.
+</Info>
+
+### Client Credentials
+
+Client credentials use a simpler application-level authentication that doesn't require user authorization.
+
+<Steps>
+  <Step title="Configuration">
+    You provide your eBay Client ID and Client Secret.
+  </Step>
+
+  <Step title="Automatic Authentication">
+    The MCP server automatically obtains an application access token from eBay.
+  </Step>
+
+  <Step title="Limited API Access">
+    The server can only access public and app-level endpoints.
+  </Step>
+</Steps>
+
+<Warning>
+  Client credentials **cannot** access user-specific data like inventory, orders, or seller analytics.
+</Warning>
+
+## Rate Limits Explained
+
+Understanding rate limits is crucial for choosing the right authentication method.
+
+### User Token Limits
+
+The daily rate limit for user tokens depends on your eBay seller account type:
+
+<AccordionGroup>
+  <Accordion title="Basic Seller - 10,000 requests/day">
+    **Who qualifies:**
+    - New eBay sellers
+    - Individual sellers
+    - Low-volume accounts
+
+    **What you can do:**
+    - Manage up to ~50 active listings
+    - Process daily orders
+    - Run basic marketing campaigns
+    - View analytics regularly
+  </Accordion>
+
+  <Accordion title="Business Seller - 25,000 requests/day">
+    **Who qualifies:**
+    - Registered business accounts
+    - Medium-volume sellers
+    - eBay Store subscribers
+
+    **What you can do:**
+    - Manage hundreds of active listings
+    - Handle high order volumes
+    - Run multiple marketing campaigns
+    - Frequent analytics queries
+  </Accordion>
+
+  <Accordion title="Enterprise Seller - 50,000 requests/day">
+    **Who qualifies:**
+    - Large-volume sellers
+    - eBay partner accounts
+    - High-tier eBay Store subscribers
+
+    **What you can do:**
+    - Manage thousands of listings
+    - Process hundreds of orders daily
+    - Complex automation workflows
+    - Real-time analytics and monitoring
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Check your current rate limit in the [eBay Developer Portal](https://developer.ebay.com) under your account settings.
+</Tip>
+
+### Client Credentials Limits
+
+<Info>
+  **Fixed at 1,000 requests/day** regardless of account type.
+</Info>
+
+This is sufficient for:
+- Testing and development
+- Occasional API exploration
+- Low-frequency automation
+- Learning the eBay APIs
+
+**Not recommended for:**
+- Production seller operations
+- High-frequency automation
+- Managing active inventory
+- Processing orders
+
+## Choosing the Right Method
+
+Use this decision tree to select the appropriate authentication method:
+
+<Tabs>
+  <Tab title="I'm Just Getting Started">
+    **Recommended: Client Credentials** ✅
+
+    **Why:**
+    - Faster setup (no OAuth flow)
+    - Perfect for learning and testing
+    - Can upgrade to user tokens later
+
+    **Next steps:**
+    1. Get your eBay Client ID and Secret
+    2. Configure with environment variables
+    3. Start exploring the APIs
+
+    <Card title="Client Credentials Guide" icon="rocket" href="/authentication/client-credentials">
+      Follow our step-by-step setup guide
+    </Card>
+  </Tab>
+
+  <Tab title="I'm Building for Production">
+    **Recommended: User Tokens** ✅
+
+    **Why:**
+    - Full API access
+    - Higher rate limits
+    - Access to seller operations
+    - Automatic token management
+
+    **Next steps:**
+    1. Set up OAuth in eBay Developer Portal
+    2. Run the interactive setup wizard
+    3. Authorize your application
+    4. Start using all 230+ tools
+
+    <Card title="OAuth Setup Guide" icon="shield-check" href="/authentication/oauth-setup">
+      Complete OAuth 2.0 configuration
+    </Card>
+  </Tab>
+
+  <Tab title="I'm Not Sure">
+    **Start with Client Credentials, then upgrade**
+
+    **Recommended path:**
+    1. **Week 1:** Use client credentials to learn the APIs
+    2. **Week 2:** Test your workflows and automation
+    3. **Week 3:** Set up user tokens for production
+    4. **Week 4:** Deploy with full API access
+
+    <Tip>
+      You can switch between authentication methods by simply updating your environment variables - no code changes needed!
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Security Considerations
+
+Both authentication methods require careful handling of credentials:
+
+### Protecting Your Credentials
+
+<AccordionGroup>
+  <Accordion title="Never Commit Credentials" icon="ban">
+    **Always use environment variables** for credentials:
+
+    ```bash
+    # ✅ Good: Use .env file (add to .gitignore)
+    EBAY_CLIENT_ID=your_client_id
+    EBAY_CLIENT_SECRET=your_client_secret
+
+    # ❌ Bad: Never hardcode in source code
+    const clientId = "YourAppId-12345"
+    ```
+
+    <Warning>
+      The `.env` file should **always** be in `.gitignore` to prevent accidental commits.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Use Separate Credentials per Environment" icon="layer-group">
+    **Best practice:**
+    - Separate Sandbox credentials for testing
+    - Separate Production credentials for live operations
+    - Never mix Sandbox and Production
+
+    **File organization:**
+    ```bash
+    .env.sandbox      # For development
+    .env.production   # For production
+    .env             # Active config (in .gitignore)
+    ```
+  </Accordion>
+
+  <Accordion title="Rotate Credentials Regularly" icon="rotate">
+    **For production environments:**
+    - Rotate credentials every 90 days
+    - Immediately rotate if compromised
+    - Keep audit logs of rotation
+
+    **How to rotate:**
+    1. Generate new credentials in [eBay Developer Portal](https://developer.ebay.com)
+    2. Update `.env` file
+    3. If using user tokens, run `npm run setup` to regenerate tokens
+    4. Delete old credentials from eBay portal
+  </Accordion>
+
+  <Accordion title="Monitor for Unauthorized Access" icon="eye">
+    **Regular security checks:**
+    - Review API usage in eBay Developer Portal
+    - Monitor for unexpected API calls
+    - Set up alerts for rate limit spikes
+    - Check token refresh patterns
+
+    <Info>
+      The eBay Developer Portal provides detailed usage analytics to help you detect anomalies.
+    </Info>
+  </Accordion>
+</AccordionGroup>
+
+## Environment Variables
+
+Both authentication methods use environment variables for configuration.
+
+### Required for Both Methods
+
+```bash
+# eBay application credentials
+EBAY_CLIENT_ID=YourAppName-YourApp-SBX-1234abcd-567890ab
+EBAY_CLIENT_SECRET=SBX-1234abcd-5678-90ab-cdef-1234
+
+# API environment (sandbox or production)
+EBAY_ENVIRONMENT=sandbox
+
+# OAuth redirect URI (required for user tokens)
+EBAY_REDIRECT_URI=http://localhost:3000/callback
+```
+
+### Additional for User Tokens
+
+```bash
+# User access token (obtained via OAuth flow)
+EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#...
+
+# User refresh token (for automatic renewal)
+EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
+
+# Token expiry timestamp
+EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+```
+
+<Note>
+  User token variables are **automatically** populated when you run `npm run setup` or `npm run auto-setup`.
+</Note>
+
+## Authentication Flow in the MCP Server
+
+Understanding how the MCP server handles authentication internally:
+
+### Startup Sequence
+
+1. **Load Environment Variables**
+   - Read `.env` file
+   - Validate required variables
+
+2. **Check for User Tokens**
+   - If user tokens present and valid → use user token authentication
+   - If user tokens missing or expired → fall back to client credentials
+
+3. **Initialize Authentication**
+   - Obtain initial access token
+   - Set up automatic refresh for user tokens
+   - Register all available tools based on authentication type
+
+4. **Validate Connection**
+   - Test API connectivity
+   - Confirm authentication is working
+   - Log authentication status
+
+<Info>
+  You can see the authentication status in the server logs when it starts.
+</Info>
+
+### During Operation
+
+The MCP server handles authentication transparently:
+
+- **Before each API call:** Checks if access token is still valid
+- **If token expired:** Automatically refreshes using refresh token
+- **If refresh fails:** Falls back to client credentials if available
+- **If all auth fails:** Returns clear error message
+
+<Check>
+  You never need to manually manage tokens - the server does it all automatically!
+</Check>
+
+## Troubleshooting Authentication
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Invalid Client Credentials">
+    **Symptoms:**
+    - "Authentication failed" errors
+    - Server won't start
+    - 401 Unauthorized responses
+
+    **Solutions:**
+    1. Verify credentials in [eBay Developer Portal](https://developer.ebay.com)
+    2. Check for typos in `.env` file
+    3. Ensure you're using credentials from the correct environment (Sandbox vs Production)
+    4. Remove any extra spaces or quotes around values
+  </Accordion>
+
+  <Accordion title="User Tokens Not Working">
+    **Symptoms:**
+    - Server falls back to client credentials
+    - User-specific endpoints return errors
+    - Token refresh fails
+
+    **Solutions:**
+    1. Re-run `npm run setup` to regenerate tokens
+    2. Verify redirect URI matches in eBay Developer Portal
+    3. Check token expiry is in correct ISO 8601 format
+    4. Ensure system clock is accurate
+  </Accordion>
+
+  <Accordion title="Rate Limit Exceeded">
+    **Symptoms:**
+    - HTTP 429 responses
+    - "Rate limit exceeded" errors
+    - API calls failing after many requests
+
+    **Solutions:**
+    1. **With client credentials:** Upgrade to user tokens
+    2. **With user tokens:** Wait for daily reset (UTC midnight)
+    3. **Long-term:** Optimize your API usage patterns
+    4. **Consider:** Upgrading your eBay seller account tier
+  </Accordion>
+
+  <Accordion title="Sandbox vs Production Mismatch">
+    **Symptoms:**
+    - "Application not found" errors
+    - Credentials work in portal but not in server
+    - Inconsistent behavior
+
+    **Solutions:**
+    1. Check `EBAY_ENVIRONMENT` in `.env` matches your credentials
+    2. Sandbox credentials only work with `EBAY_ENVIRONMENT=sandbox`
+    3. Production credentials only work with `EBAY_ENVIRONMENT=production`
+    4. Never mix Sandbox and Production credentials
+  </Accordion>
+</AccordionGroup>
+
+<Card title="More Help" icon="life-ring" href="/support/troubleshooting">
+  See the comprehensive troubleshooting guide
 </Card>
+
+## Next Steps
+
+Ready to set up authentication? Follow the guide for your chosen method:
+
+<CardGroup cols={2}>
+  <Card title="OAuth 2.0 Setup" icon="shield-check" href="/authentication/oauth-setup">
+    Set up user tokens for full API access
+  </Card>
+
+  <Card title="Client Credentials" icon="key" href="/authentication/client-credentials">
+    Quick setup with client credentials
+  </Card>
+
+  <Card title="Token Management" icon="rotate" href="/authentication/token-management">
+    Learn about token refresh and lifecycle
+  </Card>
+
+  <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
+    Complete setup guide with authentication
+  </Card>
+</CardGroup>
+
+## Learn More
+
+<CardGroup cols={2}>
+  <Card title="eBay OAuth Documentation" icon="book" href="https://developer.ebay.com/api-docs/static/oauth-tokens.html">
+    Official eBay OAuth 2.0 documentation
+  </Card>
+
+  <Card title="Rate Limits Deep Dive" icon="gauge" href="/advanced/rate-limits">
+    Understanding and optimizing rate limits
+  </Card>
+
+  <Card title="Security Best Practices" icon="shield" href="/guides/best-practices#security">
+    Comprehensive security guidelines
+  </Card>
+
+  <Card title="Configuration Guide" icon="gear" href="/configuration">
+    All configuration options explained
+  </Card>
+</CardGroup>
