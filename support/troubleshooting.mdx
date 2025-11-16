@@ -1,12 +1,1045 @@
 ---
 title: "Troubleshooting"
-description: "Documentation for Troubleshooting"
+description: "Solutions to common issues with the eBay MCP Server"
+icon: "wrench"
 ---
 
-# Troubleshooting
+Find solutions to common problems you may encounter while installing, configuring, or using the eBay MCP Server.
 
-Documentation for this section is coming soon.
+<Tip>
+  Can't find your issue? Check the [FAQ](/support/faq) or [report an issue](https://github.com/YosefHayim/ebay-mcp-server/issues) on GitHub.
+</Tip>
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Quick Diagnosis
+
+Use these questions to identify your issue category:
+
+<CardGroup cols={2}>
+  <Card title="Installation Problems" icon="download" href="#installation-issues">
+    Server won't install or build fails
+  </Card>
+
+  <Card title="Authentication Errors" icon="shield-halved" href="#authentication-issues">
+    Credential validation or OAuth failures
+  </Card>
+
+  <Card title="MCP Client Issues" icon="plug" href="#mcp-client-connection-issues">
+    Client can't find or connect to server
+  </Card>
+
+  <Card title="Runtime Errors" icon="triangle-exclamation" href="#runtime-issues">
+    Server crashes or API calls fail
+  </Card>
+</CardGroup>
+
+---
+
+## Installation Issues
+
+Problems during installation or building the server.
+
+<AccordionGroup>
+  <Accordion title="Error: Node version too old" icon="node-js">
+    **Problem:** Your Node.js version is below 18.0.0
+
+    **Cause:** The eBay MCP Server requires Node.js 18 or higher for modern JavaScript features and dependencies.
+
+    **Solution:**
+
+    1. **Update Node.js** from [nodejs.org](https://nodejs.org)
+       - Download the LTS (Long Term Support) version
+       - Run the installer
+       - Verify: `node --version`
+
+    2. **Or use a version manager** like [nvm](https://github.com/nvm-sh/nvm):
+       ```bash
+       # Install nvm (macOS/Linux)
+       curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+       # Install and use Node 18
+       nvm install 18
+       nvm use 18
+       nvm alias default 18
+       ```
+
+    3. **Verify installation:**
+       ```bash
+       node --version
+       # Should show v18.x.x or higher
+       ```
+
+    <Note>
+      After updating Node.js, you may need to reinstall the server: `rm -rf node_modules && npm install`
+    </Note>
+  </Accordion>
+
+  <Accordion title="Error: npm install fails" icon="box">
+    **Problem:** Dependency installation fails with errors
+
+    **Cause:** Common causes include corrupted cache, network issues, or permission problems.
+
+    **Solutions:**
+
+    **Try 1: Clear npm cache**
+    ```bash
+    npm cache clean --force
+    npm install
+    ```
+
+    **Try 2: Delete node_modules and reinstall**
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+
+    **Try 3: Check your internet connection**
+    - Verify you can access npmjs.org
+    - Check if you're behind a corporate firewall
+    - Try using a different network
+
+    **Try 4: Use a different registry (if in restricted network)**
+    ```bash
+    npm config set registry https://registry.npmjs.org/
+    npm install
+    ```
+
+    <Warning>
+      If errors mention "EACCES" or "EPERM", see the "Permission denied" section below.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Error: Permission denied" icon="lock">
+    **Problem:** Insufficient permissions during installation
+
+    **Cause:** npm is trying to write to a directory you don't have access to.
+
+    **Solutions:**
+
+    **macOS/Linux:**
+    ```bash
+    # Fix ownership of the project directory
+    sudo chown -R $USER:$USER ebay-mcp-server
+    cd ebay-mcp-server
+    npm install
+    ```
+
+    **Windows:**
+    - Right-click PowerShell or Command Prompt
+    - Select "Run as Administrator"
+    - Navigate to the project directory
+    - Run `npm install`
+
+    **Alternative: Fix npm global permissions** (macOS/Linux)
+    ```bash
+    mkdir ~/.npm-global
+    npm config set prefix '~/.npm-global'
+    echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.profile
+    source ~/.profile
+    ```
+
+    <Tip>
+      Never use `sudo npm install` in the project directory - fix permissions instead.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Error: Build fails" icon="hammer">
+    **Problem:** TypeScript compilation errors during `npm run build`
+
+    **Cause:** TypeScript compiler issues or source code errors.
+
+    **Solutions:**
+
+    **Try 1: Ensure TypeScript is installed**
+    ```bash
+    npm install -g typescript
+    npm run build
+    ```
+
+    **Try 2: Clean and rebuild**
+    ```bash
+    # Remove build directory
+    rm -rf build/
+
+    # Rebuild
+    npm run build
+    ```
+
+    **Try 3: Check for version mismatches**
+    ```bash
+    # Reinstall all dependencies
+    rm -rf node_modules package-lock.json
+    npm install
+    npm run build
+    ```
+
+    **Try 4: Review build errors**
+    - Read the error output carefully
+    - Look for specific file names and line numbers
+    - Check if you've modified any source files
+
+    <Note>
+      If you've modified source code, ensure your changes follow TypeScript syntax.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Error: Git clone fails" icon="code-branch">
+    **Problem:** Cannot clone the repository from GitHub
+
+    **Cause:** Network connectivity, firewall restrictions, or Git configuration issues.
+
+    **Solutions:**
+
+    **Try 1: Check internet connection**
+    ```bash
+    ping github.com
+    ```
+
+    **Try 2: Use HTTPS instead of SSH**
+    ```bash
+    git clone https://github.com/YosefHayim/ebay-mcp-server.git
+    ```
+
+    **Try 3: Configure Git proxy** (if behind firewall)
+    ```bash
+    git config --global http.proxy http://proxy.example.com:8080
+    git clone https://github.com/YosefHayim/ebay-mcp-server.git
+    ```
+
+    **Try 4: Download ZIP instead**
+    - Visit [github.com/YosefHayim/ebay-mcp-server](https://github.com/YosefHayim/ebay-mcp-server)
+    - Click "Code" → "Download ZIP"
+    - Extract and use the files
+
+    <Info>
+      If you download as ZIP, you won't have Git history, but the code will work the same.
+    </Info>
+  </Accordion>
+
+  <Accordion title="Tests failing during installation" icon="flask">
+    **Problem:** `npm test` fails with errors after installation
+
+    **Cause:** Missing credentials, network issues, or environment configuration problems.
+
+    **Solution:**
+
+    1. **Configure your `.env` file before running tests:**
+       ```bash
+       cp .env.example .env
+       # Edit .env with your credentials
+       ```
+
+    2. **Check your internet connection:**
+       - Tests require API connectivity to eBay
+       - Ensure you can reach api.ebay.com
+
+    3. **Use Sandbox credentials for testing:**
+       ```bash
+       EBAY_ENVIRONMENT=sandbox
+       ```
+
+    4. **Run a single test to diagnose:**
+       ```bash
+       npm test -- --run getInventoryItems.test.ts
+       ```
+
+    5. **Skip tests during installation:**
+       ```bash
+       npm install --ignore-scripts
+       ```
+
+    <Tip>
+      It's normal for tests to fail if you haven't configured credentials yet. Configure your `.env` file first.
+    </Tip>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Authentication Issues
+
+Problems with eBay API credentials and OAuth.
+
+<AccordionGroup>
+  <Accordion title="Error: Invalid Client Credentials" icon="key">
+    **Problem:** Your Client ID or Client Secret is rejected by eBay
+
+    **Cause:** Incorrect credentials, typos, or using credentials from the wrong environment.
+
+    **Solution:**
+
+    1. **Verify credentials in eBay Developer Portal:**
+       - Visit [developer.ebay.com](https://developer.ebay.com)
+       - Navigate to **My Account → Application Keys**
+       - Confirm your Client ID (App ID) and Client Secret (Cert ID)
+
+    2. **Check environment matching:**
+       - Sandbox credentials only work with `EBAY_ENVIRONMENT=sandbox`
+       - Production credentials only work with `EBAY_ENVIRONMENT=production`
+       - Don't mix environments!
+
+    3. **Check for typos in `.env`:**
+       ```bash
+       # ❌ Wrong - has spaces
+       EBAY_CLIENT_ID = your_id
+
+       # ✅ Correct - no spaces around =
+       EBAY_CLIENT_ID=your_id
+       ```
+
+    4. **Ensure no quotes in `.env`:**
+       ```bash
+       # ❌ Wrong - has quotes
+       EBAY_CLIENT_ID="YourAppId"
+
+       # ✅ Correct - no quotes
+       EBAY_CLIENT_ID=YourAppId
+       ```
+
+    5. **Regenerate credentials if needed:**
+       - In eBay Developer Portal, you can regenerate your Client Secret
+       - Update `.env` with the new secret immediately
+
+    <Warning>
+      Never share your Client Secret publicly or commit it to version control.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Error: Redirect URI Mismatch" icon="link">
+    **Problem:** OAuth flow fails with "redirect_uri_mismatch" error
+
+    **Cause:** The redirect URI in your `.env` doesn't match what's configured in your eBay application.
+
+    **Solution:**
+
+    1. **Go to eBay Developer Portal:**
+       - Visit [developer.ebay.com](https://developer.ebay.com)
+       - Navigate to your application settings
+
+    2. **Add the redirect URI:**
+       - Find **OAuth Redirect URIs** section
+       - Click **Add Redirect URI**
+       - Enter: `http://localhost:3000/callback`
+       - Click **Save**
+
+    3. **Update your `.env` file:**
+       ```bash
+       EBAY_REDIRECT_URI=http://localhost:3000/callback
+       ```
+
+    4. **Ensure exact match:**
+       - URIs must match **exactly** including:
+         - Protocol (http vs https)
+         - Port number
+         - Path
+
+    5. **Try OAuth again:**
+       ```bash
+       npm run setup
+       ```
+
+    <Note>
+      You can have multiple redirect URIs configured in your eBay app. This is useful for different environments.
+    </Note>
+  </Accordion>
+
+  <Accordion title="OAuth flow fails" icon="shield-check">
+    **Problem:** OAuth authorization process doesn't complete successfully
+
+    **Cause:** Browser issues, popup blocking, or application configuration problems.
+
+    **Solutions:**
+
+    **Common causes:**
+
+    1. **Browser blocking popups:**
+       - Allow popups from the terminal/setup wizard
+       - Try manually copying the URL into your browser
+
+    2. **Application not configured for OAuth:**
+       - Verify OAuth is enabled in eBay Developer Portal
+       - Check that required scopes are granted:
+         - `sell.inventory`
+         - `sell.marketing`
+         - `sell.fulfillment`
+         - `sell.analytics.readonly`
+         - `sell.account`
+
+    3. **Redirect URI not configured:**
+       - See "Redirect URI Mismatch" section above
+
+    4. **Using wrong eBay account:**
+       - Ensure you're signing in with a seller account (for production)
+       - Sandbox works with any developer account
+
+    **Manual OAuth flow:**
+    ```bash
+    # Generate OAuth URL
+    npm run generate-oauth-url
+
+    # Copy the URL and open in browser
+    # After authorization, copy the code from URL
+    # Exchange code for tokens
+    npm run exchange-oauth-code YOUR_CODE_HERE
+    ```
+
+    <Tip>
+      The interactive setup wizard (`npm run setup`) handles OAuth automatically and is easier than manual flow.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Tokens expire immediately" icon="clock">
+    **Problem:** User tokens show as expired right after generation
+
+    **Cause:** System clock is incorrect or token expiry timestamp is wrong format.
+
+    **Solution:**
+
+    1. **Check system time:**
+       ```bash
+       date
+       ```
+       - Ensure your system clock is accurate
+       - Sync with time server if needed (macOS: System Preferences → Date & Time)
+
+    2. **Check token expiry format in `.env`:**
+       ```bash
+       # ✅ Correct ISO 8601 format
+       EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+
+       # ❌ Wrong format
+       EBAY_USER_TOKEN_EXPIRY=12/31/2024
+       ```
+
+    3. **Regenerate tokens:**
+       ```bash
+       npm run setup
+       ```
+       - The wizard will generate tokens with correct expiry
+
+    4. **Verify token validity:**
+       - User access tokens typically expire in 2 hours
+       - Refresh tokens expire in 18 months
+       - The server automatically refreshes expired access tokens
+
+    <Info>
+      Token auto-refresh requires a valid refresh token. If both tokens are expired, run `npm run setup` again.
+    </Info>
+  </Accordion>
+
+  <Accordion title="Configuration validation fails" icon="triangle-exclamation">
+    **Problem:** `npm run validate-config` reports errors
+
+    **Cause:** Missing or incorrectly formatted environment variables.
+
+    **Solution:**
+
+    **Check these common issues:**
+
+    1. **Missing required variables:**
+       ```bash
+       # Required variables
+       EBAY_CLIENT_ID=...
+       EBAY_CLIENT_SECRET=...
+       EBAY_ENVIRONMENT=sandbox  # or production
+       EBAY_REDIRECT_URI=...
+       ```
+
+    2. **Extra spaces or quotes:**
+       ```bash
+       # ❌ Wrong
+       EBAY_CLIENT_ID = "your_id"
+
+       # ✅ Correct
+       EBAY_CLIENT_ID=your_id
+       ```
+
+    3. **Wrong environment value:**
+       ```bash
+       # ❌ Wrong - invalid value
+       EBAY_ENVIRONMENT=dev
+
+       # ✅ Correct - must be sandbox or production
+       EBAY_ENVIRONMENT=sandbox
+       ```
+
+    4. **Expired or invalid tokens:**
+       - Remove expired tokens from `.env`
+       - Run `npm run setup` to regenerate
+
+    **Re-run setup wizard:**
+    ```bash
+    npm run setup
+    ```
+
+    The wizard validates each setting interactively and helps fix issues.
+
+    <Tip>
+      Start fresh by copying `.env.example`: `cp .env.example .env`
+    </Tip>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## MCP Client Connection Issues
+
+Problems connecting MCP clients (Claude Desktop, Cursor, etc.) to the server.
+
+<AccordionGroup>
+  <Accordion title="MCP client can't find the server" icon="plug-circle-xmark">
+    **Problem:** MCP client shows server as unavailable or can't connect
+
+    **Cause:** Incorrect path in MCP client configuration or server not built.
+
+    **Solution:**
+
+    1. **Use absolute paths (not relative):**
+       ```json
+       {
+         "mcpServers": {
+           "ebay": {
+             "command": "node",
+             "args": [
+               "/Users/yourname/ebay-mcp-server/build/index.js"
+             ]
+           }
+         }
+       }
+       ```
+
+    2. **Verify the path exists:**
+       ```bash
+       # Check that build/index.js exists
+       ls /absolute/path/to/ebay-mcp-server/build/index.js
+       ```
+
+    3. **Ensure server is built:**
+       ```bash
+       cd ebay-mcp-server
+       npm run build
+       ```
+
+    4. **Check config file location:**
+
+       **Claude Desktop:**
+       - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+       - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+       - Linux: `~/.config/Claude/claude_desktop_config.json`
+
+       **Cursor:**
+       - macOS: `~/Library/Application Support/Cursor/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
+       - Windows: `%APPDATA%\Cursor\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json`
+
+    5. **Restart your MCP client:**
+       - Completely quit the application (Cmd+Q on Mac)
+       - Reopen and check for 🔨 tools icon
+
+    <Warning>
+      Tilde (`~`) expansion doesn't work in JSON config files. Use full paths: `/Users/yourname/...`
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Server starts but no tools appear" icon="screwdriver-wrench">
+    **Problem:** Server connects but tools don't show up in MCP client
+
+    **Cause:** Environment variables not passed to server or authentication failing silently.
+
+    **Solution:**
+
+    1. **Pass environment variables in config:**
+       ```json
+       {
+         "mcpServers": {
+           "ebay": {
+             "command": "node",
+             "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+             "env": {
+               "EBAY_CLIENT_ID": "your_client_id",
+               "EBAY_CLIENT_SECRET": "your_client_secret",
+               "EBAY_ENVIRONMENT": "sandbox"
+             }
+           }
+         }
+       }
+       ```
+
+    2. **Check server logs:**
+       - Enable debug logging: `"LOG_LEVEL": "debug"` in env
+       - Check for authentication errors
+       - Verify 230+ tools are registered
+
+    3. **Test server directly:**
+       ```bash
+       cd ebay-mcp-server
+       npm start
+       ```
+       - Look for "230+ tools registered" message
+       - Check for any error messages
+
+    4. **Verify credentials:**
+       ```bash
+       npm run validate-config
+       ```
+
+    <Note>
+      If only showing a few tools, client credentials mode may be active. Configure user tokens for full access.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Server crashes on startup" icon="bomb">
+    **Problem:** Server starts then immediately crashes or exits
+
+    **Cause:** Missing dependencies, invalid configuration, or runtime errors.
+
+    **Solution:**
+
+    1. **Check server logs:**
+       - Look for error messages before crash
+       - Common errors: missing environment variables, invalid credentials
+
+    2. **Test server standalone:**
+       ```bash
+       cd ebay-mcp-server
+       node build/index.js
+       ```
+       - This shows detailed error messages
+
+    3. **Verify build is complete:**
+       ```bash
+       npm run build
+       ls build/index.js
+       ```
+
+    4. **Check Node.js version:**
+       ```bash
+       node --version
+       # Should be v18.0.0 or higher
+       ```
+
+    5. **Reinstall dependencies:**
+       ```bash
+       rm -rf node_modules package-lock.json
+       npm install
+       npm run build
+       ```
+
+    6. **Enable debug logging:**
+       Add to your MCP client config:
+       ```json
+       "env": {
+         "LOG_LEVEL": "debug",
+         "LOG_REQUESTS": "true"
+       }
+       ```
+
+    <Tip>
+      Most startup crashes are due to missing or invalid environment variables. Double-check your `.env` file.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Tools appear but fail when used" icon="circle-exclamation">
+    **Problem:** Tools are available but return errors when called
+
+    **Cause:** Authentication issues, rate limits, or invalid API requests.
+
+    **Solutions:**
+
+    **Check authentication:**
+    ```bash
+    npm run validate-config
+    ```
+
+    **Common error patterns:**
+
+    1. **"Unauthorized" or "403 Forbidden":**
+       - Invalid credentials
+       - Expired tokens
+       - Wrong environment (sandbox vs production)
+       - Solution: Run `npm run setup` to reconfigure
+
+    2. **"429 Too Many Requests":**
+       - Hit rate limit
+       - With client credentials: Upgrade to user tokens
+       - With user tokens: Wait 24 hours or upgrade eBay account
+       - See [Rate Limit Issues](#rate-limit-errors) section
+
+    3. **"400 Bad Request":**
+       - Invalid parameters passed to tool
+       - Check tool documentation in [API Reference](/api-reference/introduction)
+       - Verify required fields are provided
+
+    4. **"404 Not Found":**
+       - Resource doesn't exist
+       - Wrong marketplace or environment
+       - Check that item/order/policy exists
+
+    <Info>
+      Enable request logging to see detailed API calls: `LOG_REQUESTS=true` in your config
+    </Info>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Runtime Issues
+
+Problems that occur while the server is running.
+
+<AccordionGroup>
+  <Accordion title="Rate limit errors" icon="gauge-high">
+    **Problem:** "429 Too Many Requests" or rate limit exceeded errors
+
+    **Cause:** You've exceeded your daily API request limit.
+
+    **Understanding Rate Limits:**
+
+    **Client Credentials:**
+    - 1,000 requests per day
+    - Very limited for production use
+
+    **User Tokens:**
+    - Basic seller: 10,000 requests/day
+    - Business seller: 25,000 requests/day
+    - Enterprise seller: 50,000 requests/day
+
+    **Solutions:**
+
+    1. **Upgrade to user tokens** (if using client credentials):
+       ```bash
+       npm run setup
+       # Complete OAuth flow for user tokens
+       ```
+
+    2. **Monitor your usage:**
+       - Track API calls in your application
+       - Implement request throttling
+       - Cache responses when possible
+
+    3. **Optimize API calls:**
+       - Use bulk operations when available
+       - Avoid unnecessary polling
+       - Batch related operations
+
+    4. **Wait for limit reset:**
+       - Rate limits reset every 24 hours
+       - Time-based limits reset by the second/minute
+
+    5. **Upgrade eBay seller account:**
+       - Higher tier accounts get higher limits
+       - Visit eBay Seller Hub for upgrade options
+
+    <Warning>
+      Repeatedly hitting rate limits may trigger additional restrictions on your API access.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Slow API responses" icon="hourglass">
+    **Problem:** API calls take a long time to complete
+
+    **Cause:** Network latency, eBay API performance, or inefficient queries.
+
+    **Solutions:**
+
+    1. **Check internet connection:**
+       ```bash
+       ping api.ebay.com
+       ```
+
+    2. **Use pagination for large datasets:**
+       - Don't request all items at once
+       - Use limit and offset parameters
+       - Process in smaller batches
+
+    3. **Optimize queries:**
+       - Request only needed fields
+       - Use filters to reduce response size
+       - Cache frequently accessed data
+
+    4. **Check eBay API status:**
+       - Visit [eBay Developer Status](https://developer.ebay.com/support/api-status)
+       - May be platform-wide performance issues
+
+    5. **Consider geographic location:**
+       - eBay APIs may be slower from certain regions
+       - Consider using a proxy or VPN to different region
+
+    <Note>
+      Some eBay API endpoints are inherently slower than others, especially bulk operations and complex queries.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Unexpected API errors" icon="bug">
+    **Problem:** Getting errors from eBay API that aren't related to authentication or rate limits
+
+    **Cause:** Invalid requests, API changes, or data validation issues.
+
+    **Diagnostic steps:**
+
+    1. **Enable detailed logging:**
+       ```bash
+       LOG_LEVEL=debug
+       LOG_REQUESTS=true
+       ```
+
+    2. **Check error message details:**
+       - Error code and message
+       - Which endpoint is failing
+       - Request parameters sent
+
+    3. **Verify data format:**
+       - Check required vs optional fields
+       - Validate data types (strings, numbers, dates)
+       - Ensure proper formatting (dates in ISO 8601, etc.)
+
+    4. **Check API documentation:**
+       - Visit [eBay Developer Docs](https://developer.ebay.com/docs)
+       - Verify endpoint requirements haven't changed
+       - Check for known issues or deprecations
+
+    5. **Test with minimal data:**
+       - Try the simplest possible request
+       - Gradually add parameters to identify the issue
+
+    6. **Environment mismatch:**
+       - Ensure you're using the right environment (sandbox vs production)
+       - Sandbox data doesn't exist in production and vice versa
+
+    <Tip>
+      If you get consistent errors with a specific tool, check the [API Reference](/api-reference/introduction) for that tool's documentation.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Memory leaks or high memory usage" icon="memory">
+    **Problem:** Server memory usage grows over time or server runs out of memory
+
+    **Cause:** Large response caching, memory leaks, or processing too much data at once.
+
+    **Solutions:**
+
+    1. **Restart the server periodically:**
+       - Implement automatic restarts for long-running servers
+       - Monitor memory usage
+
+    2. **Process data in chunks:**
+       - Don't load all items into memory
+       - Use streaming or pagination
+       - Process and discard data incrementally
+
+    3. **Update to latest version:**
+       ```bash
+       cd ebay-mcp-server
+       git pull origin main
+       npm install
+       npm run build
+       ```
+
+    4. **Monitor memory usage:**
+       ```bash
+       # macOS/Linux
+       top -p $(pgrep -f ebay-mcp-server)
+
+       # Or use Node.js memory profiling
+       node --inspect build/index.js
+       ```
+
+    5. **Report persistent issues:**
+       - If memory leaks persist, [report an issue](https://github.com/YosefHayim/ebay-mcp-server/issues)
+       - Include memory profiling data if possible
+
+    <Warning>
+      The MCP server is designed to be lightweight. Persistent memory issues may indicate a bug.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Token refresh failures" icon="arrows-rotate">
+    **Problem:** Server can't automatically refresh expired access tokens
+
+    **Cause:** Invalid refresh token, network issues, or eBay API problems.
+
+    **Solution:**
+
+    1. **Check refresh token in `.env`:**
+       ```bash
+       # Ensure refresh token is present and valid
+       EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
+       ```
+
+    2. **Verify refresh token hasn't expired:**
+       - Refresh tokens last 18 months
+       - If expired, you'll need to re-authorize
+
+    3. **Re-run OAuth flow:**
+       ```bash
+       npm run setup
+       ```
+       - This generates new access and refresh tokens
+
+    4. **Check network connectivity:**
+       ```bash
+       ping api.ebay.com
+       ```
+
+    5. **Manual token refresh:**
+       ```bash
+       npm run refresh-token
+       ```
+
+    <Info>
+      The server automatically refreshes access tokens when they expire, as long as the refresh token is valid.
+    </Info>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Environment-Specific Issues
+
+Problems related to Sandbox vs Production environments.
+
+<AccordionGroup>
+  <Accordion title="Sandbox data doesn't appear in Production" icon="flask">
+    **Problem:** Items or data created in Sandbox aren't visible in Production
+
+    **Cause:** Sandbox and Production are completely separate environments.
+
+    **Understanding:**
+
+    - **Sandbox:** Isolated test environment with fake data
+    - **Production:** Real eBay marketplace with real transactions
+
+    These environments:
+    - Use different credentials
+    - Have separate databases
+    - Don't share any data
+
+    **Solution:**
+
+    You must recreate your data in Production:
+
+    1. **Switch to Production:**
+       ```bash
+       EBAY_ENVIRONMENT=production
+       EBAY_CLIENT_ID=prod_client_id
+       EBAY_CLIENT_SECRET=prod_client_secret
+       ```
+
+    2. **Re-run OAuth for Production:**
+       ```bash
+       npm run setup
+       ```
+
+    3. **Recreate your listings/policies/data:**
+       - Use the same tools in Production
+       - Test thoroughly in Sandbox first!
+
+    <Warning>
+      **Production operations affect real listings and cost real money.** Always test in Sandbox first.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Production credentials don't work" icon="shop">
+    **Problem:** Production credentials fail validation or authorization
+
+    **Cause:** Production requires additional setup and an active seller account.
+
+    **Requirements for Production:**
+
+    1. **Active eBay seller account**
+       - Must have sold at least one item, or
+       - Completed seller registration
+       - Account in good standing
+
+    2. **Production application approved**
+       - Some APIs require eBay approval
+       - Check your application status in Developer Portal
+
+    3. **Correct credentials:**
+       - Production credentials are different from Sandbox
+       - Verify you're using Production keys
+
+    **Solution:**
+
+    1. **Verify seller account status:**
+       - Visit [eBay Seller Hub](https://www.ebay.com/sh/ovw)
+       - Ensure account is active and verified
+
+    2. **Check application status:**
+       - Visit [eBay Developer Portal](https://developer.ebay.com)
+       - Verify Production application is approved
+
+    3. **Use correct environment:**
+       ```bash
+       EBAY_ENVIRONMENT=production
+       ```
+
+    4. **Re-authorize with Production credentials:**
+       ```bash
+       npm run setup
+       ```
+
+    <Tip>
+      Start with Sandbox for development. Only switch to Production when you're ready for live operations.
+    </Tip>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Still Having Issues?
+
+If your problem isn't listed here:
+
+<CardGroup cols={2}>
+  <Card title="FAQ" icon="question" href="/support/faq">
+    Check frequently asked questions
+  </Card>
+
+  <Card title="GitHub Issues" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/issues">
+    Search existing issues or create a new one
+  </Card>
+
+  <Card title="eBay Developer Support" icon="life-ring" href="https://developer.ebay.com/support">
+    Official eBay API support resources
+  </Card>
+
+  <Card title="MCP Documentation" icon="book" href="https://modelcontextprotocol.io">
+    Model Context Protocol specification
+  </Card>
+</CardGroup>
+
+## Reporting Bugs
+
+When reporting an issue, include:
+
+<Steps>
+  <Step title="Environment Information">
+    ```bash
+    - Node.js version: node --version
+    - npm version: npm --version
+    - Operating System: macOS/Windows/Linux
+    - MCP Client: Claude Desktop/Cursor/Other
+    ```
+  </Step>
+
+  <Step title="Configuration">
+    - Environment: Sandbox or Production
+    - Authentication mode: User tokens or Client credentials
+    - Relevant `.env` variables (without secrets!)
+  </Step>
+
+  <Step title="Reproduction Steps">
+    1. Step-by-step instructions to reproduce the issue
+    2. What you expected to happen
+    3. What actually happened
+  </Step>
+
+  <Step title="Logs and Errors">
+    - Complete error messages
+    - Server logs (with `LOG_LEVEL=debug`)
+    - Screenshots if applicable
+  </Step>
+</Steps>
+
+<Warning>
+  Never include your Client Secret, access tokens, or refresh tokens in bug reports.
+</Warning>
