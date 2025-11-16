@@ -15,6 +15,18 @@
 
 ---
 
+## ⚠️ Disclaimer
+
+> **Independent Open Source Project**
+>
+> This is an independent, community-driven open source project created to contribute to the eBay developer community. We do not claim ownership of eBay, its APIs, trademarks, or any related intellectual property. All eBay-related trademarks, service marks, and intellectual property belong to eBay Inc.
+>
+> This project is **not affiliated with, endorsed by, or officially connected to eBay Inc.** in any way. We are developers who built this tool to help the community interact with eBay's publicly available APIs using the Model Context Protocol.
+>
+> Use of eBay's APIs is subject to eBay's [Developer Program Terms](https://developer.ebay.com/join/api_license_agreement) and [API License Agreement](https://developer.ebay.com/join/api_license_agreement).
+
+---
+
 ## 📖 View the Documentation
 
 ### 🌐 Online (Recommended)
