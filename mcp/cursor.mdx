@@ -1,12 +1,702 @@
 ---
-title: "Cursor"
-description: "Documentation for Cursor"
+title: "Cursor IDE Integration"
+description: "Connect eBay MCP Server to Cursor for AI-powered eBay automation in your code editor"
+icon: "code"
 ---
 
-# Cursor
+Cursor is an AI-first code editor with built-in MCP support, allowing you to manage your eBay business directly from your development environment.
 
-Documentation for this section is coming soon.
+## Why Cursor?
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+<CardGroup cols={2}>
+  <Card title="Native MCP Support" icon="plug">
+    Built-in Model Context Protocol integration in your code editor
+  </Card>
+
+  <Card title="Developer-Focused" icon="code">
+    Perfect for building eBay integrations and automation scripts
+  </Card>
+
+  <Card title="230+ eBay Tools" icon="toolbox">
+    Full access to all eBay Sell API operations while you code
+  </Card>
+
+  <Card title="Multi-Model Support" icon="wand-magic-sparkles">
+    Use Claude, GPT-4, or other AI models with eBay tools
+  </Card>
+</CardGroup>
+
+## Prerequisites
+
+Before connecting Cursor, ensure you have:
+
+<Check>
+  - eBay MCP Server [installed](/installation) and [configured](/configuration)
+  - Cursor IDE installed ([Download here](https://cursor.sh))
+  - eBay API credentials (Client ID and Secret)
+  - Node.js 18+ installed
+</Check>
+
+## Installation
+
+<Steps>
+  <Step title="Install Cursor">
+    Download and install Cursor for your operating system:
+
+    **Download Link:** [cursor.sh](https://cursor.sh)
+
+    Available for:
+    - macOS (Intel and Apple Silicon)
+    - Windows
+    - Linux
+
+    <Tip>
+      Cursor is free to use with a Pro plan available for advanced features
+    </Tip>
+  </Step>
+
+  <Step title="Locate Configuration File">
+    Find your Cursor MCP configuration file location:
+
+    <Tabs>
+      <Tab title="macOS">
+        ```bash
+        ~/Library/Application Support/Cursor/User/globalStorage/mcp.json
+        ```
+
+        Or check Cursor settings location:
+        ```bash
+        ~/Library/Application Support/Cursor/User/settings.json
+        ```
+
+        To open in Finder:
+        ```bash
+        open ~/Library/Application\ Support/Cursor/User/globalStorage/
+        ```
+
+        <Info>
+          In recent Cursor versions, MCP configuration might be in:
+          `~/.cursor/mcp_settings.json` or configured via Settings UI
+        </Info>
+      </Tab>
+
+      <Tab title="Windows">
+        ```
+        %APPDATA%\Cursor\User\globalStorage\mcp.json
+        ```
+
+        Or:
+        ```
+        %APPDATA%\Cursor\User\settings.json
+        ```
+
+        To open in Explorer:
+        ```bash
+        explorer %APPDATA%\Cursor\User\globalStorage
+        ```
+      </Tab>
+
+      <Tab title="Linux">
+        ```bash
+        ~/.config/Cursor/User/globalStorage/mcp.json
+        ```
+
+        Or:
+        ```bash
+        ~/.config/Cursor/User/settings.json
+        ```
+
+        To open in file manager:
+        ```bash
+        xdg-open ~/.config/Cursor/User/globalStorage/
+        ```
+      </Tab>
+    </Tabs>
+
+    <Warning>
+      MCP configuration location may vary by Cursor version. Check Cursor's documentation or settings UI for the current location.
+    </Warning>
+  </Step>
+
+  <Step title="Configure via Settings UI (Recommended)">
+    Cursor provides a settings interface for MCP configuration:
+
+    1. Open Cursor
+    2. Go to **Settings** (Cmd/Ctrl + ,)
+    3. Search for "MCP" or "Model Context Protocol"
+    4. Click **"Edit in settings.json"**
+
+    Add the eBay MCP Server configuration:
+
+    ```json
+    {
+      "mcp.servers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "YourAppId-12345",
+            "EBAY_CLIENT_SECRET": "YourCertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox",
+            "EBAY_REDIRECT_URI": "http://localhost:3000/callback"
+          }
+        }
+      }
+    }
+    ```
+
+    <Warning>
+      **Important:**
+      - Replace `/absolute/path/to/ebay-mcp-server` with your actual installation path
+      - Use **absolute paths**, not relative paths
+      - Replace the example credentials with your actual eBay API credentials
+    </Warning>
+
+    **Example paths:**
+    - macOS: `/Users/yourname/ebay-mcp-server/build/index.js`
+    - Windows: `C:\\Users\\yourname\\ebay-mcp-server\\build\\index.js`
+    - Linux: `/home/yourname/ebay-mcp-server/build/index.js`
+  </Step>
+
+  <Step title="Add User Tokens (Optional but Recommended)">
+    For full API access and higher rate limits, add user tokens:
+
+    ```json
+    {
+      "mcp.servers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "YourAppId-12345",
+            "EBAY_CLIENT_SECRET": "YourCertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox",
+            "EBAY_REDIRECT_URI": "http://localhost:3000/callback",
+            "EBAY_USER_ACCESS_TOKEN": "v^1.1#i^1#...",
+            "EBAY_USER_REFRESH_TOKEN": "v^1.1#i^1#...",
+            "EBAY_USER_TOKEN_EXPIRY": "2025-12-31T23:59:59.000Z"
+          }
+        }
+      }
+    }
+    ```
+
+    <Accordion title="How to get user tokens">
+      Run the setup wizard in your eBay MCP Server directory:
+
+      ```bash
+      cd /path/to/ebay-mcp-server
+      npm run setup
+      ```
+
+      The wizard will:
+      1. Guide you through OAuth authorization
+      2. Generate user access and refresh tokens
+      3. Save tokens to your `.env` file
+
+      Then copy the token values from `.env` to your Cursor settings.
+    </Accordion>
+
+    **Rate Limits:**
+    - **Without user tokens:** 1,000 requests/day (client credentials)
+    - **With user tokens:** 10,000-50,000 requests/day
+  </Step>
+
+  <Step title="Reload Cursor">
+    1. Open the Command Palette (Cmd/Ctrl + Shift + P)
+    2. Type "Reload Window" and select it
+    3. Or simply restart Cursor
+
+    <Tip>
+      After reloading, Cursor will connect to the eBay MCP Server
+    </Tip>
+  </Step>
+</Steps>
+
+## Alternative: Configuration File Method
+
+If your Cursor version uses a dedicated MCP configuration file:
+
+<Steps>
+  <Step title="Create MCP Configuration">
+    Create or edit the MCP configuration file (location varies by version):
+
+    **Common locations:**
+    - `~/.cursor/mcp_settings.json` (macOS/Linux)
+    - `%USERPROFILE%\.cursor\mcp_settings.json` (Windows)
+    - Or check Cursor documentation for your version
+
+    Add this configuration:
+
+    ```json
+    {
+      "mcpServers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "YourAppId-12345",
+            "EBAY_CLIENT_SECRET": "YourCertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox"
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Verify Configuration">
+    Check that the file is valid JSON:
+
+    ```bash
+    # Validate JSON syntax
+    python -m json.tool ~/.cursor/mcp_settings.json
+    ```
+
+    Or use an online validator like [jsonlint.com](https://jsonlint.com)
+  </Step>
+</Steps>
+
+## Verification
+
+Test your connection to ensure everything is working:
+
+<Steps>
+  <Step title="Check Cursor AI Chat">
+    1. Open Cursor AI chat (Cmd/Ctrl + L or click the chat icon)
+    2. Look for an indication that MCP tools are loaded
+    3. You may see "230+ tools available" or similar
+  </Step>
+
+  <Step title="Test Basic Query">
+    In the Cursor AI chat, try:
+
+    > "Can you list my eBay fulfillment policies using the MCP tools?"
+
+    Cursor should use the `getFulfillmentPolicies` tool and return your configured policies.
+  </Step>
+
+  <Step title="Verify in Code">
+    You can also use Cursor's inline chat while coding:
+
+    1. Open any file in Cursor
+    2. Use Cmd/Ctrl + K (inline chat)
+    3. Type: "Show my eBay inventory items"
+
+    Cursor will call the eBay MCP tools and show results.
+  </Step>
+</Steps>
+
+<Check>
+  **Success!** You now have eBay automation capabilities directly in your code editor.
+</Check>
+
+## Usage Examples
+
+Here are practical ways to use eBay MCP with Cursor:
+
+### Building eBay Integrations
+
+<Accordion title="Generate code for creating listings">
+  **Prompt in Cursor chat:**
+  > "Write a TypeScript function to create an eBay listing using the MCP tools. It should accept product details and create both the inventory item and offer."
+
+  **What happens:**
+  Cursor will:
+  1. Use eBay MCP tools to understand the API structure
+  2. Generate TypeScript code that uses `createOrReplaceInventoryItem` and `createOffer`
+  3. Include proper error handling and types
+</Accordion>
+
+<Accordion title="Debug eBay API integration">
+  **Scenario:** Your code for fetching orders isn't working
+
+  **Prompt:**
+  > "My eBay order fetching code is failing. Can you use the getOrders tool to show me what the actual API response looks like?"
+
+  **What happens:**
+  Cursor uses `getOrders` to fetch real data and helps you fix your code based on the actual response structure.
+</Accordion>
+
+<Accordion title="Generate API documentation">
+  **Prompt:**
+  > "Generate documentation for all available eBay inventory management tools"
+
+  **What happens:**
+  Cursor will enumerate eBay inventory tools and create markdown documentation with parameters and usage examples.
+</Accordion>
+
+### Quick eBay Operations
+
+<Accordion title="Check order status while coding">
+  **Inline chat (Cmd/Ctrl + K):**
+  > "Are there any new orders today?"
+
+  **What happens:**
+  Cursor uses `getOrders` with today's date filter and shows results inline.
+</Accordion>
+
+<Accordion title="Update listings during development">
+  **Chat prompt:**
+  > "Update the price of SKU LAPTOP-001 to $599.99"
+
+  **What happens:**
+  Cursor uses `updateOffer` to change the price, useful when testing price update features.
+</Accordion>
+
+### Automated Scripts
+
+<Accordion title="Generate bulk update script">
+  **Prompt:**
+  > "Create a Node.js script that increases all my product prices by 10% using the eBay MCP tools"
+
+  **What happens:**
+  Cursor generates a script that:
+  1. Fetches all inventory items
+  2. Calculates new prices
+  3. Updates each offer
+  4. Includes progress logging and error handling
+</Accordion>
+
+## Configuration Options
+
+### Multiple MCP Servers in Cursor
+
+Run multiple MCP servers alongside eBay:
+
+```json
+{
+  "mcp.servers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/path/to/ebay-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_id",
+        "EBAY_CLIENT_SECRET": "your_secret",
+        "EBAY_ENVIRONMENT": "sandbox"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "your_github_token"
+      }
+    }
+  }
+}
+```
+
+### Environment-Specific Configurations
+
+Maintain separate configurations for different environments:
+
+<Tabs>
+  <Tab title="Sandbox (Testing)">
+    ```json
+    {
+      "mcp.servers": {
+        "ebay-sandbox": {
+          "command": "node",
+          "args": ["/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "SBX-AppId-12345",
+            "EBAY_CLIENT_SECRET": "SBX-CertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Production (Live)">
+    ```json
+    {
+      "mcp.servers": {
+        "ebay-production": {
+          "command": "node",
+          "args": ["/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "PRD-AppId-12345",
+            "EBAY_CLIENT_SECRET": "PRD-CertId-67890",
+            "EBAY_ENVIRONMENT": "production",
+            "EBAY_USER_ACCESS_TOKEN": "v^1.1#i^1#...",
+            "EBAY_USER_REFRESH_TOKEN": "v^1.1#i^1#..."
+          }
+        }
+      }
+    }
+    ```
+
+    <Warning>
+      Production configuration affects real listings and transactions. Test thoroughly in Sandbox first.
+    </Warning>
+  </Tab>
+
+  <Tab title="Both Environments">
+    ```json
+    {
+      "mcp.servers": {
+        "ebay-sandbox": {
+          "command": "node",
+          "args": ["/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "SBX-AppId",
+            "EBAY_CLIENT_SECRET": "SBX-CertId",
+            "EBAY_ENVIRONMENT": "sandbox"
+          }
+        },
+        "ebay-production": {
+          "command": "node",
+          "args": ["/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "PRD-AppId",
+            "EBAY_CLIENT_SECRET": "PRD-CertId",
+            "EBAY_ENVIRONMENT": "production"
+          }
+        }
+      }
+    }
+    ```
+
+    Access each environment by referring to the server name in your prompts.
+  </Tab>
+</Tabs>
+
+### Advanced Logging
+
+Enable detailed logging for debugging:
+
+```json
+{
+  "mcp.servers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/path/to/ebay-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_id",
+        "EBAY_CLIENT_SECRET": "your_secret",
+        "EBAY_ENVIRONMENT": "sandbox",
+        "LOG_LEVEL": "debug",
+        "LOG_REQUESTS": "true"
+      }
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="MCP tools not appearing in Cursor">
+    **Possible causes:**
+    - Configuration file location is incorrect
+    - JSON syntax errors in config
+    - Server path is wrong
+
+    **Solutions:**
+    1. Check Cursor version and verify correct config location
+    2. Validate JSON syntax: `python -m json.tool your-config.json`
+    3. Verify server exists:
+       ```bash
+       ls /path/to/ebay-mcp-server/build/index.js
+       ```
+    4. Check Cursor's output panel (View → Output) for MCP-related errors
+    5. Reload window: Cmd/Ctrl + Shift + P → "Reload Window"
+  </Accordion>
+
+  <Accordion title="Error: Cannot find module">
+    **Cause:** The eBay MCP Server hasn't been built yet.
+
+    **Solution:**
+    ```bash
+    cd /path/to/ebay-mcp-server
+    npm install
+    npm run build
+    ```
+
+    Verify `build/index.js` exists after building.
+  </Accordion>
+
+  <Accordion title="Error: Invalid credentials">
+    **Cause:** eBay Client ID or Secret is incorrect.
+
+    **Solution:**
+    1. Verify credentials in [eBay Developer Portal](https://developer.ebay.com)
+    2. Ensure you're using the correct environment (Sandbox vs Production)
+    3. Check for typos in your settings
+    4. Remove any extra spaces or quotes around values
+  </Accordion>
+
+  <Accordion title="Tools visible but API calls fail">
+    **Cause:** Authentication or permission issues.
+
+    **Solutions:**
+    1. Ensure user tokens are valid and not expired
+    2. Verify your eBay app has required OAuth scopes
+    3. Check that tokens match the environment (Sandbox/Production)
+    4. Regenerate tokens:
+       ```bash
+       cd /path/to/ebay-mcp-server
+       npm run setup
+       ```
+  </Accordion>
+
+  <Accordion title="Cursor becomes slow or unresponsive">
+    **Cause:** MCP server startup issues or too many concurrent requests.
+
+    **Solutions:**
+    1. Check if server starts correctly:
+       ```bash
+       cd /path/to/ebay-mcp-server
+       npm start
+       ```
+    2. Look for errors in Cursor's Developer Tools (Help → Toggle Developer Tools)
+    3. Temporarily disable eBay MCP server in settings
+    4. Restart Cursor
+    5. Re-enable with simpler configuration
+  </Accordion>
+
+  <Accordion title="Rate limit errors">
+    **Cause:** Exceeded daily API request limit.
+
+    **Solution:**
+    - **Using client credentials?** Add user tokens for 10-50x higher limits
+    - **Already using user tokens?** Wait 24 hours or upgrade your eBay seller account
+    - Reduce the number of API calls in your scripts
+    - Implement caching for frequently accessed data
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Sandbox for Development" icon="flask">
+    Always test in Sandbox environment when developing eBay integrations to avoid affecting real listings.
+  </Card>
+
+  <Card title="Add User Tokens" icon="key">
+    Configure user tokens for full API access and higher rate limits (10,000-50,000 requests/day).
+  </Card>
+
+  <Card title="Version Control Safety" icon="git-alt">
+    Never commit MCP settings with credentials to version control. Use environment variables or separate config files.
+  </Card>
+
+  <Card title="Separate Environments" icon="layer-group">
+    Configure both Sandbox and Production servers with distinct names to avoid accidental production changes.
+  </Card>
+</CardGroup>
+
+## Viewing Logs
+
+Check Cursor and server logs for debugging:
+
+<Tabs>
+  <Tab title="Cursor Output Panel">
+    1. Open Cursor
+    2. Go to **View → Output**
+    3. Select "Model Context Protocol" from the dropdown
+    4. Look for eBay MCP server connection logs
+  </Tab>
+
+  <Tab title="Developer Console">
+    1. Open Developer Tools: **Help → Toggle Developer Tools**
+    2. Check Console tab for JavaScript errors
+    3. Check Network tab for MCP communication issues
+  </Tab>
+
+  <Tab title="Server Logs">
+    If you enabled logging in your configuration:
+
+    ```bash
+    # Check server output
+    cd /path/to/ebay-mcp-server
+    npm start
+
+    # Or check log files if configured
+    tail -f /path/to/ebay-mcp-server/logs/server.log
+    ```
+  </Tab>
+</Tabs>
+
+## Developer Tips
+
+### Optimize Your Workflow
+
+<Accordion title="Create custom Cursor rules">
+  Create a `.cursorrules` file in your project to optimize eBay integration:
+
+  ```markdown
+  # eBay Integration Rules
+
+  When working with eBay APIs:
+  - Always use the eBay MCP tools instead of direct API calls
+  - Prefer Sandbox environment for testing
+  - Include proper error handling for rate limits
+  - Use TypeScript for type safety with eBay API responses
+
+  Available eBay MCP tools include:
+  - Inventory: createOrReplaceInventoryItem, getInventoryItems, updateOffer
+  - Orders: getOrders, createShippingFulfillment
+  - Marketing: createItemPromotion, getPromotions
+  - Analytics: getTrafficReport
+  ```
+</Accordion>
+
+<Accordion title="Use keyboard shortcuts">
+  Maximize productivity with Cursor shortcuts:
+
+  - **Cmd/Ctrl + K**: Inline chat (quick eBay queries while coding)
+  - **Cmd/Ctrl + L**: Open main chat panel
+  - **Cmd/Ctrl + I**: Composer for longer tasks
+  - **Cmd/Ctrl + Shift + P**: Command palette (reload window, etc.)
+</Accordion>
+
+<Accordion title="Combine with other MCP servers">
+  Use eBay MCP alongside filesystem and database servers:
+
+  **Example workflow:**
+  1. Use filesystem MCP to read product CSV
+  2. Use eBay MCP to create listings from CSV data
+  3. Use database MCP to log results
+
+  All orchestrated through natural language in Cursor!
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Build eBay Tools" icon="wrench" href="/guides/bulk-operations">
+    Create automation scripts and tools for eBay
+  </Card>
+
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Explore all 230+ available eBay tools
+  </Card>
+
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Learn tips for optimal eBay integration development
+  </Card>
+
+  <Card title="Testing Guide" icon="flask" href="/advanced/testing">
+    Set up testing for your eBay integrations
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+<CardGroup cols={2}>
+  <Card title="Cursor Documentation" icon="book" href="https://cursor.sh/docs">
+    Official Cursor IDE documentation
+  </Card>
+
+  <Card title="Troubleshooting" icon="life-ring" href="/support/troubleshooting">
+    Comprehensive solutions for common issues
+  </Card>
+</CardGroup>

@@ -1,12 +1,547 @@
 ---
-title: "Claude Desktop"
-description: "Documentation for Claude Desktop"
+title: "Claude Desktop Integration"
+description: "Connect eBay MCP Server to Claude Desktop for AI-powered eBay automation"
+icon: "message"
 ---
 
-# Claude Desktop
+Claude Desktop provides native MCP support, making it one of the easiest ways to use the eBay MCP Server with AI assistance.
 
-Documentation for this section is coming soon.
+## Why Claude Desktop?
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
+<CardGroup cols={2}>
+  <Card title="Native MCP Support" icon="plug">
+    Built-in Model Context Protocol integration - no plugins needed
+  </Card>
+
+  <Card title="230+ eBay Tools" icon="toolbox">
+    Full access to all eBay Sell API operations
+  </Card>
+
+  <Card title="200K Context Window" icon="file-lines">
+    Handle large product catalogs and complex operations
+  </Card>
+
+  <Card title="Advanced Reasoning" icon="brain">
+    Claude's exceptional analysis for business decisions
+  </Card>
+</CardGroup>
+
+## Prerequisites
+
+Before connecting Claude Desktop, ensure you have:
+
+<Check>
+  - eBay MCP Server [installed](/installation) and [configured](/configuration)
+  - Claude Desktop app installed ([Download here](https://claude.ai/download))
+  - eBay API credentials (Client ID and Secret)
+  - Node.js 18+ installed
+</Check>
+
+## Installation
+
+<Steps>
+  <Step title="Install Claude Desktop">
+    Download and install Claude Desktop for your operating system:
+
+    **Download Links:**
+    - [macOS](https://claude.ai/download)
+    - [Windows](https://claude.ai/download)
+    - [Linux](https://claude.ai/download)
+
+    <Tip>
+      You'll need a Claude Pro or Max subscription to use Claude Desktop
+    </Tip>
+  </Step>
+
+  <Step title="Locate Configuration File">
+    Find your Claude Desktop configuration file location:
+
+    <Tabs>
+      <Tab title="macOS">
+        ```bash
+        ~/Library/Application Support/Claude/claude_desktop_config.json
+        ```
+
+        To open in Finder:
+        ```bash
+        open ~/Library/Application\ Support/Claude/
+        ```
+      </Tab>
+
+      <Tab title="Windows">
+        ```
+        %APPDATA%\Claude\claude_desktop_config.json
+        ```
+
+        To open in Explorer:
+        ```bash
+        explorer %APPDATA%\Claude
+        ```
+      </Tab>
+
+      <Tab title="Linux">
+        ```bash
+        ~/.config/Claude/claude_desktop_config.json
+        ```
+
+        To open in file manager:
+        ```bash
+        xdg-open ~/.config/Claude/
+        ```
+      </Tab>
+    </Tabs>
+
+    <Info>
+      If the file doesn't exist, create it with an empty JSON object: `{}`
+    </Info>
+  </Step>
+
+  <Step title="Configure eBay MCP Server">
+    Edit `claude_desktop_config.json` and add the eBay MCP Server configuration:
+
+    ```json
+    {
+      "mcpServers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "YourAppId-12345",
+            "EBAY_CLIENT_SECRET": "YourCertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox",
+            "EBAY_REDIRECT_URI": "http://localhost:3000/callback"
+          }
+        }
+      }
+    }
+    ```
+
+    <Warning>
+      **Important:**
+      - Replace `/absolute/path/to/ebay-mcp-server` with your actual installation path
+      - Use **absolute paths**, not relative paths (e.g., `~/ebay-mcp-server` won't work on Windows)
+      - Replace the example credentials with your actual eBay API credentials
+    </Warning>
+
+    **Example paths:**
+    - macOS: `/Users/yourname/ebay-mcp-server/build/index.js`
+    - Windows: `C:\\Users\\yourname\\ebay-mcp-server\\build\\index.js`
+    - Linux: `/home/yourname/ebay-mcp-server/build/index.js`
+  </Step>
+
+  <Step title="Add User Tokens (Optional but Recommended)">
+    For full API access and higher rate limits, add user tokens to your configuration:
+
+    ```json
+    {
+      "mcpServers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "YourAppId-12345",
+            "EBAY_CLIENT_SECRET": "YourCertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox",
+            "EBAY_REDIRECT_URI": "http://localhost:3000/callback",
+            "EBAY_USER_ACCESS_TOKEN": "v^1.1#i^1#...",
+            "EBAY_USER_REFRESH_TOKEN": "v^1.1#i^1#...",
+            "EBAY_USER_TOKEN_EXPIRY": "2025-12-31T23:59:59.000Z"
+          }
+        }
+      }
+    }
+    ```
+
+    <Accordion title="How to get user tokens">
+      Run the setup wizard in your eBay MCP Server directory:
+
+      ```bash
+      cd /path/to/ebay-mcp-server
+      npm run setup
+      ```
+
+      The wizard will:
+      1. Guide you through OAuth authorization
+      2. Generate user access and refresh tokens
+      3. Save tokens to your `.env` file
+
+      Then copy the token values from `.env` to your Claude Desktop config.
+    </Accordion>
+
+    **Rate Limits:**
+    - **Without user tokens:** 1,000 requests/day (client credentials)
+    - **With user tokens:** 10,000-50,000 requests/day
+  </Step>
+
+  <Step title="Restart Claude Desktop">
+    1. **Quit** Claude Desktop completely (not just close the window)
+       - macOS: `Cmd + Q`
+       - Windows: Right-click system tray → Quit
+       - Linux: Close all windows and quit from system tray
+
+    2. **Reopen** Claude Desktop
+
+    3. **Verify** the connection by looking for the 🔨 tools icon
+
+    <Tip>
+      If you don't see the tools icon, check the Claude Desktop logs for errors
+    </Tip>
+  </Step>
+</Steps>
+
+## Verification
+
+Test your connection to ensure everything is working:
+
+<Steps>
+  <Step title="Check for Tools Icon">
+    Look for the 🔨 **tools** icon in the Claude Desktop interface. This indicates MCP servers are connected.
+  </Step>
+
+  <Step title="Test Basic Query">
+    Try a simple query in Claude Desktop:
+
+    > "Can you list my eBay fulfillment policies?"
+
+    Claude should use the `getFulfillmentPolicies` tool and return your configured policies.
+  </Step>
+
+  <Step title="Verify Tool Access">
+    Ask Claude:
+
+    > "What eBay tools do you have access to?"
+
+    Claude should list the 230+ available eBay MCP tools.
+  </Step>
+</Steps>
+
+<Check>
+  **Success!** You now have full eBay automation capabilities in Claude Desktop.
+</Check>
+
+## Usage Examples
+
+Here are some practical ways to use eBay MCP with Claude Desktop:
+
+### Inventory Management
+
+<Accordion title="List all inventory items">
+  **Prompt:**
+  > "Show me all my eBay inventory items"
+
+  **What happens:**
+  Claude uses `getInventoryItems` to retrieve and display your listings with details like SKU, title, price, and quantity.
+</Accordion>
+
+<Accordion title="Create a new listing">
+  **Prompt:**
+  > "Create a new eBay listing for a vintage camera. SKU: CAM-001, Title: 'Vintage Canon AE-1 35mm Film Camera', Price: $199.99, Quantity: 1, Condition: Used"
+
+  **What happens:**
+  Claude will:
+  1. Use `createOrReplaceInventoryItem` to create the inventory item
+  2. Use `createOffer` to create a publishable offer
+  3. Confirm the listing details
+</Accordion>
+
+<Accordion title="Update pricing">
+  **Prompt:**
+  > "Increase the price of SKU CAM-001 to $249.99"
+
+  **What happens:**
+  Claude uses `updateOffer` to modify the price of the specified item.
+</Accordion>
+
+### Order Fulfillment
+
+<Accordion title="View recent orders">
+  **Prompt:**
+  > "Show me all orders from the last 7 days"
+
+  **What happens:**
+  Claude uses `getOrders` with date filters to retrieve recent orders with buyer info, shipping details, and payment status.
+</Accordion>
+
+<Accordion title="Fulfill an order">
+  **Prompt:**
+  > "Mark order ID ABC123 as shipped with tracking number 1Z999AA10123456784 via UPS Ground"
+
+  **What happens:**
+  Claude uses `createShippingFulfillment` to mark the order as shipped and provide tracking information to the buyer.
+</Accordion>
+
+### Marketing & Analytics
+
+<Accordion title="Run a promotion">
+  **Prompt:**
+  > "Create a 20% off sale for all items in category 'Electronics' running from Dec 1-15"
+
+  **What happens:**
+  Claude uses `createItemPromotion` to set up a promotional campaign with the specified discount and date range.
+</Accordion>
+
+<Accordion title="View traffic reports">
+  **Prompt:**
+  > "Show me my traffic report for the last 30 days"
+
+  **What happens:**
+  Claude uses `getTrafficReport` to display page views, click-through rates, and other analytics for your listings.
+</Accordion>
+
+## Configuration Options
+
+### Multiple MCP Servers
+
+You can run multiple MCP servers alongside eBay:
+
+```json
+{
+  "mcpServers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/path/to/ebay-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_id",
+        "EBAY_CLIENT_SECRET": "your_secret",
+        "EBAY_ENVIRONMENT": "sandbox"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
+    }
+  }
+}
+```
+
+### Environment-Specific Configurations
+
+Use different configurations for Sandbox and Production:
+
+<Tabs>
+  <Tab title="Sandbox (Testing)">
+    ```json
+    {
+      "mcpServers": {
+        "ebay-sandbox": {
+          "command": "node",
+          "args": ["/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "SBX-AppId-12345",
+            "EBAY_CLIENT_SECRET": "SBX-CertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Production (Live)">
+    ```json
+    {
+      "mcpServers": {
+        "ebay-production": {
+          "command": "node",
+          "args": ["/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "PRD-AppId-12345",
+            "EBAY_CLIENT_SECRET": "PRD-CertId-67890",
+            "EBAY_ENVIRONMENT": "production",
+            "EBAY_USER_ACCESS_TOKEN": "v^1.1#i^1#...",
+            "EBAY_USER_REFRESH_TOKEN": "v^1.1#i^1#..."
+          }
+        }
+      }
+    }
+    ```
+
+    <Warning>
+      Production configuration affects real listings and transactions. Test thoroughly in Sandbox first.
+    </Warning>
+  </Tab>
+</Tabs>
+
+### Advanced Logging
+
+Enable detailed logging for debugging:
+
+```json
+{
+  "mcpServers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/path/to/ebay-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_id",
+        "EBAY_CLIENT_SECRET": "your_secret",
+        "EBAY_ENVIRONMENT": "sandbox",
+        "LOG_LEVEL": "debug",
+        "LOG_REQUESTS": "true"
+      }
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Tools icon (🔨) not appearing">
+    **Possible causes:**
+    - Configuration file has syntax errors
+    - Path to server is incorrect
+    - Claude Desktop didn't fully restart
+
+    **Solutions:**
+    1. Validate your JSON syntax using [jsonlint.com](https://jsonlint.com)
+    2. Verify the path exists:
+       ```bash
+       ls /path/to/ebay-mcp-server/build/index.js
+       ```
+    3. Fully quit and restart Claude Desktop
+    4. Check Claude Desktop logs:
+       - macOS: `~/Library/Logs/Claude/`
+       - Windows: `%APPDATA%\Claude\logs\`
+       - Linux: `~/.config/Claude/logs/`
+  </Accordion>
+
+  <Accordion title="Error: Cannot find module">
+    **Cause:** The eBay MCP Server build directory doesn't exist or wasn't compiled.
+
+    **Solution:**
+    ```bash
+    cd /path/to/ebay-mcp-server
+    npm install
+    npm run build
+    ```
+
+    Verify `build/index.js` was created.
+  </Accordion>
+
+  <Accordion title="Error: Invalid credentials">
+    **Cause:** eBay Client ID or Secret is incorrect.
+
+    **Solution:**
+    1. Verify credentials in [eBay Developer Portal](https://developer.ebay.com)
+    2. Ensure you're using the correct environment (Sandbox vs Production)
+    3. Check for typos in your config file
+    4. Remove any extra spaces or quotes
+  </Accordion>
+
+  <Accordion title="Error: Rate limit exceeded">
+    **Cause:** You've exceeded your daily API request limit.
+
+    **Solution:**
+    - **Using client credentials?** Add user tokens for 10-50x higher limits
+    - **Already using user tokens?** Wait 24 hours or upgrade your eBay seller account
+    - Check your current usage in the eBay Developer Portal
+  </Accordion>
+
+  <Accordion title="Tools working but API calls fail">
+    **Cause:** Authentication or permission issues.
+
+    **Solutions:**
+    1. Ensure user tokens are valid and not expired
+    2. Verify your eBay app has required OAuth scopes
+    3. Check that tokens match the environment (Sandbox/Production)
+    4. Regenerate tokens: `npm run setup`
+  </Accordion>
+
+  <Accordion title="Claude Desktop crashes on startup">
+    **Cause:** Server startup error or resource exhaustion.
+
+    **Solutions:**
+    1. Test the server independently:
+       ```bash
+       cd /path/to/ebay-mcp-server
+       npm start
+       ```
+    2. Check server logs for errors
+    3. Temporarily remove eBay config from `claude_desktop_config.json`
+    4. Restart Claude Desktop to verify it works without eBay MCP
+    5. Re-add configuration with simpler settings
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Start with Sandbox" icon="flask">
+    Always test in Sandbox environment before using Production to avoid affecting real listings.
+  </Card>
+
+  <Card title="Use User Tokens" icon="key">
+    Configure user tokens for full API access and higher rate limits (10,000-50,000 requests/day).
+  </Card>
+
+  <Card title="Monitor Usage" icon="chart-line">
+    Keep track of API usage to avoid hitting rate limits. Ask Claude to check rate limit status periodically.
+  </Card>
+
+  <Card title="Secure Credentials" icon="shield">
+    Never share your `claude_desktop_config.json` file - it contains sensitive API credentials.
+  </Card>
+</CardGroup>
+
+## Viewing Logs
+
+Check Claude Desktop logs for debugging connection issues:
+
+<Tabs>
+  <Tab title="macOS">
+    ```bash
+    # View logs
+    tail -f ~/Library/Logs/Claude/mcp*.log
+
+    # Open log directory
+    open ~/Library/Logs/Claude/
+    ```
+  </Tab>
+
+  <Tab title="Windows">
+    ```bash
+    # Open log directory
+    explorer %APPDATA%\Claude\logs
+
+    # View with PowerShell
+    Get-Content "$env:APPDATA\Claude\logs\mcp*.log" -Wait
+    ```
+  </Tab>
+
+  <Tab title="Linux">
+    ```bash
+    # View logs
+    tail -f ~/.config/Claude/logs/mcp*.log
+
+    # Open log directory
+    xdg-open ~/.config/Claude/logs/
+    ```
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create Your First Listing" icon="plus" href="/guides/first-listing">
+    Step-by-step guide to creating an eBay listing via Claude
+  </Card>
+
+  <Card title="Manage Orders" icon="box" href="/guides/managing-orders">
+    Learn how to fulfill orders and handle returns
+  </Card>
+
+  <Card title="Run Promotions" icon="megaphone" href="/guides/running-promotions">
+    Set up marketing campaigns and promoted listings
+  </Card>
+
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Tips for optimal usage and performance
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+<Card title="Troubleshooting Guide" icon="life-ring" href="/support/troubleshooting">
+  Comprehensive solutions for common issues
 </Card>
