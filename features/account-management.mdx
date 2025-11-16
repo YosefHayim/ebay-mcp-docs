@@ -1,12 +1,636 @@
 ---
 title: "Account Management"
-description: "Documentation for Account Management"
+description: "Configure seller policies, manage programs, handle sales tax, and optimize account settings with 30 comprehensive tools"
 ---
 
 # Account Management
 
-Documentation for this section is coming soon.
+The eBay MCP Server provides complete account management capabilities through the **Account API**, offering 30 specialized tools to configure policies, manage seller programs, handle sales tax, and control account settings.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Overview
+
+The Account API is essential for setting up and managing your eBay seller account. Properly configured policies and settings ensure smooth transactions, legal compliance, and eligibility for seller programs.
+
+<Info>
+**Account Management Essentials:**
+1. **Business Policies**: Fulfillment, payment, and return policies for listings
+2. **Seller Programs**: Opt into programs for benefits and features
+3. **Sales Tax**: Configure tax collection by jurisdiction
+4. **Account Settings**: KYC status, privileges, and subscriptions
+</Info>
+
+## Core Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Business Policies" icon="file-contract">
+    Create reusable fulfillment, payment, and return policies
+  </Card>
+  <Card title="Sales Tax Management" icon="receipt">
+    Configure tax rates by state and jurisdiction
+  </Card>
+  <Card title="Seller Programs" icon="trophy">
+    Opt into programs for enhanced features
+  </Card>
+  <Card title="Account Settings" icon="gear">
+    Manage KYC, privileges, and subscriptions
+  </Card>
+</CardGroup>
+
+## Business Policies
+
+Business policies are reusable templates that define shipping, payment, and return rules for your listings. They streamline listing creation and ensure consistency.
+
+### Policy Types
+
+<Tabs>
+  <Tab title="Fulfillment Policies">
+    **Define shipping and handling**
+
+    - Shipping services and costs
+    - Handling time
+    - Free shipping options
+    - International shipping
+    - Local pickup availability
+
+    ```typescript
+    {
+      "policy": {
+        "name": "Standard Shipping - US",
+        "marketplaceId": "EBAY_US",
+        "categoryTypes": [{"name": "ALL_EXCLUDING_MOTORS_VEHICLES"}],
+        "handlingTime": {
+          "value": 1,
+          "unit": "BUSINESS_DAY"
+        },
+        "shippingOptions": [
+          {
+            "costType": "FLAT_RATE",
+            "shippingServices": [
+              {
+                "shippingCarrierCode": "USPS",
+                "shippingServiceCode": "USPSPriority",
+                "freeShipping": false,
+                "shippingCost": {
+                  "value": "8.99",
+                  "currency": "USD"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Payment Policies">
+    **Configure payment options**
+
+    - Accepted payment methods
+    - Payment instructions
+    - Immediate payment requirements
+
+    ```typescript
+    {
+      "policy": {
+        "name": "Standard Payment",
+        "marketplaceId": "EBAY_US",
+        "categoryTypes": [{"name": "ALL_EXCLUDING_MOTORS_VEHICLES"}],
+        "paymentMethods": [
+          {
+            "paymentMethodType": "PAYPAL",
+            "recipientAccountReference": {
+              "referenceId": "seller@example.com",
+              "referenceType": "PAYPAL_EMAIL"
+            }
+          }
+        ],
+        "immediatePay": true
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Return Policies">
+    **Set return and refund terms**
+
+    - Return acceptance
+    - Return period (14, 30, 60 days)
+    - Refund method
+    - Return shipping cost responsibility
+
+    ```typescript
+    {
+      "policy": {
+        "name": "30 Day Returns",
+        "marketplaceId": "EBAY_US",
+        "categoryTypes": [{"name": "ALL_EXCLUDING_MOTORS_VEHICLES"}],
+        "returnsAccepted": true,
+        "returnPeriod": {
+          "value": 30,
+          "unit": "DAY"
+        },
+        "refundMethod": "MONEY_BACK",
+        "returnShippingCostPayer": "BUYER"
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Custom Policies">
+    **Additional terms and conditions**
+
+    - Product safety disclosures
+    - Regulatory compliance
+    - Custom seller terms
+
+    ```typescript
+    {
+      "policy": {
+        "name": "Product Safety Disclosure",
+        "policyType": "PRODUCT_COMPLIANCE",
+        "description": "This product complies with all applicable safety standards.",
+        "marketplaceId": "EBAY_US"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Managing Fulfillment Policies
+
+<Steps>
+  <Step title="Get Existing Policies">
+    ```typescript
+    {
+      "marketplaceId": "EBAY_US"
+    }
+    ```
+
+    **Tools:**
+    - `ebay_get_fulfillment_policies` - List all fulfillment policies
+    - `ebay_get_fulfillment_policy` - Get policy by ID
+    - `ebay_get_fulfillment_policy_by_name` - Find by name
+  </Step>
+
+  <Step title="Create New Policy">
+    **Tool:** `ebay_create_fulfillment_policy`
+
+    **Required Fields:**
+    - Policy name
+    - Marketplace ID
+    - Category types
+    - Handling time
+    - At least one shipping option
+  </Step>
+
+  <Step title="Update or Delete">
+    **Tools:**
+    - `ebay_update_fulfillment_policy` - Modify existing policy
+    - `ebay_delete_fulfillment_policy` - Remove policy
+
+    <Warning>
+    **Note:** Cannot delete policies currently in use by active listings
+    </Warning>
+  </Step>
+</Steps>
+
+### Managing Payment and Return Policies
+
+The same create, read, update, delete pattern applies to all policy types:
+
+**Payment Policies (5 tools):**
+- `ebay_create_payment_policy`
+- `ebay_get_payment_policies`
+- `ebay_get_payment_policy`
+- `ebay_get_payment_policy_by_name`
+- `ebay_update_payment_policy`
+- `ebay_delete_payment_policy`
+
+**Return Policies (5 tools):**
+- `ebay_create_return_policy`
+- `ebay_get_return_policies`
+- `ebay_get_return_policy`
+- `ebay_get_return_policy_by_name`
+- `ebay_update_return_policy`
+- `ebay_delete_return_policy`
+
+**Custom Policies (4 tools):**
+- `ebay_create_custom_policy`
+- `ebay_get_custom_policies`
+- `ebay_get_custom_policy`
+- `ebay_update_custom_policy`
+- `ebay_delete_custom_policy`
+
+## Sales Tax Management
+
+Configure sales tax collection for jurisdictions where you're required to collect tax.
+
+### Understanding Sales Tax
+
+<Info>
+**Important:** eBay automatically calculates and collects Internet Sales Tax in many U.S. states. You only need to configure additional tax rates if required by your state or for specific jurisdictions.
+</Info>
+
+### Managing Sales Tax Tables
+
+<Steps>
+  <Step title="Get Existing Tax Tables">
+    ```typescript
+    {
+      "countryCode": "US"
+    }
+    ```
+
+    **Tool:** `ebay_get_sales_taxes`
+
+    Returns all configured tax rates for the specified country
+  </Step>
+
+  <Step title="Create or Update Tax Rate">
+    ```typescript
+    {
+      "countryCode": "US",
+      "jurisdictionId": "CA",
+      "salesTaxBase": {
+        "salesTaxPercentage": "7.25",
+        "shippingAndHandlingTaxed": false
+      }
+    }
+    ```
+
+    **Tool:** `ebay_create_or_replace_sales_tax`
+
+    **Jurisdiction IDs:**
+    - Use two-letter state codes for U.S. states (CA, NY, TX, etc.)
+    - Contact eBay for other jurisdiction codes
+  </Step>
+
+  <Step title="Bulk Operations">
+    Configure multiple jurisdictions at once:
+
+    ```typescript
+    {
+      "requests": [
+        {
+          "countryCode": "US",
+          "jurisdictionId": "CA",
+          "salesTaxBase": {
+            "salesTaxPercentage": "7.25",
+            "shippingAndHandlingTaxed": false
+          }
+        },
+        {
+          "countryCode": "US",
+          "jurisdictionId": "NY",
+          "salesTaxBase": {
+            "salesTaxPercentage": "4.00",
+            "shippingAndHandlingTaxed": false
+          }
+        }
+      ]
+    }
+    ```
+
+    **Tool:** `ebay_bulk_create_or_replace_sales_tax`
+  </Step>
+
+  <Step title="Delete Tax Table">
+    ```typescript
+    {
+      "countryCode": "US",
+      "jurisdictionId": "CA"
+    }
+    ```
+
+    **Tool:** `ebay_delete_sales_tax`
+  </Step>
+</Steps>
+
+<Warning>
+**Tax Compliance:** Consult with a tax professional to ensure you're collecting the correct tax rates and complying with all applicable laws.
+</Warning>
+
+## Seller Programs
+
+Opt into eBay seller programs to access enhanced features, benefits, and selling tools.
+
+### Available Programs
+
+<CardGroup cols={2}>
+  <Card title="Top Rated Seller" icon="star">
+    Premium seller status with fee discounts and badge
+  </Card>
+  <Card title="eBay Payments" icon="credit-card">
+    Integrated payment processing (standard for all sellers)
+  </Card>
+  <Card title="Advertising Programs" icon="megaphone">
+    Access to promoted listings and marketing tools
+  </Card>
+  <Card title="Out of Stock Control" icon="box-open">
+    Keep listings active when out of stock
+  </Card>
+</CardGroup>
+
+### Program Management
+
+<Steps>
+  <Step title="Check Opted-In Programs">
+    ```typescript
+    {}  // No parameters required
+    ```
+
+    **Tool:** `ebay_get_opted_in_programs`
+
+    Returns all programs you're currently enrolled in
+  </Step>
+
+  <Step title="Check Program Eligibility">
+    ```typescript
+    {
+      "marketplaceId": "EBAY_US",
+      "programTypes": "PROMOTED_LISTINGS_STANDARD"
+    }
+    ```
+
+    **Tool:** `ebay_get_advertising_eligibility`
+
+    Check if you qualify for advertising programs
+  </Step>
+
+  <Step title="Opt In to Program">
+    ```typescript
+    {
+      "request": {
+        "programType": "OUT_OF_STOCK_CONTROL"
+      }
+    }
+    ```
+
+    **Tool:** `ebay_opt_in_to_program`
+  </Step>
+
+  <Step title="Opt Out of Program">
+    ```typescript
+    {
+      "request": {
+        "programType": "OUT_OF_STOCK_CONTROL"
+      }
+    }
+    ```
+
+    **Tool:** `ebay_opt_out_of_program`
+  </Step>
+</Steps>
+
+<Accordion title="Payment Program Tools">
+**eBay Payments Program (Deprecated):**
+
+All sellers are now automatically enrolled in eBay's managed payments. These tools remain for compatibility:
+
+- `ebay_opt_in_to_payments_program`
+- `ebay_get_payments_program_status`
+- `ebay_get_payments_program`
+- `ebay_get_payments_program_onboarding`
+
+<Info>
+These methods are deprecated as all seller accounts globally have been enabled for the new eBay payment and checkout flow.
+</Info>
+</Accordion>
+
+## Account Settings and Information
+
+Access seller account information, privileges, and subscription details.
+
+### KYC Status
+
+Know Your Customer (KYC) verification is required for selling on eBay:
+
+```typescript
+{}  // No parameters required
+```
+
+**Tool:** `ebay_get_kyc`
+
+**Returns:**
+- Verification status
+- Required documents
+- Completion percentage
+- Next steps
+
+### Seller Privileges
+
+Check your account's selling limits and privileges:
+
+```typescript
+{}  // No parameters required
+```
+
+**Tool:** `ebay_get_privileges`
+
+**Returns:**
+- Selling limit (quantity and value)
+- Registration completion status
+- Special privileges
+- Account restrictions
+
+<Accordion title="Example Privileges Response">
+```json
+{
+  "sellingLimit": {
+    "quantity": 100,
+    "amount": {
+      "value": "5000.00",
+      "currency": "USD"
+    }
+  },
+  "sellerRegistrationCompleted": true,
+  "specialPrivileges": [
+    "SELL_MOTORS_VEHICLES"
+  ]
+}
+```
+</Accordion>
+
+### Subscription Information
+
+View your eBay Store subscription and fee structure:
+
+```typescript
+{
+  "limitType": "SELLING_LIMIT"  // Optional filter
+}
+```
+
+**Tool:** `ebay_get_subscription`
+
+**Returns:**
+- Subscription tier (Basic, Premium, Anchor, Enterprise)
+- Monthly fees
+- Listing allowances
+- Final value fee discounts
+
+### Rate Tables
+
+Get shipping rate tables configured for your account:
+
+```typescript
+{}  // No parameters required
+```
+
+**Tool:** `ebay_get_rate_tables`
+
+Returns configured shipping rate tables for calculated shipping
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Setting Up a New Seller Account">
+    **Complete setup workflow:**
+
+    1. Check KYC status: `ebay_get_kyc`
+    2. Check privileges: `ebay_get_privileges`
+    3. Create fulfillment policy: `ebay_create_fulfillment_policy`
+    4. Create payment policy: `ebay_create_payment_policy`
+    5. Create return policy: `ebay_create_return_policy`
+    6. Configure sales tax: `ebay_create_or_replace_sales_tax`
+    7. Opt into programs: `ebay_opt_in_to_program`
+
+    Now you're ready to create listings!
+  </Accordion>
+
+  <Accordion title="Updating Shipping Costs">
+    **Adjust shipping across all listings:**
+
+    1. Get current policies: `ebay_get_fulfillment_policies`
+    2. Update policy: `ebay_update_fulfillment_policy`
+    3. Changes apply immediately to all listings using the policy
+  </Accordion>
+
+  <Accordion title="Configuring Multi-State Sales Tax">
+    **Set up tax for multiple states:**
+
+    1. Determine tax obligations
+    2. Use `ebay_bulk_create_or_replace_sales_tax` with all jurisdictions
+    3. Verify with `ebay_get_sales_taxes`
+  </Accordion>
+
+  <Accordion title="Checking Account Limits">
+    **Monitor selling capacity:**
+
+    1. Get privileges: `ebay_get_privileges`
+    2. Check current month sales against limits
+    3. Request increase if needed (via eBay Seller Hub)
+  </Accordion>
+</AccordionGroup>
+
+## Tool Reference
+
+### Fulfillment Policies (5 tools)
+- `ebay_get_fulfillment_policies` - List all policies
+- `ebay_get_fulfillment_policy` - Get by ID
+- `ebay_get_fulfillment_policy_by_name` - Get by name
+- `ebay_create_fulfillment_policy` - Create new policy
+- `ebay_update_fulfillment_policy` - Update policy
+- `ebay_delete_fulfillment_policy` - Delete policy
+
+### Payment Policies (5 tools)
+- `ebay_get_payment_policies` - List all policies
+- `ebay_get_payment_policy` - Get by ID
+- `ebay_get_payment_policy_by_name` - Get by name
+- `ebay_create_payment_policy` - Create new policy
+- `ebay_update_payment_policy` - Update policy
+- `ebay_delete_payment_policy` - Delete policy
+
+### Return Policies (5 tools)
+- `ebay_get_return_policies` - List all policies
+- `ebay_get_return_policy` - Get by ID
+- `ebay_get_return_policy_by_name` - Get by name
+- `ebay_create_return_policy` - Create new policy
+- `ebay_update_return_policy` - Update policy
+- `ebay_delete_return_policy` - Delete policy
+
+### Custom Policies (4 tools)
+- `ebay_get_custom_policies` - List all policies
+- `ebay_get_custom_policy` - Get by ID
+- `ebay_create_custom_policy` - Create new policy
+- `ebay_update_custom_policy` - Update policy
+- `ebay_delete_custom_policy` - Delete policy
+
+### Sales Tax (5 tools)
+- `ebay_get_sales_taxes` - Get all tax tables for country
+- `ebay_get_sales_tax` - Get specific jurisdiction
+- `ebay_create_or_replace_sales_tax` - Set tax rate
+- `ebay_bulk_create_or_replace_sales_tax` - Bulk set rates
+- `ebay_delete_sales_tax` - Remove tax table
+
+### Programs (5 tools)
+- `ebay_get_opted_in_programs` - List enrolled programs
+- `ebay_opt_in_to_program` - Join program
+- `ebay_opt_out_of_program` - Leave program
+- `ebay_get_advertising_eligibility` - Check ad program eligibility
+- `ebay_opt_in_to_payments_program` - *Deprecated*
+- `ebay_get_payments_program_status` - *Deprecated*
+- `ebay_get_payments_program` - *Deprecated*
+- `ebay_get_payments_program_onboarding` - *Deprecated*
+
+### Account Information (3 tools)
+- `ebay_get_kyc` - KYC verification status
+- `ebay_get_privileges` - Selling limits and privileges
+- `ebay_get_subscription` - Store subscription details
+- `ebay_get_rate_tables` - Shipping rate tables
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Create Policy Templates" icon="file-lines">
+    Set up reusable policies for common scenarios (domestic, international, etc.)
+  </Card>
+  <Card title="Update Policies Centrally" icon="arrows-rotate">
+    Modify policies instead of individual listings to ensure consistency
+  </Card>
+  <Card title="Review Tax Settings Annually" icon="calendar">
+    Sales tax laws change - verify your configuration yearly
+  </Card>
+  <Card title="Monitor Account Limits" icon="gauge-high">
+    Track selling limits to avoid hitting caps during peak seasons
+  </Card>
+</CardGroup>
+
+## Policy Naming Conventions
+
+<Tip>
+**Recommended naming:**
+- Fulfillment: "Standard - US" or "Expedited - International"
+- Payment: "Immediate Pay" or "Standard Payment"
+- Return: "30 Day Returns" or "No Returns Accepted"
+
+Clear names make policy selection easier when creating listings.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Creating Your First Listing" href="/guides/first-listing" icon="rocket">
+    Use your configured policies to create listings
+  </Card>
+  <Card title="Inventory Management" href="/features/inventory-management" icon="box">
+    Start adding products to your catalog
+  </Card>
+  <Card title="Account API Reference" href="/api-reference/account/overview" icon="book">
+    Complete API documentation
+  </Card>
+  <Card title="Best Practices Guide" href="/guides/best-practices" icon="lightbulb">
+    Optimize your seller account
+  </Card>
+</CardGroup>
+
+## Rate Limits
+
+<Info>
+**User Tokens:** 10,000-50,000 requests/day
+
+**Recommendation:** Policy operations are typically one-time setup. Batch policy creation during initial setup.
+</Info>
+
+See [Rate Limits](/advanced/rate-limits) for detailed information.
