@@ -1,5 +1,9 @@
 # eBay MCP Server Documentation
 
+**Live Documentation:** https://ebaymcp.com
+**Repository:** https://github.com/YosefHayim/ebay-mcp-server
+**License:** Apache 2.0
+
 ## Priority Pages
 
 ### Getting Started (High Priority)
