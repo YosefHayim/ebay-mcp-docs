@@ -3,8 +3,732 @@ title: "OAuth 2.0 Setup"
 description: "Set up OAuth 2.0 user tokens for full API access"
 ---
 
-OAuth setup documentation coming soon.
+OAuth 2.0 user tokens provide full access to the eBay Sell APIs with high rate limits (10,000-50,000 requests/day). This guide walks you through setting up OAuth authentication for the eBay MCP Server.
 
-<Card title="Quickstart Guide" href="/quickstart#step-3-configure-your-credentials" icon="rocket">
-  See OAuth setup in the quickstart guide
-</Card>
+<Info>
+  **Time to complete:** 10-15 minutes
+
+  **Prerequisites:**
+  - eBay Developer account
+  - eBay application created (Client ID and Secret)
+  - MCP server [installed](/installation)
+</Info>
+
+## Why OAuth 2.0?
+
+OAuth 2.0 user tokens unlock the full potential of the eBay MCP Server:
+
+<CardGroup cols={2}>
+  <Card title="Full API Access" icon="unlock">
+    Access all 230+ tools including inventory, orders, and analytics
+  </Card>
+
+  <Card title="High Rate Limits" icon="gauge-high">
+    10,000-50,000 requests/day vs 1,000 for client credentials
+  </Card>
+
+  <Card title="Automatic Refresh" icon="rotate">
+    Tokens refresh automatically - no manual management
+  </Card>
+
+  <Card title="User-specific Data" icon="user-check">
+    Access seller data, manage listings, process orders
+  </Card>
+</CardGroup>
+
+## OAuth Flow Overview
+
+Understanding the OAuth 2.0 authorization flow:
+
+<Steps>
+  <Step title="User Authorization Request">
+    Your application redirects the user to eBay's authorization URL where they log in and approve your application.
+  </Step>
+
+  <Step title="Authorization Code">
+    After approval, eBay redirects back to your redirect URI with an authorization code.
+  </Step>
+
+  <Step title="Token Exchange">
+    Your application exchanges the authorization code for access and refresh tokens.
+  </Step>
+
+  <Step title="API Access">
+    Use the access token to make API calls on behalf of the user.
+  </Step>
+
+  <Step title="Token Refresh">
+    When the access token expires (typically after 2 hours), use the refresh token to get a new access token.
+  </Step>
+</Steps>
+
+<Tip>
+  The eBay MCP Server handles steps 3-5 automatically. You only need to complete the initial authorization!
+</Tip>
+
+## Setup Method 1: Interactive Wizard (Recommended)
+
+The easiest way to set up OAuth - a beautiful CLI wizard that handles everything:
+
+### Step 1: Run the Setup Wizard
+
+```bash
+npm run setup
+```
+
+This launches an interactive wizard with eBay brand colors and clear instructions.
+
+### Step 2: Choose Your Environment
+
+Select your eBay environment:
+- **Sandbox:** For testing and development (recommended initially)
+- **Production:** For live seller operations
+
+<Warning>
+  Start with Sandbox to test your setup before moving to Production.
+</Warning>
+
+### Step 3: Enter Your Credentials
+
+The wizard will prompt you for:
+
+```
+eBay Client ID: YourAppName-YourApp-SBX-1234abcd-567890ab
+eBay Client Secret: SBX-1234abcd-5678-90ab-cdef-1234
+Redirect URI: http://localhost:3000/callback
+```
+
+<Info>
+  Get these credentials from your [eBay Developer Portal](https://developer.ebay.com) application settings.
+</Info>
+
+### Step 4: Authorize Your Application
+
+The wizard will:
+
+1. **Generate an authorization URL**
+2. **Open your browser automatically** (or display the URL if auto-open fails)
+3. **You log in to eBay** with your seller account
+4. **You approve the application** by clicking "Agree"
+5. **eBay redirects back** to the callback URL
+
+<Note>
+  The redirect will show a "Can't connect" error in your browser - **this is normal!** The wizard captures the authorization code from the URL automatically.
+</Note>
+
+### Step 5: Token Exchange
+
+The wizard automatically:
+- Extracts the authorization code from the redirect
+- Exchanges it for access and refresh tokens
+- Saves tokens securely to your `.env` file
+
+<Check>
+  **Success!** Your OAuth setup is complete. The wizard will confirm with a success message showing your authentication status.
+</Check>
+
+## Setup Method 2: Automatic Setup
+
+If you prefer to edit the `.env` file first:
+
+<Steps>
+  <Step title="Create .env File">
+    ```bash
+    cp .env.example .env
+    ```
+
+    Edit `.env` with your credentials:
+
+    ```bash
+    EBAY_CLIENT_ID=YourAppName-YourApp-SBX-1234abcd-567890ab
+    EBAY_CLIENT_SECRET=SBX-1234abcd-5678-90ab-cdef-1234
+    EBAY_ENVIRONMENT=sandbox
+    EBAY_REDIRECT_URI=http://localhost:3000/callback
+    ```
+  </Step>
+
+  <Step title="Run Automatic Setup">
+    ```bash
+    npm run auto-setup
+    ```
+
+    This validates your credentials and launches the OAuth flow automatically.
+  </Step>
+
+  <Step title="Authorize in Browser">
+    Your browser opens to eBay's authorization page:
+    1. Log in with your eBay seller account
+    2. Review the requested scopes
+    3. Click "Agree" to authorize
+
+    The redirect URL will show a browser error - this is expected!
+  </Step>
+
+  <Step title="Verification">
+    The setup script automatically:
+    - Captures the authorization code
+    - Exchanges it for tokens
+    - Updates your `.env` file
+    - Confirms successful setup
+  </Step>
+</Steps>
+
+## Setup Method 3: Manual OAuth Flow
+
+For advanced users who want complete control:
+
+<Steps>
+  <Step title="Generate Authorization URL">
+    ```bash
+    npm run generate-oauth-url
+    ```
+
+    This outputs an authorization URL like:
+
+    ```
+    https://auth.ebay.com/oauth2/authorize?client_id=...&redirect_uri=...&response_type=code&scope=...
+    ```
+
+    Copy this URL for the next step.
+  </Step>
+
+  <Step title="Authorize in Browser">
+    1. Paste the URL into your browser
+    2. Log in with your eBay seller account
+    3. Review the scopes and click "Agree"
+    4. After authorization, eBay redirects to:
+
+    ```
+    http://localhost:3000/callback?code=v^1.1#i^1#...&expires_in=299
+    ```
+
+    5. Copy the **entire redirect URL** from your browser address bar
+
+    <Tip>
+      The browser will show "This site can't be reached" - ignore this and just copy the URL!
+    </Tip>
+  </Step>
+
+  <Step title="Extract Authorization Code">
+    From the redirect URL, copy the value after `code=` (everything before `&expires_in`):
+
+    ```
+    v^1.1#i^1#...your_authorization_code_here...
+    ```
+  </Step>
+
+  <Step title="Exchange Code for Tokens">
+    ```bash
+    npm run exchange-oauth-code "v^1.1#i^1#...your_authorization_code_here..."
+    ```
+
+    <Warning>
+      Wrap the authorization code in quotes to handle special characters!
+    </Warning>
+
+    This exchanges the code for access and refresh tokens and saves them to `.env`.
+  </Step>
+
+  <Step title="Verify Setup">
+    Check your `.env` file - it should now contain:
+
+    ```bash
+    EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#...
+    EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
+    EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+    ```
+
+    <Check>
+      OAuth setup complete!
+    </Check>
+  </Step>
+</Steps>
+
+## Configuring eBay Developer Portal
+
+Before running the OAuth flow, ensure your application is properly configured in the eBay Developer Portal.
+
+### Required OAuth Settings
+
+<Steps>
+  <Step title="Navigate to Application Settings">
+    1. Sign in to [eBay Developer Portal](https://developer.ebay.com)
+    2. Go to **My Account** → **Application Keys**
+    3. Select your application (Sandbox or Production)
+  </Step>
+
+  <Step title="Add Redirect URI">
+    In the **OAuth Redirect URIs** section:
+
+    1. Click **Add OAuth Redirect URI**
+    2. Enter: `http://localhost:3000/callback`
+    3. Click **Save**
+
+    <Warning>
+      The redirect URI must **exactly** match what you use in your `.env` file.
+    </Warning>
+
+    **Common redirect URIs:**
+    - `http://localhost:3000/callback` (default)
+    - `https://yourdomain.com/oauth/callback` (production)
+    - `http://127.0.0.1:3000/callback` (alternative localhost)
+  </Step>
+
+  <Step title="Verify OAuth Scopes">
+    Ensure these scopes are enabled for your application:
+
+    **Required scopes:**
+    - `https://api.ebay.com/oauth/api_scope/sell.inventory`
+    - `https://api.ebay.com/oauth/api_scope/sell.fulfillment`
+    - `https://api.ebay.com/oauth/api_scope/sell.account`
+    - `https://api.ebay.com/oauth/api_scope/sell.marketing`
+    - `https://api.ebay.com/oauth/api_scope/sell.analytics.readonly`
+    - `https://api.ebay.com/oauth/api_scope/sell.account.readonly`
+
+    <Info>
+      Most scopes are enabled by default for Sell API applications.
+    </Info>
+  </Step>
+
+  <Step title="Note Your Credentials">
+    Copy your credentials for use in the setup:
+
+    **Sandbox:**
+    - App ID (Client ID)
+    - Cert ID (Client Secret)
+
+    **Production:**
+    - App ID (Client ID)
+    - Cert ID (Client Secret)
+
+    <Tip>
+      Production credentials are on a separate tab in the Developer Portal.
+    </Tip>
+  </Step>
+</Steps>
+
+## Understanding OAuth Scopes
+
+OAuth scopes define what your application can access. The eBay MCP Server requires these scopes:
+
+<AccordionGroup>
+  <Accordion title="sell.inventory - Manage Inventory" icon="boxes">
+    **Allows:**
+    - Create, read, update, delete inventory items
+    - Manage offers and listings
+    - Handle inventory locations
+    - Bulk operations on inventory
+
+    **Tools enabled:** 60+ inventory management tools
+  </Accordion>
+
+  <Accordion title="sell.fulfillment - Order Management" icon="truck">
+    **Allows:**
+    - View and manage orders
+    - Handle shipping and fulfillment
+    - Process returns and cancellations
+    - Update tracking information
+
+    **Tools enabled:** 40+ fulfillment tools
+  </Accordion>
+
+  <Accordion title="sell.account - Account Management" icon="user-gear">
+    **Allows:**
+    - Manage fulfillment policies
+    - Configure payment policies
+    - Set return policies
+    - Manage selling programs
+
+    **Tools enabled:** 30+ account management tools
+  </Accordion>
+
+  <Accordion title="sell.marketing - Marketing & Promotions" icon="megaphone">
+    **Allows:**
+    - Create promoted listings campaigns
+    - Manage item promotions
+    - View campaign analytics
+    - Optimize marketing spend
+
+    **Tools enabled:** 50+ marketing tools
+  </Accordion>
+
+  <Accordion title="sell.analytics.readonly - Analytics Access" icon="chart-line">
+    **Allows:**
+    - View traffic reports
+    - Access seller analytics
+    - Generate performance insights
+    - Track metrics
+
+    **Tools enabled:** 20+ analytics tools
+
+    <Info>
+      This is read-only - no data modification.
+    </Info>
+  </Accordion>
+
+  <Accordion title="sell.account.readonly - Account Info (Read)" icon="eye">
+    **Allows:**
+    - Read account settings
+    - View policy information
+    - Check program enrollment
+    - Access metadata
+
+    **Tools enabled:** 10+ read-only account tools
+  </Accordion>
+</AccordionGroup>
+
+## Testing Your OAuth Setup
+
+After completing OAuth setup, verify everything works:
+
+### 1. Check Environment Variables
+
+Verify your `.env` file contains all required variables:
+
+```bash
+cat .env | grep EBAY
+```
+
+Expected output:
+```bash
+EBAY_CLIENT_ID=YourAppId-12345
+EBAY_CLIENT_SECRET=YourCertId-67890
+EBAY_ENVIRONMENT=sandbox
+EBAY_REDIRECT_URI=http://localhost:3000/callback
+EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#...
+EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
+EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+```
+
+### 2. Validate Configuration
+
+Run the validation script:
+
+```bash
+npm run validate-config
+```
+
+This checks:
+- ✅ All required variables present
+- ✅ Credentials format is correct
+- ✅ Tokens are valid and not expired
+- ✅ API connectivity works
+
+### 3. Start the MCP Server
+
+```bash
+npm start
+```
+
+Check the startup logs for:
+```
+✅ User tokens loaded
+✅ Authentication: OAuth 2.0 (User Tokens)
+✅ Rate limit: 10,000-50,000 requests/day
+✅ 230+ tools registered
+```
+
+<Check>
+  If you see these messages, your OAuth setup is working correctly!
+</Check>
+
+## Token Lifecycle
+
+Understanding how tokens work helps you troubleshoot issues:
+
+### Access Token
+
+**Lifetime:** ~2 hours (7,200 seconds)
+
+**Purpose:** Used for API calls
+
+**Automatic refresh:** Yes, when expired
+
+```bash
+EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#r^1#...
+```
+
+### Refresh Token
+
+**Lifetime:** 18 months (540 days)
+
+**Purpose:** Obtain new access tokens
+
+**Renewal:** Automatically renewed when used
+
+```bash
+EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#r^1#...
+```
+
+<Info>
+  Each time you refresh an access token, eBay also provides a new refresh token, effectively making refresh tokens never expire as long as you use the MCP server regularly.
+</Info>
+
+### Token Expiry
+
+```bash
+EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+```
+
+**Format:** ISO 8601 timestamp
+
+**Purpose:** Server knows when to refresh
+
+**Automatic update:** Yes, after each refresh
+
+## Troubleshooting OAuth Setup
+
+### Common Issues and Solutions
+
+<AccordionGroup>
+  <Accordion title="Redirect URI Mismatch Error">
+    **Error message:**
+    ```
+    redirect_uri_mismatch
+    ```
+
+    **Cause:** The redirect URI in your `.env` doesn't match what's configured in eBay Developer Portal.
+
+    **Solution:**
+    1. Go to [eBay Developer Portal](https://developer.ebay.com)
+    2. Navigate to your application's OAuth settings
+    3. Ensure `http://localhost:3000/callback` is in the OAuth Redirect URIs list
+    4. Check for typos (http vs https, trailing slashes, etc.)
+    5. Update `.env` to match exactly
+
+    <Tip>
+      The redirect URI is case-sensitive and must match exactly!
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Invalid Client ID/Secret">
+    **Error message:**
+    ```
+    invalid_client
+    ```
+
+    **Cause:** Incorrect Client ID or Client Secret.
+
+    **Solution:**
+    1. Verify credentials in eBay Developer Portal
+    2. Ensure you're using the correct environment (Sandbox vs Production)
+    3. Check for copy-paste errors or extra spaces
+    4. Regenerate credentials if necessary
+  </Accordion>
+
+  <Accordion title="Authorization Code Expired">
+    **Error message:**
+    ```
+    authorization_code_expired or invalid_grant
+    ```
+
+    **Cause:** Authorization codes expire after 5 minutes.
+
+    **Solution:**
+    1. Start the OAuth flow again from the beginning
+    2. Complete the authorization quickly
+    3. Use the interactive wizard (`npm run setup`) which handles timing automatically
+  </Accordion>
+
+  <Accordion title="Browser Doesn't Open Automatically">
+    **Issue:** The setup wizard says it opened a browser, but nothing happens.
+
+    **Solution:**
+    1. Copy the authorization URL from the terminal
+    2. Manually paste it into your browser
+    3. Complete the authorization
+    4. The wizard will detect the callback automatically
+  </Accordion>
+
+  <Accordion title="Invalid Scope Error">
+    **Error message:**
+    ```
+    invalid_scope
+    ```
+
+    **Cause:** Requested scopes aren't enabled for your application.
+
+    **Solution:**
+    1. Go to eBay Developer Portal
+    2. Check your application's scope settings
+    3. Ensure all required Sell API scopes are enabled
+    4. Save changes and retry authorization
+  </Accordion>
+
+  <Accordion title="Tokens Not Refreshing">
+    **Issue:** Server falls back to client credentials after token expiry.
+
+    **Cause:** Refresh token is invalid or expired.
+
+    **Solution:**
+    1. Check `EBAY_USER_REFRESH_TOKEN` exists in `.env`
+    2. Verify token format is correct (starts with `v^1.1#`)
+    3. Re-run `npm run setup` to regenerate fresh tokens
+    4. Check server logs for specific refresh errors
+  </Accordion>
+</AccordionGroup>
+
+## Advanced OAuth Configuration
+
+### Custom Redirect URI
+
+If you need to use a different redirect URI:
+
+<Steps>
+  <Step title="Update eBay Developer Portal">
+    Add your custom URI to OAuth Redirect URIs:
+    ```
+    https://yourdomain.com/oauth/callback
+    ```
+  </Step>
+
+  <Step title="Update .env">
+    ```bash
+    EBAY_REDIRECT_URI=https://yourdomain.com/oauth/callback
+    ```
+  </Step>
+
+  <Step title="Handle the Callback">
+    You'll need to set up a web server at your redirect URI to capture the authorization code and redirect to your application.
+  </Step>
+</Steps>
+
+<Warning>
+  Custom redirect URIs require additional setup. The default `localhost` URI is recommended for most users.
+</Warning>
+
+### Production OAuth Setup
+
+When moving to production:
+
+<Steps>
+  <Step title="Create Production Application">
+    In [eBay Developer Portal](https://developer.ebay.com):
+    1. Switch to **Production** tab
+    2. Create new application (or use existing)
+    3. Configure OAuth redirect URIs
+    4. Note production credentials
+  </Step>
+
+  <Step title="Update .env for Production">
+    ```bash
+    EBAY_ENVIRONMENT=production
+    EBAY_CLIENT_ID=YourProdAppId
+    EBAY_CLIENT_SECRET=YourProdCertId
+    # Remove or comment out Sandbox tokens
+    # EBAY_USER_ACCESS_TOKEN=...
+    # EBAY_USER_REFRESH_TOKEN=...
+    ```
+
+    <Warning>
+      Production credentials are different from Sandbox - you must use the production Client ID and Secret!
+    </Warning>
+  </Step>
+
+  <Step title="Run OAuth Flow for Production">
+    ```bash
+    npm run setup
+    ```
+
+    Select **Production** when prompted.
+
+    <Warning>
+      You'll need to authorize with a real eBay seller account for production.
+    </Warning>
+  </Step>
+
+  <Step title="Verify Production Setup">
+    ```bash
+    npm run validate-config
+    ```
+
+    Ensure it shows:
+    ```
+    Environment: production
+    Authentication: OAuth 2.0 (User Tokens)
+    ```
+  </Step>
+</Steps>
+
+## Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="Never Share Tokens" icon="shield">
+    **Tokens are like passwords** - treat them with the same security:
+
+    - ✅ Store in `.env` file (add to `.gitignore`)
+    - ✅ Use environment variables in production
+    - ✅ Never commit to version control
+    - ✅ Never share in chat, screenshots, or logs
+    - ❌ Never hardcode in source code
+    - ❌ Never send via email or messaging
+  </Accordion>
+
+  <Accordion title="Secure Your Redirect URI" icon="lock">
+    **For production deployments:**
+
+    - Use HTTPS redirect URIs
+    - Validate the `state` parameter (anti-CSRF)
+    - Implement rate limiting on callback endpoint
+    - Log all authorization attempts
+    - Monitor for suspicious activity
+  </Accordion>
+
+  <Accordion title="Monitor Token Usage" icon="chart-line">
+    **Regular security audits:**
+
+    - Review API usage in eBay Developer Portal
+    - Check for unexpected token refreshes
+    - Monitor rate limit consumption
+    - Alert on anomalous patterns
+  </Accordion>
+
+  <Accordion title="Rotate Tokens Periodically" icon="rotate">
+    **Production token rotation:**
+
+    - Re-authorize every 6-12 months
+    - Immediately revoke if compromised
+    - Test new tokens before switching
+    - Keep audit trail of rotations
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Token Management" icon="rotate" href="/authentication/token-management">
+    Learn about token refresh and lifecycle
+  </Card>
+
+  <Card title="Connect MCP Client" icon="plug" href="/mcp/claude-desktop">
+    Configure Claude Desktop or other MCP clients
+  </Card>
+
+  <Card title="Create First Listing" icon="plus" href="/guides/first-listing">
+    Start using your OAuth setup
+  </Card>
+
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Optimize your MCP server usage
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+<CardGroup cols={2}>
+  <Card title="eBay OAuth Guide" icon="book" href="https://developer.ebay.com/api-docs/static/oauth-tokens.html">
+    Official eBay OAuth 2.0 documentation
+  </Card>
+
+  <Card title="OAuth 2.0 Specification" icon="file-lines" href="https://oauth.net/2/">
+    Learn more about OAuth 2.0 standard
+  </Card>
+
+  <Card title="Troubleshooting" icon="wrench" href="/support/troubleshooting">
+    Common issues and solutions
+  </Card>
+
+  <Card title="FAQ" icon="question" href="/support/faq">
+    Frequently asked questions
+  </Card>
+</CardGroup>

@@ -1,6 +1,720 @@
 ---
-title: "token management"
-description: "Documentation for token management"
+title: "Token Management"
+description: "Understanding and managing OAuth tokens in the eBay MCP Server"
 ---
 
-Documentation coming soon.
+The eBay MCP Server automatically manages OAuth tokens for you, but understanding how token management works helps you troubleshoot issues and optimize your setup.
+
+<Info>
+  **Good news:** The MCP server handles all token management automatically. This guide is for understanding what happens behind the scenes.
+</Info>
+
+## Token Types
+
+The eBay MCP Server works with two types of OAuth tokens:
+
+<CardGroup cols={2}>
+  <Card title="Access Token" icon="key">
+    **Lifetime:** ~2 hours
+
+    **Purpose:** Used for API requests
+
+    **Refreshed:** Automatically when expired
+  </Card>
+
+  <Card title="Refresh Token" icon="rotate">
+    **Lifetime:** 18 months
+
+    **Purpose:** Obtain new access tokens
+
+    **Renewed:** Each time it's used
+  </Card>
+</CardGroup>
+
+## How Token Management Works
+
+### Automatic Token Lifecycle
+
+<Steps>
+  <Step title="Initial Authorization">
+    When you complete OAuth setup, eBay provides:
+    - Access token (valid ~2 hours)
+    - Refresh token (valid 18 months)
+    - Token expiry timestamp
+
+    These are saved to your `.env` file automatically.
+  </Step>
+
+  <Step title="Token Storage">
+    The MCP server loads tokens from environment variables:
+
+    ```bash
+    EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#r^1#...
+    EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#r^1#...
+    EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+    ```
+  </Step>
+
+  <Step title="Token Validation">
+    Before each API call, the server checks:
+    - Is the access token still valid?
+    - Has it expired based on the expiry timestamp?
+  </Step>
+
+  <Step title="Automatic Refresh">
+    When the access token expires:
+    1. Server uses refresh token to request new access token
+    2. eBay returns new access token + new refresh token
+    3. Server updates `.env` file with new tokens
+    4. API call proceeds with new access token
+  </Step>
+
+  <Step title="Continuous Operation">
+    This cycle repeats automatically:
+    - Every ~2 hours, tokens refresh
+    - Each refresh renews the refresh token
+    - As long as the server runs occasionally, tokens never truly expire
+  </Step>
+</Steps>
+
+<Check>
+  You never need to manually refresh tokens - the MCP server does it all for you!
+</Check>
+
+## Token Expiry Details
+
+### Access Token Expiration
+
+**Typical lifetime:** 7,200 seconds (2 hours)
+
+**Expiry behavior:**
+- Server checks expiry before each API call
+- Automatically refreshes if expired
+- Uses cached token if still valid (performance optimization)
+
+**Format in `.env`:**
+```bash
+EBAY_USER_TOKEN_EXPIRY=2024-12-31T14:30:45.000Z
+```
+
+<Info>
+  The expiry timestamp is in ISO 8601 format with UTC timezone (the `Z` suffix).
+</Info>
+
+### Refresh Token Expiration
+
+**Typical lifetime:** 540 days (18 months)
+
+**Important:** Each time you use a refresh token to get a new access token, eBay also provides a **new refresh token** with a fresh 18-month expiry.
+
+**This means:**
+- If you use the MCP server at least once every 18 months, your refresh token effectively never expires
+- Long periods of inactivity (>18 months) require re-authorization
+
+<Tabs>
+  <Tab title="Regular Use">
+    **Scenario:** You use the MCP server weekly
+
+    **What happens:**
+    - Access tokens refresh every ~2 hours when needed
+    - Each refresh renews the refresh token
+    - Refresh token expiry resets to 18 months from last use
+    - **Result:** Tokens never expire ✅
+  </Tab>
+
+  <Tab title="Inactive Account">
+    **Scenario:** You don't use the MCP server for 19 months
+
+    **What happens:**
+    - Access token expired after 2 hours
+    - Refresh token expired after 18 months
+    - Server cannot refresh automatically
+    - **Result:** You need to re-authorize ⚠️
+
+    **Solution:**
+    ```bash
+    npm run setup
+    ```
+    Complete OAuth flow again to get new tokens.
+  </Tab>
+</Tabs>
+
+## Token Refresh Process
+
+### When Refresh Happens
+
+The server refreshes tokens in these situations:
+
+1. **Before API calls** - If access token is expired
+2. **On server startup** - If access token is expired
+3. **Proactively** - If token expires within next 5 minutes (configurable)
+
+### How Refresh Works
+
+<Steps>
+  <Step title="Detect Expiration">
+    Server compares current time with `EBAY_USER_TOKEN_EXPIRY`:
+
+    ```typescript
+    if (currentTime >= tokenExpiry) {
+      // Token expired, need to refresh
+    }
+    ```
+  </Step>
+
+  <Step title="Call eBay Token Endpoint">
+    Server makes a POST request to eBay's token endpoint:
+
+    ```http
+    POST https://api.ebay.com/identity/v1/oauth2/token
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=refresh_token
+    &refresh_token=v^1.1#i^1#r^1#...
+    ```
+
+    With Authorization header containing Client ID and Secret.
+  </Step>
+
+  <Step title="Receive New Tokens">
+    eBay responds with:
+
+    ```json
+    {
+      "access_token": "v^1.1#i^1#p^1#...",
+      "token_type": "User Access Token",
+      "expires_in": 7200,
+      "refresh_token": "v^1.1#i^1#r^1#..."
+    }
+    ```
+  </Step>
+
+  <Step title="Update Environment">
+    Server updates `.env` file with new values:
+
+    ```bash
+    EBAY_USER_ACCESS_TOKEN=<new_access_token>
+    EBAY_USER_REFRESH_TOKEN=<new_refresh_token>
+    EBAY_USER_TOKEN_EXPIRY=<calculated_expiry>
+    ```
+
+    Expiry is calculated as: `currentTime + expires_in` seconds.
+  </Step>
+
+  <Step title="Continue Operation">
+    The API call proceeds with the new access token.
+  </Step>
+</Steps>
+
+<Tip>
+  All of this happens transparently - you won't even notice tokens are being refreshed!
+</Tip>
+
+## Monitoring Token Status
+
+### Check Current Token Status
+
+View your current token information:
+
+```bash
+cat .env | grep EBAY_USER
+```
+
+This shows:
+- Current access token
+- Current refresh token
+- When access token expires
+
+### Validate Tokens
+
+Ensure your tokens are valid:
+
+```bash
+npm run validate-config
+```
+
+This checks:
+- ✅ Tokens exist
+- ✅ Format is correct
+- ✅ Tokens work with eBay API
+- ✅ Expiry timestamp is valid
+
+<Info>
+  Run this after setup or if you suspect token issues.
+</Info>
+
+### Server Logs
+
+The MCP server logs token-related events:
+
+```
+[INFO] User tokens loaded successfully
+[INFO] Access token expires at: 2024-12-31T14:30:45.000Z
+[INFO] Access token refreshed successfully
+[WARN] Access token expired, refreshing...
+[ERROR] Token refresh failed: invalid_grant
+```
+
+<Tip>
+  Set `LOG_LEVEL=debug` in `.env` to see detailed token management logs.
+</Tip>
+
+## Manual Token Operations
+
+While automatic management is recommended, you can manually manage tokens if needed:
+
+### Manually Refresh Tokens
+
+Force a token refresh:
+
+```bash
+npm run refresh-tokens
+```
+
+This:
+1. Uses current refresh token
+2. Obtains new access and refresh tokens
+3. Updates `.env` file
+
+<Warning>
+  Only use manual refresh for troubleshooting - the server handles this automatically.
+</Warning>
+
+### Regenerate Tokens
+
+If tokens are corrupted or invalid, regenerate them:
+
+```bash
+npm run setup
+```
+
+This starts the OAuth flow from scratch:
+1. Opens browser for authorization
+2. Exchanges code for new tokens
+3. Saves to `.env`
+
+<Info>
+  This is the same process as initial OAuth setup.
+</Info>
+
+### Revoke Tokens
+
+To revoke all tokens and start fresh:
+
+<Steps>
+  <Step title="Remove from .env">
+    Delete or comment out token variables:
+
+    ```bash
+    # EBAY_USER_ACCESS_TOKEN=...
+    # EBAY_USER_REFRESH_TOKEN=...
+    # EBAY_USER_TOKEN_EXPIRY=...
+    ```
+  </Step>
+
+  <Step title="Revoke in eBay Portal (Optional)">
+    1. Sign in to [eBay Developer Portal](https://developer.ebay.com)
+    2. Navigate to **User Tokens**
+    3. Find your application
+    4. Click **Revoke** to invalidate tokens
+  </Step>
+
+  <Step title="Re-authorize">
+    Run setup to get new tokens:
+
+    ```bash
+    npm run setup
+    ```
+  </Step>
+</Steps>
+
+## Token Security
+
+### Protecting Your Tokens
+
+<AccordionGroup>
+  <Accordion title="Never Expose Tokens" icon="shield">
+    **Tokens are credentials** - protect them like passwords:
+
+    ✅ **Do:**
+    - Store in `.env` file (add to `.gitignore`)
+    - Use environment variables in production
+    - Set file permissions: `chmod 600 .env`
+    - Use secret management in cloud deployments
+
+    ❌ **Don't:**
+    - Commit to version control
+    - Share via email/chat
+    - Include in screenshots
+    - Log to console in production
+    - Hardcode in source files
+  </Accordion>
+
+  <Accordion title="Monitor Token Usage" icon="eye">
+    **Regular security checks:**
+
+    - Review API usage in [eBay Developer Portal](https://developer.ebay.com)
+    - Check for unexpected token refreshes
+    - Monitor for unusual activity patterns
+    - Set up alerts for rate limit spikes
+
+    <Info>
+      The eBay Developer Portal shows detailed API usage by token.
+    </Info>
+  </Accordion>
+
+  <Accordion title="Rotate Tokens Periodically" icon="rotate">
+    **Best practices for production:**
+
+    - Re-authorize every 6-12 months
+    - Immediately revoke if compromised
+    - Test new tokens before switching
+    - Keep audit logs of rotations
+
+    **How to rotate:**
+    1. Run `npm run setup` to get new tokens
+    2. Verify new tokens work
+    3. (Optional) Revoke old tokens in eBay portal
+    4. Update production deployment
+  </Accordion>
+
+  <Accordion title="Handle Token Compromise" icon="triangle-exclamation">
+    **If you suspect tokens are compromised:**
+
+    1. **Immediately revoke** in eBay Developer Portal
+    2. **Remove** from `.env` and any backups
+    3. **Review** recent API activity for unauthorized use
+    4. **Generate new** tokens via `npm run setup`
+    5. **Update** all deployments with new tokens
+    6. **Document** the incident and response
+
+    <Warning>
+      Act quickly - compromised tokens give full API access!
+    </Warning>
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting Token Issues
+
+### Common Problems
+
+<AccordionGroup>
+  <Accordion title="Token Refresh Fails">
+    **Symptoms:**
+    - "Token refresh failed" errors in logs
+    - Server falls back to client credentials
+    - 401 Unauthorized responses
+
+    **Possible causes:**
+    1. Refresh token expired (>18 months inactive)
+    2. Refresh token invalid or corrupted
+    3. Client ID/Secret changed
+    4. Network connectivity issues
+
+    **Solutions:**
+    1. Re-run OAuth setup:
+       ```bash
+       npm run setup
+       ```
+    2. Verify Client ID and Secret haven't changed
+    3. Check network connectivity to eBay APIs
+    4. Review server logs for specific error messages
+  </Accordion>
+
+  <Accordion title="Token Expiry Keeps Resetting">
+    **Symptoms:**
+    - Token expiry is always in the past
+    - Constant refresh attempts
+    - Performance degradation
+
+    **Possible causes:**
+    1. System clock is incorrect
+    2. Timezone mismatch
+    3. `.env` file not being updated
+
+    **Solutions:**
+    1. Check system time: `date`
+    2. Ensure system clock is accurate
+    3. Verify `.env` file permissions (must be writable)
+    4. Check disk space (file updates might fail)
+  </Accordion>
+
+  <Accordion title=".env File Not Updating">
+    **Symptoms:**
+    - Tokens refresh but `.env` still has old values
+    - Manual edits to `.env` get reverted
+    - Token expiry timestamp doesn't update
+
+    **Possible causes:**
+    1. File permissions issue
+    2. Multiple instances running
+    3. `.env` file locked by another process
+
+    **Solutions:**
+    1. Check file permissions:
+       ```bash
+       ls -la .env
+       chmod 644 .env
+       ```
+    2. Ensure only one instance is running
+    3. Restart the MCP server
+    4. Check for file system errors
+  </Accordion>
+
+  <Accordion title="Server Falls Back to Client Credentials">
+    **Symptoms:**
+    - Server starts with user tokens but switches to client credentials
+    - Limited API access after running
+    - Higher rate limit errors
+
+    **Possible causes:**
+    1. User tokens became invalid
+    2. Token refresh failed
+    3. Access token expired and refresh token missing
+
+    **Solutions:**
+    1. Check server logs for token errors
+    2. Verify all token variables in `.env`:
+       ```bash
+       EBAY_USER_ACCESS_TOKEN
+       EBAY_USER_REFRESH_TOKEN
+       EBAY_USER_TOKEN_EXPIRY
+       ```
+    3. Re-run OAuth setup if tokens are missing
+    4. Ensure refresh token is valid
+  </Accordion>
+
+  <Accordion title="Invalid Token Format">
+    **Symptoms:**
+    - "Invalid token format" errors
+    - Token validation fails
+    - API calls return 401
+
+    **Possible causes:**
+    1. Token string got truncated
+    2. Extra spaces or newlines in `.env`
+    3. Token got corrupted during copy/paste
+
+    **Solutions:**
+    1. Re-run OAuth setup to get fresh tokens:
+       ```bash
+       npm run setup
+       ```
+    2. Check `.env` for formatting issues
+    3. Ensure no quotes around token values
+    4. Verify no line breaks in token strings
+  </Accordion>
+</AccordionGroup>
+
+## Token Management Best Practices
+
+### For Development
+
+<Tabs>
+  <Tab title="Local Development">
+    **Recommended setup:**
+
+    1. Use **Sandbox** environment
+    2. Store tokens in `.env` file
+    3. Add `.env` to `.gitignore`
+    4. Use interactive setup wizard
+    5. Let automatic refresh handle tokens
+
+    **Sample `.env`:**
+    ```bash
+    EBAY_ENVIRONMENT=sandbox
+    EBAY_CLIENT_ID=YourSandboxAppId
+    EBAY_CLIENT_SECRET=YourSandboxCertId
+    EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#...
+    EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
+    EBAY_USER_TOKEN_EXPIRY=2024-12-31T14:30:45.000Z
+    ```
+  </Tab>
+
+  <Tab title="Team Development">
+    **Each developer should:**
+
+    1. Have their own eBay Developer account
+    2. Create their own application credentials
+    3. Run their own OAuth authorization
+    4. Never share tokens with teammates
+
+    **Never:**
+    - Commit `.env` to version control
+    - Share tokens via chat or email
+    - Use shared eBay accounts for development
+
+    **Use:**
+    - `.env.example` with placeholder values
+    - Documentation for setup process
+    - Each developer's own credentials
+  </Tab>
+</Tabs>
+
+### For Production
+
+<Tabs>
+  <Tab title="Cloud Deployment">
+    **Use environment variables, not `.env` files:**
+
+    **AWS:**
+    - AWS Secrets Manager
+    - Systems Manager Parameter Store
+    - Environment variables in ECS/Lambda
+
+    **Azure:**
+    - Azure Key Vault
+    - App Service Configuration
+
+    **Google Cloud:**
+    - Secret Manager
+    - Cloud Run environment variables
+
+    **Docker:**
+    ```bash
+    docker run -e EBAY_USER_ACCESS_TOKEN=... \
+               -e EBAY_USER_REFRESH_TOKEN=... \
+               ebay-mcp-server
+    ```
+  </Tab>
+
+  <Tab title="Monitoring">
+    **Set up monitoring for:**
+
+    1. **Token refresh events**
+       - Log successful refreshes
+       - Alert on failures
+
+    2. **Token expiry**
+       - Monitor time until expiry
+       - Alert if refresh token >12 months old
+
+    3. **API usage**
+       - Track requests per day
+       - Alert on rate limit approaches
+       - Monitor for unusual patterns
+
+    4. **Authentication failures**
+       - 401 Unauthorized errors
+       - Invalid token errors
+       - Refresh failures
+  </Tab>
+
+  <Tab title="Disaster Recovery">
+    **Have a plan for token issues:**
+
+    1. **Backup credentials:**
+       - Keep Client ID and Secret in secure vault
+       - Document OAuth setup process
+       - Have runbook for re-authorization
+
+    2. **Token rotation schedule:**
+       - Re-authorize every 6 months
+       - Test new tokens before switching
+       - Keep old tokens valid during transition
+
+    3. **Incident response:**
+       - Immediate revocation procedure
+       - Communication plan for downtime
+       - Automated rollback to previous tokens
+  </Tab>
+</Tabs>
+
+## Advanced Token Management
+
+### Token Caching
+
+The MCP server caches access tokens in memory for performance:
+
+**Benefits:**
+- Reduces file I/O
+- Faster API calls
+- Less disk wear
+
+**Behavior:**
+- Access token cached on first load
+- Cache invalidated on expiry
+- New token cached after refresh
+
+<Info>
+  Restart the server to clear the token cache.
+</Info>
+
+### Preemptive Refresh
+
+The server can refresh tokens before they expire:
+
+**Configuration:**
+```bash
+# Refresh token when <5 minutes remaining (default)
+TOKEN_REFRESH_BUFFER=300
+```
+
+**Benefits:**
+- Prevents mid-request expiry
+- Smoother operation
+- Reduced API call failures
+
+### Multiple Environments
+
+Managing tokens across environments:
+
+**Structure:**
+```bash
+.env.sandbox        # Sandbox tokens
+.env.production     # Production tokens
+.env               # Current environment
+```
+
+**Switching environments:**
+```bash
+# Switch to sandbox
+cp .env.sandbox .env
+
+# Switch to production
+cp .env.production .env
+```
+
+<Warning>
+  Never mix Sandbox and Production tokens in the same `.env` file!
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="OAuth Setup" icon="shield-check" href="/authentication/oauth-setup">
+    Learn how to set up OAuth tokens
+  </Card>
+
+  <Card title="Client Credentials" icon="key" href="/authentication/client-credentials">
+    Understand the fallback authentication method
+  </Card>
+
+  <Card title="Rate Limits" icon="gauge" href="/advanced/rate-limits">
+    Optimize your API usage
+  </Card>
+
+  <Card title="Troubleshooting" icon="wrench" href="/support/troubleshooting">
+    Solve common token issues
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+<CardGroup cols={2}>
+  <Card title="eBay Token Documentation" icon="book" href="https://developer.ebay.com/api-docs/static/oauth-tokens.html">
+    Official eBay token management guide
+  </Card>
+
+  <Card title="Security Best Practices" icon="shield" href="/guides/best-practices#security">
+    Comprehensive security guidelines
+  </Card>
+
+  <Card title="Configuration Guide" icon="gear" href="/configuration">
+    All environment variables explained
+  </Card>
+
+  <Card title="Error Handling" icon="triangle-exclamation" href="/advanced/error-handling">
+    Handle authentication errors gracefully
+  </Card>
+</CardGroup>
