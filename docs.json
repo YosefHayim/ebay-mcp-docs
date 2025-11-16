@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "venus",
+  "theme": "mint",
   "name": "eBay MCP Server",
   "url": "https://ebaymcp.com",
   "colors": {
