@@ -4,7 +4,7 @@ Comprehensive documentation for the eBay MCP Server - a Model Context Protocol i
 
 ## 🚀 Quick Links
 
-- **Live Documentation:** [Deploy your docs to see them live]
+- **Live Documentation:** [ebaymcp.com](https://ebaymcp.com)
 - **Source Repository:** [github.com/YosefHayim/ebay-mcp-server](https://github.com/YosefHayim/ebay-mcp-server)
 - **eBay Developer Portal:** [developer.ebay.com](https://developer.ebay.com)
 - **MCP Specification:** [modelcontextprotocol.io](https://modelcontextprotocol.io)
