@@ -22,20 +22,43 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 ### Version 1.1.7 - Documentation Improvements (2025-11-12) {#v1-1-7}
 
 <Card title="📚 Enhanced Documentation & Compliance" icon="book">
-  Comprehensive documentation updates with security policies and OAuth setup guides.
+  Comprehensive documentation updates with security policies, community guidelines, and OAuth setup guides.
 </Card>
 
-**What's New:**
-- ✨ **SECURITY.md** - Comprehensive security policy with vulnerability reporting guidelines
-- ✨ **CODE_OF_CONDUCT.md** - Community standards following Contributor Covenant v2.1
-- ✨ **OAUTH-SETUP.md** - Detailed OAuth configuration instructions
-- 🔧 Corrected tool count documentation to accurately reflect **140 tools**
-- 🚀 Streamlined CI/CD by removing GitHub Actions linting workflow
+#### What's New
 
-**Project Stats:**
-- 170+ commits
-- 870 tests
-- 99%+ function coverage
+**Added:**
+- ✨ **SECURITY.md** - Comprehensive security documentation including:
+  - Vulnerability reporting procedures
+  - Token security best practices
+  - OAuth security guidelines
+- ✨ **CODE_OF_CONDUCT.md** - Community standards following Contributor Covenant v2.1
+- ✨ **OAUTH-SETUP.md** - Detailed OAuth token flow instructions
+
+**Fixed:**
+- 🔧 Documentation accuracy corrections:
+  - README now correctly states **140 tools** (not 137)
+  - CLAUDE.md updated to show **8 API categories**
+
+**Removed:**
+- 🚀 GitHub Actions linting workflow (streamlined CI/CD while maintaining local npm scripts)
+
+#### Project Statistics
+
+<CardGroup cols={3}>
+  <Card title="Commits" icon="code-commit">
+    **170+** total commits
+  </Card>
+
+  <Card title="Tests" icon="vial">
+    **870** tests across 26 files
+  </Card>
+
+  <Card title="Coverage" icon="shield-check">
+    **99%+** function coverage
+    **85%+** line coverage
+  </Card>
+</CardGroup>
 
 <CardGroup cols={2}>
   <Card title="View on GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.7">
@@ -54,28 +77,42 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 ### Version 1.1.4 - Comprehensive Enum Type System (2025-11-12) {#v1-1-4}
 
 <AccordionGroup>
-  <Accordion title="Release Notes" icon="clipboard">
-    **Type-Safe Enum System for Enhanced Developer Experience**
+  <Accordion title="📋 Release Notes - Type-Safe Enum System" icon="code">
 
-    **Added:**
-    - ✨ **33 native TypeScript enums** for improved type safety
-    - ✨ **MarketplaceId enum** with 41 global marketplace values
-    - ✨ **Condition enum** with 17 product condition values
-    - ✨ **Measurement unit enums** for shipping and dimensions
-    - ✨ **86 new tests** for enum validation (870 total tests)
+    #### Added
 
-    **Changed:**
-    - 🔄 Migrated 23 Zod schemas to use native enum validation
-    - 🔄 Enhanced compile-time type safety
-    - 🔄 Improved IDE auto-completion support
+    **33 Native TypeScript Enums:**
+    - ✨ **MarketplaceId** enum with **41 global marketplace values**
+    - ✨ **Condition** enum with **17 product condition values**
+    - ✨ **OrderPaymentStatus** for payment tracking
+    - ✨ **CampaignStatus** for marketing campaigns
+    - ✨ **Measurement unit enums** for shipping and dimensions (currency, language codes)
+    - ✨ **86 new tests** for comprehensive enum validation
 
-    **Impact:**
-    - Better developer experience with IntelliSense
-    - Fewer runtime errors through compile-time validation
-    - More maintainable codebase
+    #### Changed
 
-    <Card title="View Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.4">
-      See detailed changes
+    - 🔄 **Migrated 23 Zod schemas** from string literals to native enum validation
+    - 🔄 Enhanced **compile-time type safety** - catch invalid values before runtime
+    - 🔄 Improved **IDE auto-completion** for better developer experience
+
+    #### Developer Benefits
+
+    <CardGroup cols={3}>
+      <Card title="Type Safety" icon="shield-check">
+        Catch invalid enum values at compile time
+      </Card>
+
+      <Card title="IntelliSense" icon="sparkles">
+        Enhanced IDE auto-completion
+      </Card>
+
+      <Card title="Self-Documenting" icon="book">
+        Code documents available values
+      </Card>
+    </CardGroup>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.4">
+      See detailed changes on GitHub
     </Card>
   </Accordion>
 </AccordionGroup>
@@ -85,27 +122,47 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 ### Version 1.1.3 - Marketing Test Fixes & Automated Setup (2025-11-12) {#v1-1-3}
 
 <AccordionGroup>
-  <Accordion title="Release Notes" icon="clipboard">
-    **Enhanced Testing & Multi-Client Setup Automation**
+  <Accordion title="🔧 Release Notes - Test Fixes & Setup Automation" icon="wrench">
 
-    **Added:**
-    - ✨ **Automated MCP client configuration script**
-    - ✨ **Centralized setup template** (mcp-setup.json)
-    - ✨ **Multi-client support** for Claude Desktop, Google Gemini, and ChatGPT
-    - ✨ Streamlined configuration process
+    #### Fixed
 
-    **Fixed:**
-    - 🐛 Resolved 11 failing marketing API tests
+    **Marketing API Testing:**
+    - 🐛 Resolved **11 failing marketing API tests**
+    - 🐛 Fixed response type mismatches
     - 🐛 Improved test reliability and stability
-    - 🐛 Enhanced error handling in marketing tools
 
-    **Improved:**
-    - 📝 Setup automation reduces configuration time
-    - 📝 Standardized client configuration format
-    - 📝 Better onboarding experience
+    #### Added
 
-    <Card title="View Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.3">
-      See detailed changes
+    **Automated MCP Client Configuration:**
+    - ✨ **setup-mcp-clients.sh** - Automated configuration script
+    - ✨ **mcp-setup.json** - Centralized credential management template
+    - ✨ **Multi-client support:**
+      - Claude Desktop
+      - Google Gemini
+      - ChatGPT
+
+    #### Benefits
+
+    <CardGroup cols={2}>
+      <Card title="Faster Setup" icon="rocket">
+        Automated configuration reduces setup time
+      </Card>
+
+      <Card title="Better Testing" icon="vial">
+        Improved test reliability
+      </Card>
+
+      <Card title="Multi-Client" icon="users">
+        Support for major AI platforms
+      </Card>
+
+      <Card title="Standardized" icon="check">
+        Centralized credential management
+      </Card>
+    </CardGroup>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.3">
+      See detailed changes on GitHub
     </Card>
   </Accordion>
 </AccordionGroup>
@@ -115,29 +172,45 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 ### Version 1.1.2 - Package Optimization (2025-11-12) {#v1-1-2}
 
 <AccordionGroup>
-  <Accordion title="Release Notes" icon="clipboard">
-    **Significant Package Size Reduction**
+  <Accordion title="⚡ Release Notes - Package Size Reduction" icon="bolt">
 
-    **Optimized:**
+    #### Changed
+
+    **Package Optimization:**
     - ⚡ **46% package size reduction** (2.2MB → 1.2MB)
-    - ⚡ Excluded development files from npm distribution
-    - ⚡ Optimized .npmignore configuration
-    - ⚡ Faster installation times
+    - ⚡ Optimized `package.json` files array
+    - ⚡ Enhanced `.npmignore` configuration
 
-    **Excluded from Package:**
-    - Documentation source files
-    - Test files and fixtures
-    - Development scripts
-    - Build configuration files
+    #### Excluded from Distribution
 
-    **Impact:**
-    - Faster npm install times
-    - Reduced bandwidth usage
-    - Smaller node_modules footprint
-    - No functionality changes
+    The following files are no longer included in npm packages:
+    - `docs/` - Documentation source files
+    - `tests/` - Test files and fixtures
+    - `scripts/` - Development scripts
+    - Development configuration files
 
-    <Card title="View Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.2">
-      See detailed changes
+    #### Impact
+
+    <CardGroup cols={3}>
+      <Card title="Faster Install" icon="download">
+        Reduced installation time
+      </Card>
+
+      <Card title="Less Bandwidth" icon="network-wired">
+        Lower bandwidth usage
+      </Card>
+
+      <Card title="Smaller Footprint" icon="compress">
+        Smaller node_modules size
+      </Card>
+    </CardGroup>
+
+    <Note>
+      **No functionality changes** - This is a distribution optimization only.
+    </Note>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.2">
+      See detailed changes on GitHub
     </Card>
   </Accordion>
 </AccordionGroup>
@@ -147,21 +220,21 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 ### Version 1.1.1 - GitHub Repository URL Corrections (2025-11-12) {#v1-1-1}
 
 <AccordionGroup>
-  <Accordion title="Release Notes" icon="clipboard">
-    **Metadata Maintenance Release**
+  <Accordion title="🔧 Release Notes - Metadata Corrections" icon="link">
 
-    **Fixed:**
-    - 🔧 Corrected GitHub repository URLs in package.json
+    #### Fixed
+
+    **Metadata Updates:**
+    - 🔧 Corrected GitHub repository URLs in `package.json`
     - 🔧 Updated documentation links
     - 🔧 Fixed npm package metadata
 
-    **Note:**
-    - Metadata-only release
-    - No API or dependency changes
-    - No functionality impact
+    <Info>
+      **Metadata-only release** - No API changes, dependency updates, or functionality impact.
+    </Info>
 
-    <Card title="View Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.1">
-      See detailed changes
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.1">
+      See detailed changes on GitHub
     </Card>
   </Accordion>
 </AccordionGroup>
@@ -171,29 +244,50 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 ### Version 1.1.0 - CI/CD Pipeline & Dual Package Managers (2025-11-12) {#v1-1-0}
 
 <AccordionGroup>
-  <Accordion title="Release Notes" icon="clipboard">
-    **Production Infrastructure & Multi-Platform Testing**
+  <Accordion title="🚀 Release Notes - CI/CD Infrastructure" icon="gears">
 
-    **Added:**
-    - ✨ **GitHub Actions CI/CD pipeline** with automated testing
-    - ✨ **Dual package manager support** (npm + pnpm)
-    - ✨ **Multi-OS testing** on Ubuntu, Windows, and macOS
-    - ✨ **Test coverage thresholds** (71-91% across metrics)
+    #### Added
 
-    **CI/CD Features:**
-    - Automated test runs on every push
-    - Multi-platform compatibility verification
-    - Code coverage reporting
-    - ~5 minute build time
+    **GitHub Actions CI/CD Pipeline:**
+    - ✨ Automated testing across **Ubuntu, Windows, and macOS**
+    - ✨ **Test coverage enforcement:**
+      - **83%** line coverage
+      - **91%** function coverage
+      - **71%** branch coverage
+    - ✨ Automated test runs on every push
+    - ✨ ~5 minute build time
 
-    **Quality Assurance:**
-    - 870 tests across 26 test files
-    - Cross-platform validation
-    - Consistent build processes
-    - Automated quality gates
+    **Dual Package Manager Support:**
+    - ✨ **npm** support (primary)
+    - ✨ **pnpm** support (alternative)
+    - ✨ Automated dependency updates workflow
 
-    <Card title="View Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.0">
-      See detailed changes
+    #### Quality Assurance
+
+    <CardGroup cols={3}>
+      <Card title="Multi-Platform" icon="desktop">
+        Ubuntu, Windows, macOS
+      </Card>
+
+      <Card title="870 Tests" icon="vial">
+        Across 26 test files
+      </Card>
+
+      <Card title="Automated Gates" icon="shield-check">
+        Coverage thresholds enforced
+      </Card>
+    </CardGroup>
+
+    #### CI/CD Features
+
+    - ✅ Automated test runs on every push
+    - ✅ Multi-platform compatibility verification
+    - ✅ Code coverage reporting
+    - ✅ Consistent build processes
+    - ✅ Cross-platform validation
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.0">
+      See detailed changes on GitHub
     </Card>
   </Accordion>
 </AccordionGroup>
@@ -203,39 +297,93 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 ### Version 1.0.0 - Initial Production Release (2025-11-12) {#v1-0-0}
 
 <Card title="🎉 First Stable Release" icon="party-horn">
-  The eBay MCP Server reaches production-ready status with comprehensive API coverage and robust testing.
+  The eBay MCP Server reaches production-ready status with comprehensive API coverage, robust testing, and enterprise-grade features.
 </Card>
 
-**Core Features:**
-- ✨ **170+ eBay Sell API tools** across 9 categories
+#### Core Features
+
+**API Integration:**
+- ✨ **170+ eBay Sell API tools** across **9 categories**
 - ✨ **OAuth 2.0/2.1 authentication** with automatic token refresh
-- ✨ **STDIO and HTTP transport modes** for flexible integration
+- ✨ **Dual transport modes:**
+  - **STDIO** - For local MCP clients
+  - **HTTP** - For remote deployments
 - ✨ **Client-side rate limiting** (5,000 requests/minute)
-- ✨ **Comprehensive testing** - 870 tests with 99%+ function coverage
 
-**API Categories:**
-- **Account Management** - Seller account configuration and policies
-- **Inventory** - Item listings and product management
-- **Fulfillment** - Order processing and shipping
-- **Marketing** - Campaigns and promotions
-- **Analytics** - Business insights and reporting
-- **Communication** - Buyer messaging (future)
-- **Metadata** - eBay marketplace data
-- **Taxonomy** - Category and aspect information
-- **Feed** - Bulk operations
+**Security & Authentication:**
+- 🔐 **File-based token persistence** for secure storage
+- 🔐 **Two-tier authentication:**
+  - User tokens (10,000-50,000 requests/day)
+  - Application tokens (1,000 requests/day)
+- 🔐 **Automatic token refresh** to prevent expiration
 
-**MCP Client Support:**
-- ✅ Claude Desktop (tested)
-- ✅ Cursor (tested)
-- ✅ Cline (tested)
-- ✅ Any MCP-compatible client
+**Quality Assurance:**
+- ✅ **870 tests** across 26 test files
+- ✅ **99%+ function coverage**
+- ✅ **85%+ line coverage**
+- ✅ Comprehensive validation with Zod schemas
 
-**Developer Experience:**
-- Interactive OAuth setup wizard
-- Automatic credential validation
-- Environment variable management
-- Clear error messages and logging
-- Comprehensive documentation
+#### API Categories
+
+<AccordionGroup>
+  <Accordion title="View All 9 API Categories" icon="layer-group">
+
+    | Category | Description |
+    |----------|-------------|
+    | **Account** | Seller account configuration and policies |
+    | **Inventory** | Item listings and product management |
+    | **Fulfillment** | Order processing and shipping |
+    | **Marketing** | Campaigns and promotions |
+    | **Analytics** | Business insights and reporting |
+    | **Communication** | Buyer messaging (future support) |
+    | **Metadata** | eBay marketplace data |
+    | **Taxonomy** | Category and aspect information |
+    | **Feed** | Bulk operations |
+
+  </Accordion>
+</AccordionGroup>
+
+#### Technology Stack
+
+<CardGroup cols={4}>
+  <Card title="TypeScript" icon="code">
+    Type-safe development
+  </Card>
+
+  <Card title="Node.js" icon="node-js">
+    Runtime environment
+  </Card>
+
+  <Card title="Zod" icon="shield-check">
+    Schema validation
+  </Card>
+
+  <Card title="Vitest" icon="vial">
+    Testing framework
+  </Card>
+</CardGroup>
+
+#### MCP Client Support
+
+**Tested and verified with:**
+- ✅ **Claude Desktop** - Fully supported
+- ✅ **Cursor** - Fully supported
+- ✅ **Cline** - Fully supported
+- ✅ **Any MCP-compatible client** - Standard protocol
+
+#### Developer Experience
+
+**Setup & Configuration:**
+- 🛠️ Interactive OAuth setup wizard
+- 🛠️ Automatic credential validation
+- 🛠️ Environment variable management
+- 🛠️ Clear error messages and logging
+
+**Documentation:**
+- 📚 Comprehensive guides
+- 📚 API reference
+- 📚 Troubleshooting support
+- 📚 Real-world examples
 
 <CardGroup cols={2}>
   <Card title="View on GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.0.0">
