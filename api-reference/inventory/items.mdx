@@ -1,0 +1,402 @@
+---
+title: "Inventory Items"
+description: "Create, update, and manage your eBay inventory items using SKU-based management"
+---
+
+# Inventory Items
+
+Inventory items represent products you have available to sell. Each item is identified by a unique SKU (Stock Keeping Unit) that you define.
+
+## Core Operations
+
+<CardGroup cols={2}>
+  <Card title="Create Item" icon="plus" color="#E53238">
+    Add new products to your inventory
+  </Card>
+  <Card title="Update Item" icon="pen" color="#0064D2">
+    Modify existing inventory items
+  </Card>
+  <Card title="Get Items" icon="list" color="#F5AF02">
+    Retrieve inventory item details
+  </Card>
+  <Card title="Delete Item" icon="trash" color="#86B817">
+    Remove discontinued products
+  </Card>
+</CardGroup>
+
+## Creating Inventory Items
+
+### Single Item
+
+```javascript
+const item = await mcp.useTool('inventory_createOrReplaceInventoryItem', {
+  sku: 'LAPTOP-001',
+  product: {
+    title: 'Dell XPS 15 Laptop - 16GB RAM, 512GB SSD - Silver',
+    description: '<h2>Premium Laptop</h2><p>Perfect for work and gaming...</p>',
+    aspects: {
+      Brand: ['Dell'],
+      Model: ['XPS 15'],
+      'Processor Type': ['Intel Core i7'],
+      'RAM Size': ['16 GB'],
+      'SSD Capacity': ['512 GB'],
+      Color: ['Silver']
+    },
+    imageUrls: [
+      'https://example.com/laptop-front.jpg',
+      'https://example.com/laptop-keyboard.jpg',
+      'https://example.com/laptop-ports.jpg'
+    ],
+    ean: ['1234567890123'], // European Article Number (optional)
+    upc: ['123456789012']   // Universal Product Code (optional)
+  },
+  condition: 'NEW',
+  conditionDescription: 'Brand new, factory sealed',
+  availability: {
+    shipToLocationAvailability: {
+      quantity: 10
+    }
+  },
+  packageWeightAndSize: {
+    dimensions: {
+      height: 1.0,
+      length: 16.0,
+      width: 11.0,
+      unit: 'INCH'
+    },
+    weight: {
+      value: 4.5,
+      unit: 'POUND'
+    }
+  }
+});
+
+console.log(`✅ Inventory item created: ${item.sku}`);
+```
+
+### Bulk Upload
+
+```javascript
+const items = [
+  { sku: 'WIDGET-001', title: 'Blue Widget', quantity: 100 },
+  { sku: 'WIDGET-002', title: 'Red Widget', quantity: 75 },
+  { sku: 'WIDGET-003', title: 'Green Widget', quantity: 50 }
+];
+
+const requests = items.map(item => ({
+  sku: item.sku,
+  product: {
+    title: item.title,
+    aspects: { Brand: ['WidgetCo'] }
+  },
+  condition: 'NEW',
+  availability: {
+    shipToLocationAvailability: {
+      quantity: item.quantity
+    }
+  }
+}));
+
+const result = await mcp.useTool('inventory_bulkCreateOrReplaceInventoryItem', {
+  requests
+});
+
+const successful = result.responses.filter(r => r.statusCode === 200).length;
+console.log(`✅ Created ${successful}/${items.length} items`);
+```
+
+## Item Parameters
+
+### Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `sku` | string | Your unique product identifier |
+| `product.title` | string | Product name (max 80 chars) |
+| `condition` | string | `NEW`, `LIKE_NEW`, `USED_EXCELLENT`, etc. |
+| `availability` | object | Stock quantity and availability |
+
+### Product Aspects
+
+Aspects are key-value pairs that describe your product:
+
+```javascript
+aspects: {
+  'Brand': ['Apple'],
+  'Model': ['iPhone 14 Pro'],
+  'Storage Capacity': ['256 GB'],
+  'Color': ['Deep Purple'],
+  'Carrier': ['Unlocked'],
+  'Operating System': ['iOS']
+}
+```
+
+**Finding Required Aspects:**
+Use eBay's taxonomy to find required aspects for your category:
+
+```javascript
+// Get category aspects
+const aspects = await mcp.useTool('taxonomy_getCategoryAspects', {
+  category_tree_id: 'EBAY_US',
+  category_id: '9355' // Cell phones category
+});
+
+console.log('Required aspects:', aspects.aspects.filter(a => a.aspectConstraint.aspectRequired));
+```
+
+### Condition Values
+
+| Condition | Description |
+|-----------|-------------|
+| `NEW` | Brand new, unused, unopened |
+| `LIKE_NEW` | Appears unused, perfect condition |
+| `NEW_OTHER` | New with defects or irregularities |
+| `NEW_WITH_DEFECTS` | New but has defects |
+| `MANUFACTURER_REFURBISHED` | Restored by manufacturer |
+| `CERTIFIED_REFURBISHED` | Certified refurbished |
+| `SELLER_REFURBISHED` | Refurbished by seller |
+| `USED_EXCELLENT` | Minimal wear, fully functional |
+| `USED_VERY_GOOD` | Light wear, fully functional |
+| `USED_GOOD` | Moderate wear, fully functional |
+| `USED_ACCEPTABLE` | Heavy wear but works |
+| `FOR_PARTS_OR_NOT_WORKING` | Not functional |
+
+## Managing Inventory
+
+### Get Single Item
+
+```javascript
+const item = await mcp.useTool('inventory_getInventoryItem', {
+  sku: 'LAPTOP-001'
+});
+
+console.log(`Title: ${item.product.title}`);
+console.log(`Quantity: ${item.availability.shipToLocationAvailability.quantity}`);
+console.log(`Condition: ${item.condition}`);
+```
+
+### Get All Items
+
+```javascript
+let allItems = [];
+let offset = 0;
+const limit = 100;
+
+while (true) {
+  const response = await mcp.useTool('inventory_getInventoryItems', {
+    limit,
+    offset
+  });
+
+  allItems = allItems.concat(response.inventoryItems);
+
+  if (!response.next) break; // No more items
+  offset += limit;
+}
+
+console.log(`Total inventory items: ${allItems.length}`);
+```
+
+### Update Quantity
+
+```javascript
+// Single item update
+await mcp.useTool('inventory_createOrReplaceInventoryItem', {
+  sku: 'WIDGET-001',
+  availability: {
+    shipToLocationAvailability: {
+      quantity: 150 // Updated quantity
+    }
+  }
+});
+
+// Bulk quantity update
+await mcp.useTool('inventory_bulkUpdatePriceQuantity', {
+  requests: [
+    {
+      sku: 'WIDGET-001',
+      shipToLocationAvailability: { quantity: 150 }
+    },
+    {
+      sku: 'WIDGET-002',
+      shipToLocationAvailability: { quantity: 200 }
+    }
+  ]
+});
+```
+
+### Delete Item
+
+```javascript
+await mcp.useTool('inventory_deleteInventoryItem', {
+  sku: 'DISCONTINUED-PRODUCT'
+});
+
+console.log('✅ Item deleted');
+```
+
+## Product Variations
+
+### Create Item Group
+
+For products with variations (size, color, etc.):
+
+```javascript
+// 1. Create individual variation items
+const colors = ['Red', 'Blue', 'Black'];
+const sizes = ['S', 'M', 'L', 'XL'];
+
+for (const color of colors) {
+  for (const size of sizes) {
+    const sku = `SHIRT-${color}-${size}`;
+
+    await mcp.useTool('inventory_createOrReplaceInventoryItem', {
+      sku,
+      product: {
+        title: `Cotton T-Shirt - ${color} - Size ${size}`,
+        aspects: {
+          Size: [size],
+          Color: [color],
+          Brand: ['YourBrand'],
+          Material: ['100% Cotton']
+        },
+        imageUrls: [`https://example.com/shirt-${color.toLowerCase()}.jpg`]
+      },
+      condition: 'NEW',
+      availability: {
+        shipToLocationAvailability: { quantity: 25 }
+      }
+    });
+  }
+}
+
+// 2. Create inventory item group
+const group = await mcp.useTool('inventory_createOrReplaceInventoryItemGroup', {
+  inventory_item_group_key: 'SHIRT-GROUP',
+  title: 'Premium Cotton T-Shirt',
+  description: '<p>Soft, comfortable cotton t-shirt in multiple colors and sizes</p>',
+  imageUrls: [
+    'https://example.com/shirt-main.jpg',
+    'https://example.com/shirt-detail.jpg'
+  ],
+  variesBy: {
+    specifications: [
+      { name: 'Color', values: colors },
+      { name: 'Size', values: sizes }
+    ]
+  },
+  variantSKUs: colors.flatMap(color =>
+    sizes.map(size => `SHIRT-${color}-${size}`)
+  )
+});
+
+console.log('✅ Variation group created with', colors.length * sizes.length, 'variations');
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="SKU Naming Strategy">
+    Use a consistent, descriptive format:
+
+    ```
+    Format: [CATEGORY]-[BRAND]-[MODEL]-[VARIANT]
+
+    Examples:
+    - LAPTOP-DELL-XPS15-16GB-512GB
+    - PHONE-APPLE-IPHONE14PRO-256GB-PURPLE
+    - SHIRT-NIKE-DRYFIT-L-BLUE
+    ```
+
+    Benefits:
+    - Easy to search and filter
+    - Prevents duplicates
+    - Simplifies inventory reports
+    - Integrates well with other systems
+  </Accordion>
+
+  <Accordion title="Image Optimization">
+    **Requirements:**
+    - Minimum 500px (longest side)
+    - Recommended: 1600px or larger
+    - White/light background for main image
+    - JPG format (smaller file size)
+    - Compress images (aim for <200KB per image)
+
+    **Image order:**
+    1. Main product (white background)
+    2. Product in use
+    3. Close-up details
+    4. Size/scale reference
+    5. Package contents
+  </Accordion>
+
+  <Accordion title="Product Descriptions">
+    **Use HTML formatting:**
+    ```javascript
+    const description = `
+      <h2>Product Overview</h2>
+      <p>Premium quality laptop perfect for professionals and gamers.</p>
+
+      <h3>Key Features:</h3>
+      <ul>
+        <li>Intel Core i7 11th Gen processor</li>
+        <li>16GB DDR4 RAM</li>
+        <li>512GB NVMe SSD</li>
+        <li>15.6" Full HD display</li>
+      </ul>
+
+      <h3>What's Included:</h3>
+      <ul>
+        <li>Dell XPS 15 Laptop</li>
+        <li>65W AC Adapter</li>
+        <li>User Manual</li>
+      </ul>
+
+      <h3>Warranty:</h3>
+      <p>1-year manufacturer warranty included.</p>
+    `;
+    ```
+  </Accordion>
+
+  <Accordion title="Inventory Accuracy">
+    **Prevent overselling:**
+    - Update quantities immediately after sales
+    - Reserve 5-10% safety stock
+    - Sync with warehouse system hourly
+    - Use webhooks for real-time updates
+
+    ```javascript
+    // Hourly sync
+    setInterval(async () => {
+      const warehouseData = await fetchWarehouseInventory();
+
+      await mcp.useTool('inventory_bulkUpdatePriceQuantity', {
+        requests: warehouseData.map(item => ({
+          sku: item.sku,
+          shipToLocationAvailability: {
+            quantity: Math.max(0, item.warehouseQty - 5) // 5 unit safety stock
+          }
+        }))
+      });
+    }, 3600000); // Every hour
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create Offers" icon="tag" href="/api-reference/inventory/offers">
+    List your inventory items on eBay
+  </Card>
+  <Card title="Inventory Locations" icon="warehouse" href="/api-reference/inventory/locations">
+    Setup warehouse locations
+  </Card>
+  <Card title="First Listing Guide" icon="rocket" href="/guides/first-listing">
+    Complete tutorial for listing items
+  </Card>
+  <Card title="Bulk Operations" icon="layer-group" href="/guides/bulk-operations">
+    Upload inventory in bulk
+  </Card>
+</CardGroup>

@@ -1,0 +1,144 @@
+---
+title: "Traffic Reports"
+description: "Analyze listing views, impressions, clicks, and conversion metrics"
+---
+
+# Traffic Reports
+
+Track how buyers find and engage with your listings using traffic analytics.
+
+## Getting Traffic Data
+
+```javascript
+// Get listing traffic for the past 30 days
+const report = await mcp.useTool('analytics_getTrafficReport', {
+  dimension: 'LISTING',
+  filter: 'listing_ids:{1234567890|9876543210}',
+  metric_keys: ['CLICK_THROUGH_RATE,LISTING_IMPRESSION,LISTING_VIEWS,TRANSACTION'],
+  start_date: '2024-01-01',
+  end_date: '2024-01-31'
+});
+
+report.records.forEach(record => {
+  console.log(`Listing: ${record.listing_id}`);
+  console.log(`  Impressions: ${record.listing_impression}`);
+  console.log(`  Views: ${record.listing_views}`);
+  console.log(`  CTR: ${record.click_through_rate}%`);
+  console.log(`  Sales: ${record.transaction}`);
+  console.log(`  Conversion: ${(record.transaction / record.listing_views * 100).toFixed(2)}%`);
+});
+```
+
+## Available Dimensions
+
+| Dimension | Description |
+|-----------|-------------|
+| `LISTING` | Per-listing metrics |
+| `DAY` | Daily aggregated metrics |
+| `TRAFFIC_SOURCE` | Metrics by traffic source (search, browse, etc.) |
+
+## Key Metrics
+
+<CardGroup cols={2}>
+  <Card title="Impressions" icon="eye" color="#E53238">
+    How many times your listing appeared in search results
+  </Card>
+  <Card title="Click-Through Rate" icon="mouse-pointer" color="#0064D2">
+    Percentage of impressions that led to listing views
+  </Card>
+  <Card title="Conversion Rate" icon="chart-line" color="#F5AF02">
+    Percentage of views that resulted in sales
+  </Card>
+  <Card title="Sales Velocity" icon="bolt" color="#86B817">
+    Number of transactions over time period
+  </Card>
+</CardGroup>
+
+## Optimization Tips
+
+<AccordionGroup>
+  <Accordion title="Improve Click-Through Rate">
+    **Low CTR (<2%)?** Improve:
+    - Main image quality (use white background)
+    - Title optimization (add relevant keywords)
+    - Pricing competitiveness
+    - Shipping costs visibility
+  </Accordion>
+
+  <Accordion title="Boost Conversion Rate">
+    **Low conversion (<5%)?** Focus on:
+    - Detailed product descriptions
+    - Multiple high-quality images
+    - Competitive pricing
+    - Clear return policy
+    - Fast/free shipping options
+  </Accordion>
+
+  <Accordion title="Increase Impressions">
+    **Low impressions?** Try:
+    - Promoted Listings campaigns
+    - Better category selection
+    - More relevant item specifics
+    - Competitive pricing
+    - Item title optimization
+  </Accordion>
+</AccordionGroup>
+
+## Example: Weekly Performance Report
+
+```javascript
+async function weeklyPerformanceReport() {
+  const endDate = new Date();
+  const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const report = await mcp.useTool('analytics_getTrafficReport', {
+    dimension: 'DAY',
+    metric_keys: ['LISTING_IMPRESSION,LISTING_VIEWS,TRANSACTION'],
+    start_date: startDate.toISOString().split('T')[0],
+    end_date: endDate.toISOString().split('T')[0]
+  });
+
+  console.log('📊 Weekly Performance Report\n');
+
+  let totalImpressions = 0;
+  let totalViews = 0;
+  let totalSales = 0;
+
+  report.records.forEach(record => {
+    totalImpressions += record.listing_impression || 0;
+    totalViews += record.listing_views || 0;
+    totalSales += record.transaction || 0;
+
+    console.log(`${record.date}:`);
+    console.log(`  Impressions: ${record.listing_impression}`);
+    console.log(`  Views: ${record.listing_views}`);
+    console.log(`  Sales: ${record.transaction}`);
+  });
+
+  console.log('\n📈 Weekly Totals:');
+  console.log(`Total Impressions: ${totalImpressions}`);
+  console.log(`Total Views: ${totalViews}`);
+  console.log(`Total Sales: ${totalSales}`);
+  console.log(`Average CTR: ${(totalViews / totalImpressions * 100).toFixed(2)}%`);
+  console.log(`Average Conversion: ${(totalSales / totalViews * 100).toFixed(2)}%`);
+}
+
+await weeklyPerformanceReport();
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Analytics Overview" icon="home" href="/api-reference/analytics/overview">
+    Back to Analytics API overview
+  </Card>
+  <Card title="Marketing API" icon="bullhorn" href="/api-reference/marketing/overview">
+    Boost performance with promoted listings
+  </Card>
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Optimize your listings
+  </Card>
+  <Card title="Analytics Guide" icon="book" href="/features/analytics-reporting">
+    Complete analytics tutorial
+  </Card>
+</CardGroup>

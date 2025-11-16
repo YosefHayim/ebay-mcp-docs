@@ -1,0 +1,73 @@
+---
+title: "Shipping & Tracking"
+description: "Ship orders, upload tracking, and generate shipping labels"
+---
+
+# Shipping & Tracking
+
+Upload tracking information and manage shipping fulfillment for your orders.
+
+## Creating Shipping Fulfillment
+
+```javascript
+const fulfillment = await mcp.useTool('fulfillment_createShippingFulfillment', {
+  order_id: '12-34567-89012',
+  line_items: [
+    {
+      line_item_id: 'item1',
+      quantity: 2
+    }
+  ],
+  shipped_date: new Date().toISOString(),
+  shipping_carrier_code: 'UPS',
+  tracking_number: '1Z999AA10123456784'
+});
+
+console.log(`✅ Tracking uploaded: ${fulfillment.fulfillmentId}`);
+```
+
+## Supported Carriers
+
+| Carrier | Code |
+|---------|------|
+| USPS | `USPS` |
+| UPS | `UPS` |
+| FedEx | `FEDEX` |
+| DHL | `DHL` |
+| Other | `OTHER` |
+
+## Shipping Best Practices
+
+<AccordionGroup>
+  <Accordion title="Upload Tracking Immediately">
+    Upload tracking within 1 business day of shipping to:
+    - Maintain Top Rated Seller status
+    - Protect against "item not received" claims
+    - Provide buyers with shipment visibility
+  </Accordion>
+
+  <Accordion title="Use Valid Tracking Numbers">
+    Always use valid, scannable tracking numbers:
+    - USPS: 22 digits (9400...)
+    - UPS: 18 characters (1Z...)
+    - FedEx: 12 digits
+  </Accordion>
+
+  <Accordion title="Ship Within Handling Time">
+    Ship within your promised handling time:
+    - 1 business day: Ship same or next day
+    - Protects seller metrics
+    - Increases buyer satisfaction
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Order Management" icon="shopping-cart" href="/api-reference/fulfillment/orders">
+    Retrieve and process orders
+  </Card>
+  <Card title="Fulfillment Overview" icon="home" href="/api-reference/fulfillment/overview">
+    Back to Fulfillment API overview
+  </Card>
+</CardGroup>

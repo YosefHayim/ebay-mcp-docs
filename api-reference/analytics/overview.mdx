@@ -1,0 +1,88 @@
+---
+title: "Analytics API Overview"
+description: "Track performance metrics, traffic reports, and seller analytics"
+---
+
+# Analytics API Overview
+
+The Analytics API provides **20+ tools** to track your eBay performance, analyze traffic, and optimize your selling strategy.
+
+<CardGroup cols={2}>
+  <Card title="Traffic Reports" icon="chart-line" color="#E53238">
+    View listing views, impressions, and clicks
+  </Card>
+  <Card title="Sales Metrics" icon="dollar-sign" color="#0064D2">
+    Track sales performance and conversion rates
+  </Card>
+  <Card title="Seller Standards" icon="star" color="#F5AF02">
+    Monitor your seller performance metrics
+  </Card>
+  <Card title="Custom Reports" icon="file-chart-column" color="#86B817">
+    Generate custom analytics reports
+  </Card>
+</CardGroup>
+
+## Traffic Reports
+
+Analyze listing performance and buyer engagement.
+
+```javascript
+// Get traffic report for a listing
+const report = await mcp.useTool('analytics_getTrafficReport', {
+  dimension: 'LISTING',
+  metric_keys: ['CLICK_THROUGH_RATE,LISTING_IMPRESSION,LISTING_VIEWS'],
+  start_date: '2024-01-01',
+  end_date: '2024-01-31'
+});
+
+console.log(`Total Impressions: ${report.records[0].listing_impression}`);
+console.log(`Total Views: ${report.records[0].listing_views}`);
+console.log(`Click-Through Rate: ${report.records[0].click_through_rate}%`);
+```
+
+## Seller Standards
+
+Monitor your performance metrics to maintain Top Rated Seller status.
+
+```javascript
+const standards = await mcp.useTool('analytics_getSellerStandardsProfile', {
+  marketplace_id: 'EBAY_US'
+});
+
+console.log(`Transaction Defect Rate: ${standards.defectRate}%`);
+console.log(`Late Shipment Rate: ${standards.lateShipmentRate}%`);
+console.log(`Cases Closed Without Resolution: ${standards.casesClosedWithoutResolution}%`);
+```
+
+## Available Metrics
+
+| Metric | Description |
+|--------|-------------|
+| `LISTING_IMPRESSION` | Times listing appeared in search |
+| `LISTING_VIEWS` | Times listing detail page was viewed |
+| `CLICK_THROUGH_RATE` | Percentage of impressions that led to views |
+| `TRANSACTION` | Number of sales |
+| `CONVERSION_RATE` | Percentage of views that converted to sales |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Traffic Reports" icon="chart-line" href="/api-reference/analytics/traffic-reports">
+    Detailed traffic analytics guide
+  </Card>
+  <Card title="Analytics Guide" icon="book" href="/features/analytics-reporting">
+    Complete analytics feature guide
+  </Card>
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Optimize based on analytics
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    All API tools
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Analytics API Documentation](https://developer.ebay.com/api-docs/sell/analytics/overview.html)
+- [Analytics Reporting Guide](/features/analytics-reporting)
+- [Performance Metrics Guide](/guides/best-practices)

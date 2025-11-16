@@ -1,0 +1,104 @@
+---
+title: "Promoted Listings Campaigns"
+description: "Create and manage promoted listings advertising campaigns"
+---
+
+# Promoted Listings Campaigns
+
+Promoted Listings is eBay's pay-per-sale advertising program. You only pay when an item sells.
+
+## Creating a Campaign
+
+```javascript
+const campaign = await mcp.useTool('marketing_createCampaign', {
+  campaign_name: 'High-Profit Items Campaign',
+  marketplace_id: 'EBAY_US',
+  funding_strategy: 'COST_PER_SALE',
+  campaign_criterion: {
+    criterion_type: 'INVENTORY_PARTITION',
+    selection_rules: [
+      {
+        inventory_items: [
+          { inventory_reference_id: 'WIDGET-001', inventory_reference_type: 'INVENTORY_ITEM' },
+          { inventory_reference_id: 'WIDGET-002', inventory_reference_type: 'INVENTORY_ITEM' }
+        ]
+      }
+    ]
+  }
+});
+
+// Set ad rate
+await mcp.useTool('marketing_updateAdRate', {
+  campaign_id: campaign.campaignId,
+  ad_rate: 10 // 10% ad rate
+});
+```
+
+## Ad Rate Recommendations
+
+| Product Type | Suggested Ad Rate |
+|--------------|-------------------|
+| High-margin items (>40%) | 8-12% |
+| Standard margin (20-40%) | 5-8% |
+| Low-margin items (<20%) | 3-5% |
+| Competitive categories | 10-15% |
+| New listings | 8-10% (first 30 days) |
+
+## Campaign Management
+
+### Get All Campaigns
+
+```javascript
+const campaigns = await mcp.useTool('marketing_getCampaigns', {
+  marketplace_id: 'EBAY_US'
+});
+
+campaigns.campaigns.forEach(campaign => {
+  console.log(`${campaign.campaignName}: ${campaign.campaignStatus}`);
+});
+```
+
+### Pause/Resume Campaign
+
+```javascript
+// Pause campaign
+await mcp.useTool('marketing_pauseCampaign', {
+  campaign_id: 'campaign_id_here'
+});
+
+// Resume campaign
+await mcp.useTool('marketing_resumeCampaign', {
+  campaign_id: 'campaign_id_here'
+});
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start with High-Margin Items">
+    Promote items with profit margins above 30% to ensure profitability after ad fees.
+  </Accordion>
+
+  <Accordion title="Monitor ROI Weekly">
+    Track sales vs. ad costs weekly and adjust ad rates accordingly.
+  </Accordion>
+
+  <Accordion title="Promote New Listings">
+    Boost new listings in first 30 days to gain initial traction and reviews.
+  </Accordion>
+
+  <Accordion title="Test Ad Rates">
+    Start at 5%, monitor for 1 week, then adjust based on performance.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Promotions" icon="percent" href="/api-reference/marketing/promotions">
+    Create sales and discounts
+  </Card>
+  <Card title="Marketing Overview" icon="home" href="/api-reference/marketing/overview">
+    Back to Marketing API overview
+  </Card>
+</CardGroup>

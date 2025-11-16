@@ -1,0 +1,119 @@
+---
+title: "Offers & Listings"
+description: "Create, publish, and manage eBay offers and listings"
+---
+
+# Offers & Listings
+
+Offers define how your inventory items are listed on eBay, including price, quantity, format (auction vs fixed price), and listing policies.
+
+## Offer Lifecycle
+
+<Steps>
+  <Step title="Create Offer">
+    Configure price, format, and policies
+  </Step>
+  <Step title="Publish Offer">
+    Make the offer live on eBay
+  </Step>
+  <Step title="Manage Listing">
+    Update price, quantity, or end listing
+  </Step>
+</Steps>
+
+## Creating Offers
+
+```javascript
+const offer = await mcp.useTool('inventory_createOffer', {
+  sku: 'WIDGET-001',
+  marketplace_id: 'EBAY_US',
+  format: 'FIXED_PRICE',
+  listing_duration: 'GTC', // Good 'Til Cancelled
+  available_quantity: 50,
+  category_id: '12345',
+  
+  // Pricing
+  pricingSummary: {
+    price: { value: '29.99', currency: 'USD' }
+  },
+  
+  // Policies (from Account API)
+  listing_policies: {
+    payment_policy_id: 'payment_id',
+    return_policy_id: 'return_id',
+    fulfillment_policy_id: 'fulfillment_id'
+  },
+  
+  // Optional: Merchant location key
+  merchant_location_key: 'warehouse-1'
+});
+
+console.log(`Offer created: ${offer.offerId}`);
+```
+
+## Publishing Offers
+
+```javascript
+// Publish single offer
+const listing = await mcp.useTool('inventory_publishOffer', {
+  offer_id: offer.offerId
+});
+
+console.log(`✅ Published! Listing ID: ${listing.listingId}`);
+console.log(`View at: https://www.ebay.com/itm/${listing.listingId}`);
+```
+
+## Offer Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sku` | string | ✅ | Inventory item SKU |
+| `marketplace_id` | string | ✅ | `EBAY_US`, `EBAY_GB`, etc. |
+| `format` | string | ✅ | `FIXED_PRICE` or `AUCTION` |
+| `category_id` | string | ✅ | eBay category ID |
+| `pricingSummary` | object | ✅ | Price and currency |
+| `listing_duration` | string | ✅ | `GTC`, `DAYS_3`, `DAYS_7`, etc. |
+| `listing_policies` | object | ✅ | Policy IDs from Account API |
+
+## Managing Offers
+
+### Update Offer
+
+```javascript
+await mcp.useTool('inventory_updateOffer', {
+  offer_id: 'offer_id_here',
+  pricingSummary: {
+    price: { value: '24.99', currency: 'USD' } // Price drop!
+  },
+  available_quantity: 100 // Restocked
+});
+```
+
+### Withdraw (End) Listing
+
+```javascript
+await mcp.useTool('inventory_withdrawOffer', {
+  offer_id: 'offer_id_here'
+});
+
+console.log('✅ Listing ended');
+```
+
+### Delete Offer
+
+```javascript
+await mcp.useTool('inventory_deleteOffer', {
+  offer_id: 'offer_id_here'
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Inventory Items" icon="box" href="/api-reference/inventory/items">
+    Manage your inventory
+  </Card>
+  <Card title="Fulfillment API" icon="truck" href="/api-reference/fulfillment/overview">
+    Process orders
+  </Card>
+</CardGroup>

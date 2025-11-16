@@ -1,0 +1,83 @@
+---
+title: "Promotions & Sales"
+description: "Create discounts, sales, and special offers for your listings"
+---
+
+# Promotions & Sales
+
+Create promotions to drive sales with discounts, volume pricing, and special offers.
+
+## Promotion Types
+
+<CardGroup cols={2}>
+  <Card title="Markdown Sale" icon="percent" color="#E53238">
+    Discount specific items or categories
+  </Card>
+  <Card title="Order Discount" icon="shopping-cart" color="#0064D2">
+    Discounts based on order value
+  </Card>
+  <Card title="Volume Pricing" icon="layer-group" color="#F5AF02">
+    Buy more, save more deals
+  </Card>
+  <Card title="Shipping Discount" icon="truck" color="#86B817">
+    Free or discounted shipping
+  </Card>
+</CardGroup>
+
+## Creating a Markdown Sale
+
+```javascript
+const promotion = await mcp.useTool('marketing_createItemPromotion', {
+  marketplace_id: 'EBAY_US',
+  name: 'Flash Sale - 25% Off Electronics',
+  promotion_type: 'MARKDOWN_SALE',
+  start_date: '2024-06-01T00:00:00Z',
+  end_date: '2024-06-07T23:59:59Z',
+  discount_rules: [
+    {
+      discount_type: 'PERCENTAGE',
+      discount_amount: '25',
+      inventory_items: [
+        { inventory_reference_id: 'LAPTOP-001', inventory_reference_type: 'INVENTORY_ITEM' },
+        { inventory_reference_id: 'PHONE-001', inventory_reference_type: 'INVENTORY_ITEM' }
+      ]
+    }
+  ]
+});
+
+console.log(`✅ Promotion created: ${promotion.promotionId}`);
+```
+
+## Volume Pricing
+
+```javascript
+// Buy 2 get 10% off, buy 3+ get 20% off
+const volumePromo = await mcp.useTool('marketing_createItemPromotion', {
+  marketplace_id: 'EBAY_US',
+  name: 'Buy More Save More',
+  promotion_type: 'VOLUME_DISCOUNT',
+  discount_rules: [
+    {
+      minimum_quantity: 2,
+      discount_type: 'PERCENTAGE',
+      discount_amount: '10'
+    },
+    {
+      minimum_quantity: 3,
+      discount_type: 'PERCENTAGE',
+      discount_amount: '20'
+    }
+  ]
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Campaigns" icon="bullhorn" href="/api-reference/marketing/campaigns">
+    Promoted listings advertising
+  </Card>
+  <Card title="Marketing Overview" icon="home" href="/api-reference/marketing/overview">
+    Back to Marketing API overview
+  </Card>
+</CardGroup>

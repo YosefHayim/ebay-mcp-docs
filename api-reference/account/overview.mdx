@@ -1,0 +1,253 @@
+---
+title: "Account API Overview"
+description: "Manage eBay seller account settings, policies, and fulfillment programs"
+---
+
+# Account API Overview
+
+The Account API provides tools to manage your eBay seller account, including return policies, payment policies, fulfillment programs, and sales tax settings.
+
+## Available Tools
+
+The eBay MCP Server provides **25+ Account API tools** for comprehensive account management:
+
+<CardGroup cols={2}>
+  <Card title="Return Policies" icon="rotate-left" color="#E53238">
+    Create, update, and manage return policies for your listings
+  </Card>
+  <Card title="Payment Policies" icon="credit-card" color="#0064D2">
+    Configure payment methods and policies for your store
+  </Card>
+  <Card title="Fulfillment Policies" icon="truck" color="#F5AF02">
+    Set up shipping and handling policies
+  </Card>
+  <Card title="Sales Tax" icon="receipt" color="#86B817">
+    Manage sales tax tables and jurisdiction settings
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Policy Management
+- **Return Policies**: Define return windows, return shipping costs, and refund methods
+- **Payment Policies**: Set accepted payment methods and payment instructions
+- **Fulfillment Policies**: Configure shipping services, handling times, and costs
+
+### Program Enrollment
+- **eBay Programs**: Enroll in or opt out of eBay seller programs
+- **Fulfillment Programs**: Manage enrollment in fulfillment services
+- **Program Status**: Check eligibility and current enrollment status
+
+### Account Settings
+- **Sales Tax**: Configure tax tables for different jurisdictions
+- **Shipping Locations**: Manage shipping locations and regions
+- **Custom Policies**: Create custom policies tailored to your business
+
+## Quick Start
+
+<Steps>
+  <Step title="Connect to Account API">
+    Ensure your MCP client has access to Account API tools:
+    ```bash
+    # List available Account API tools
+    mcp list-tools | grep account_
+    ```
+  </Step>
+
+  <Step title="Get Account Policies">
+    Retrieve your existing policies:
+    ```javascript
+    // Get all return policies
+    const returnPolicies = await mcp.useTool('account_getReturnPolicies', {
+      marketplace_id: 'EBAY_US'
+    });
+    ```
+  </Step>
+
+  <Step title="Create or Update Policies">
+    Create new policies or update existing ones:
+    ```javascript
+    // Create a return policy
+    const newPolicy = await mcp.useTool('account_createReturnPolicy', {
+      marketplace_id: 'EBAY_US',
+      name: '30-Day Returns',
+      return_period: {
+        value: 30,
+        unit: 'DAY'
+      },
+      refund_method: 'MONEY_BACK'
+    });
+    ```
+  </Step>
+</Steps>
+
+## Common Use Cases
+
+### 1. Setting Up Return Policies
+
+```javascript
+// Create a customer-friendly return policy
+const returnPolicy = await mcp.useTool('account_createReturnPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Easy Returns - 60 Days',
+  description: 'We accept returns within 60 days of purchase',
+  return_period: {
+    value: 60,
+    unit: 'DAY'
+  },
+  returns_accepted: true,
+  refund_method: 'MONEY_BACK',
+  return_shipping_cost_payer: 'SELLER'
+});
+
+console.log(`Return policy created: ${returnPolicy.returnPolicyId}`);
+```
+
+### 2. Configuring Payment Policies
+
+```javascript
+// Create a payment policy with multiple methods
+const paymentPolicy = await mcp.useTool('account_createPaymentPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Standard Payment Policy',
+  payment_methods: [
+    { paymentMethodType: 'PAYPAL' },
+    { paymentMethodType: 'CREDIT_CARD' }
+  ],
+  immediate_pay: true
+});
+```
+
+### 3. Managing Fulfillment Policies
+
+```javascript
+// Create a fulfillment policy with multiple shipping options
+const fulfillmentPolicy = await mcp.useTool('account_createFulfillmentPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Fast Shipping',
+  shipping_options: [
+    {
+      option_type: 'DOMESTIC',
+      cost_type: 'FLAT_RATE',
+      shipping_services: [
+        {
+          shipping_carrier_code: 'USPS',
+          shipping_service_code: 'USPSPriority',
+          ship_to_locations: {
+            region_included: [{ region_name: 'US', region_type: 'COUNTRY' }]
+          },
+          shipping_cost: { value: '8.99', currency: 'USD' }
+        }
+      ]
+    }
+  ],
+  handling_time: { value: 1, unit: 'BUSINESS_DAY' }
+});
+```
+
+## Tool Categories
+
+### Policy Tools
+
+| Tool Name | Description | Rate Limit |
+|-----------|-------------|------------|
+| `account_getReturnPolicies` | Get all return policies | 5,000/day |
+| `account_createReturnPolicy` | Create a return policy | 5,000/day |
+| `account_updateReturnPolicy` | Update return policy | 5,000/day |
+| `account_deleteReturnPolicy` | Delete return policy | 5,000/day |
+| `account_getPaymentPolicies` | Get all payment policies | 5,000/day |
+| `account_createPaymentPolicy` | Create payment policy | 5,000/day |
+| `account_getFulfillmentPolicies` | Get fulfillment policies | 5,000/day |
+| `account_createFulfillmentPolicy` | Create fulfillment policy | 5,000/day |
+
+### Program Tools
+
+| Tool Name | Description | Rate Limit |
+|-----------|-------------|------------|
+| `account_getPrograms` | List all seller programs | 5,000/day |
+| `account_optInToProgram` | Enroll in a program | 5,000/day |
+| `account_optOutOfProgram` | Opt out of a program | 5,000/day |
+
+### Sales Tax Tools
+
+| Tool Name | Description | Rate Limit |
+|-----------|-------------|------------|
+| `account_getSalesTaxes` | Get sales tax tables | 10,000/day |
+| `account_createOrReplaceSalesTax` | Set sales tax for jurisdiction | 5,000/day |
+| `account_deleteSalesTax` | Delete sales tax entry | 5,000/day |
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Policy Naming Conventions">
+    Use descriptive, consistent names for your policies:
+    - **Good**: `"30-Day Returns - Free Shipping"`
+    - **Bad**: `"Policy 1"`
+
+    This makes it easier to manage policies across multiple listings.
+  </Accordion>
+
+  <Accordion title="Return Policy Optimization">
+    Consider offering:
+    - **Longer return periods** (30-60 days) to increase buyer confidence
+    - **Free return shipping** for higher-value items
+    - **Clear return instructions** in policy descriptions
+  </Accordion>
+
+  <Accordion title="Fulfillment Policy Strategy">
+    - Offer multiple shipping options (economy, standard, expedited)
+    - Set realistic handling times (1-2 business days is ideal)
+    - Include free shipping for orders over a threshold
+    - Use calculated shipping for large/heavy items
+  </Accordion>
+
+  <Accordion title="Rate Limit Management">
+    - Cache policy data to reduce API calls
+    - Batch policy updates when possible
+    - Use webhooks for policy change notifications
+  </Accordion>
+</AccordionGroup>
+
+## Error Handling
+
+Common errors and solutions:
+
+```javascript
+try {
+  const policy = await mcp.useTool('account_createReturnPolicy', { /* ... */ });
+} catch (error) {
+  if (error.code === 'INVALID_MARKETPLACE') {
+    // Invalid marketplace_id provided
+    console.error('Please use a valid marketplace (e.g., EBAY_US)');
+  } else if (error.code === 'DUPLICATE_POLICY_NAME') {
+    // Policy with this name already exists
+    console.error('Policy name must be unique');
+  } else if (error.code === 'INVALID_RETURN_PERIOD') {
+    // Return period exceeds maximum allowed
+    console.error('Return period must be between 14-60 days');
+  }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Policies Guide" icon="file-contract" href="/api-reference/account/policies">
+    Learn about return, payment, and fulfillment policies
+  </Card>
+  <Card title="Programs Guide" icon="award" href="/api-reference/account/programs">
+    Explore eBay seller programs and enrollment
+  </Card>
+  <Card title="Policy Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Optimize your policies for better sales
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Complete API tool documentation
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Account API Documentation](https://developer.ebay.com/api-docs/sell/account/overview.html)
+- [Policy Management Guide](/guides/best-practices)
+- [Rate Limits Reference](/advanced/rate-limits)

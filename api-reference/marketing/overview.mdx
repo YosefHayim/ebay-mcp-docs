@@ -1,0 +1,122 @@
+---
+title: "Marketing API Overview"
+description: "Create promoted listings campaigns and run promotions to boost sales"
+---
+
+# Marketing API Overview
+
+The Marketing API provides **40+ tools** to create advertising campaigns, run promotions, and boost listing visibility on eBay.
+
+<CardGroup cols={2}>
+  <Card title="Promoted Listings" icon="bullhorn" color="#E53238">
+    Pay-per-sale advertising for higher visibility
+  </Card>
+  <Card title="Promotions" icon="percent" color="#0064D2">
+    Create sales, discounts, and special offers
+  </Card>
+  <Card title="Campaign Analytics" icon="chart-line" color="#F5AF02">
+    Track campaign performance and ROI
+  </Card>
+  <Card title="Item Recommendations" icon="star" color="#86B817">
+    Get AI-powered listing recommendations
+  </Card>
+</CardGroup>
+
+## Promoted Listings
+
+Boost listing visibility with pay-per-sale advertising.
+
+```javascript
+// Create a promoted listings campaign
+const campaign = await mcp.useTool('marketing_createCampaign', {
+  campaign_name: 'Summer Sale 2024',
+  marketplace_id: 'EBAY_US',
+  funding_strategy: 'COST_PER_SALE',
+  campaign_criterion: {
+    criterion_type: 'INVENTORY_PARTITION',
+    selection_rules: [
+      {
+        categoryIds: ['12345'],
+        inventory_items: [
+          {
+            inventory_reference_id: 'WIDGET-001',
+            inventory_reference_type: 'INVENTORY_ITEM'
+          }
+        ]
+      }
+    ]
+  }
+});
+
+console.log(`✅ Campaign created: ${campaign.campaignId}`);
+
+// Set ad rate (percentage)
+await mcp.useTool('marketing_updateAdRate', {
+  campaign_id: campaign.campaignId,
+  ad_rate: 8 // 8% ad rate
+});
+```
+
+## Promotions & Sales
+
+Create discounts and special offers.
+
+```javascript
+// Create a sale promotion
+const promotion = await mcp.useTool('marketing_createItemPromotion', {
+  marketplace_id: 'EBAY_US',
+  name: 'Summer Clearance - 20% Off',
+  promotion_type: 'MARKDOWN_SALE',
+  start_date: '2024-06-01T00:00:00Z',
+  end_date: '2024-06-30T23:59:59Z',
+  discount_rules: [
+    {
+      discount_type: 'PERCENTAGE',
+      discount_amount: '20',
+      inventory_items: [
+        { inventory_reference_id: 'WIDGET-001', inventory_reference_type: 'INVENTORY_ITEM' }
+      ]
+    }
+  ]
+});
+
+console.log(`✅ Promotion created: ${promotion.promotionId}`);
+```
+
+## Campaign Performance
+
+```javascript
+// Get campaign analytics
+const report = await mcp.useTool('marketing_getCampaignReport', {
+  campaign_id: 'campaign_id_here',
+  metric_keys: ['CLICK,IMPRESSION,SALE']
+});
+
+console.log(`Impressions: ${report.metrics.impression}`);
+console.log(`Clicks: ${report.metrics.click}`);
+console.log(`Sales: ${report.metrics.sale}`);
+console.log(`Ad Revenue: ${report.metrics.adRevenue.value}`);
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Campaigns" icon="bullhorn" href="/api-reference/marketing/campaigns">
+    Promoted listings campaigns guide
+  </Card>
+  <Card title="Promotions" icon="percent" href="/api-reference/marketing/promotions">
+    Create sales and discounts
+  </Card>
+  <Card title="Running Promotions Guide" icon="book" href="/guides/running-promotions">
+    Complete promotions tutorial
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    All API tools
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Marketing API Documentation](https://developer.ebay.com/api-docs/sell/marketing/overview.html)
+- [Promotions Guide](/guides/running-promotions)
+- [Best Practices](/guides/best-practices)

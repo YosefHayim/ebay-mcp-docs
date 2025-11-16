@@ -1,7 +1,7 @@
 /* eBay MCP Server Custom Styles */
 /* Official eBay Brand Colors */
 :root {
-  /* eBay Primary Colors */
+  /* eBay Primary Colors (all 4 official colors) */
   --ebay-red: #E53238;
   --ebay-blue: #0064D2;
   --ebay-yellow: #F5AF02;
@@ -13,7 +13,7 @@
   --ebay-yellow-dark: #CF9402;
   --ebay-green-dark: #6A9413;
 
-  /* Neutral Colors */
+  /* Neutral Colors - Light Gray as Default Theme */
   --ebay-gray-900: #191919;
   --ebay-gray-800: #3C3C3C;
   --ebay-gray-700: #5A5A5A;
@@ -22,7 +22,8 @@
   --ebay-gray-400: #AFAFAF;
   --ebay-gray-300: #CCCCCC;
   --ebay-gray-200: #E5E5E5;
-  --ebay-gray-100: #F7F7F7;
+  --ebay-gray-100: #F7F7F7; /* Default light background */
+  --ebay-default-bg: #F7F7F7; /* Light gray default theme */
 
   /* Semantic Colors */
   --ebay-success: #86B817;
@@ -31,16 +32,63 @@
   --ebay-info: #0064D2;
 }
 
-/* Enhanced Card Styling with eBay Colors */
+/* Default Light Gray Background Theme */
+body {
+  background-color: var(--ebay-default-bg);
+}
+
+.dark body {
+  background-color: var(--ebay-gray-900);
+}
+
+/* Enhanced Card Styling with All 4 eBay Colors */
 .card {
   border-left: 3px solid var(--ebay-red);
   transition: all 0.3s ease;
+  background-color: white;
+}
+
+.dark .card {
+  background-color: var(--ebay-gray-800);
 }
 
 .card:hover {
   border-left-color: var(--ebay-blue);
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(229, 50, 56, 0.15);
+}
+
+/* Cycle through all 4 eBay colors for card variety */
+.card:nth-child(4n+1) {
+  border-left-color: var(--ebay-red);
+}
+
+.card:nth-child(4n+2) {
+  border-left-color: var(--ebay-blue);
+}
+
+.card:nth-child(4n+3) {
+  border-left-color: var(--ebay-yellow);
+}
+
+.card:nth-child(4n+4) {
+  border-left-color: var(--ebay-green);
+}
+
+.card:nth-child(4n+1):hover {
+  box-shadow: 0 8px 16px rgba(229, 50, 56, 0.15);
+}
+
+.card:nth-child(4n+2):hover {
+  box-shadow: 0 8px 16px rgba(0, 100, 210, 0.15);
+}
+
+.card:nth-child(4n+3):hover {
+  box-shadow: 0 8px 16px rgba(245, 175, 2, 0.15);
+}
+
+.card:nth-child(4n+4):hover {
+  box-shadow: 0 8px 16px rgba(134, 184, 23, 0.15);
 }
 
 /* Primary Button Styling */
