@@ -1,80 +1,565 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: "Quickstart Guide"
+description: "Get your eBay MCP Server running in under 10 minutes"
 ---
 
-## Get started in three steps
-
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+This guide will walk you through setting up the eBay MCP Server from scratch. By the end, you'll have a fully functional MCP server connected to your AI assistant.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **Time to complete:** Approximately 10 minutes
+
+  **Prerequisites:**
+  - Node.js 18 or higher installed
+  - Git installed
+  - An eBay Developer account (we'll help you create one)
 </Note>
+
+## Step 1: Get eBay Developer Credentials
+
+Before installing the server, you need eBay API credentials.
+
+<Steps>
+  <Step title="Create an eBay Developer Account">
+    1. Visit the [eBay Developer Portal](https://developer.ebay.com)
+    2. Click **"Register"** in the top right corner
+    3. Complete the registration process
+    4. Verify your email address
+
+    <Tip>
+      If you already have an eBay account, you can use those credentials to sign in.
+    </Tip>
+  </Step>
+
+  <Step title="Create an Application">
+    1. Sign in to the [Developer Portal](https://developer.ebay.com)
+    2. Navigate to **"My Account"** → **"Application Keys"**
+    3. Click **"Create an Application Key"**
+    4. Choose **"Production"** or **"Sandbox"** environment
+    5. Fill in your application details:
+       - **Application Title:** Choose a descriptive name (e.g., "My eBay MCP Server")
+       - **Application Type:** Select "Public Application"
+
+    <Warning>
+      Start with the **Sandbox** environment for testing. Switch to Production when you're ready to go live.
+    </Warning>
+  </Step>
+
+  <Step title="Configure OAuth Settings">
+    1. In your application settings, scroll to **"OAuth Redirect URIs"**
+    2. Add the following redirect URI:
+       ```
+       http://localhost:3000/callback
+       ```
+    3. Click **"Save"** and note your credentials:
+       - **Client ID** (App ID)
+       - **Client Secret** (Cert ID)
+
+    <Info>
+      Keep these credentials secure - you'll need them in Step 3.
+    </Info>
+  </Step>
+
+  <Step title="Grant Application Scopes">
+    Ensure your application has the following scopes enabled:
+    - `https://api.ebay.com/oauth/api_scope/sell.inventory`
+    - `https://api.ebay.com/oauth/api_scope/sell.marketing`
+    - `https://api.ebay.com/oauth/api_scope/sell.fulfillment`
+    - `https://api.ebay.com/oauth/api_scope/sell.analytics.readonly`
+    - `https://api.ebay.com/oauth/api_scope/sell.account`
+    - `https://api.ebay.com/oauth/api_scope/sell.account.readonly`
+
+    <Tip>
+      Most of these scopes are enabled by default. Verify them in your application settings.
+    </Tip>
+  </Step>
+</Steps>
+
+## Step 2: Install the Server
+
+<Steps>
+  <Step title="Clone the Repository">
+    Open your terminal and run:
+
+    ```bash
+    git clone https://github.com/YosefHayim/ebay-mcp-server.git
+    cd ebay-mcp-server
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    ```bash
+    npm install
+    ```
+
+    This will install all required dependencies including the MCP SDK and eBay API client libraries.
+
+    <Note>
+      Installation typically takes 30-60 seconds depending on your internet connection.
+    </Note>
+  </Step>
+
+  <Step title="Verify Installation">
+    Check that everything installed correctly:
+
+    ```bash
+    npm run version
+    ```
+
+    You should see version information for the eBay MCP Server.
+  </Step>
+</Steps>
+
+## Step 3: Configure Your Credentials
+
+The eBay MCP Server offers three configuration methods. Choose the one that works best for you.
+
+<Tabs>
+  <Tab title="Interactive Setup (Recommended)">
+    The easiest way to configure your server with a beautiful CLI wizard.
+
+    ```bash
+    npm run setup
+    ```
+
+    The wizard will guide you through:
+
+    1. **Environment Selection**
+       - Choose between Sandbox (testing) or Production
+       - The wizard validates your selection
+
+    2. **Credential Input**
+       - Enter your eBay Client ID
+       - Enter your eBay Client Secret
+       - Set your redirect URI (default: `http://localhost:3000/callback`)
+
+    3. **Validation**
+       - Real-time validation of your credentials
+       - Checks for proper format and accessibility
+
+    4. **OAuth Flow (Optional)**
+       - Generate user tokens for full API access
+       - Automatically opens your browser for authorization
+       - Saves tokens securely in `.env`
+
+    <Tip>
+      The setup wizard features colorful eBay branding and clear instructions at each step.
+    </Tip>
+  </Tab>
+
+  <Tab title="Automatic Setup">
+    If you prefer to edit the `.env` file directly first:
+
+    1. Create a `.env` file in the project root:
+       ```bash
+       cp .env.example .env
+       ```
+
+    2. Edit `.env` with your credentials:
+       ```bash
+       EBAY_CLIENT_ID=your_client_id_here
+       EBAY_CLIENT_SECRET=your_client_secret_here
+       EBAY_ENVIRONMENT=sandbox
+       EBAY_REDIRECT_URI=http://localhost:3000/callback
+       ```
+
+    3. Run automatic setup:
+       ```bash
+       npm run auto-setup
+       ```
+
+    This will validate your credentials and set up OAuth tokens automatically.
+  </Tab>
+
+  <Tab title="Manual Configuration">
+    For advanced users who want full control:
+
+    1. Create `.env` file:
+       ```bash
+       cp .env.example .env
+       ```
+
+    2. Edit with all required variables:
+       ```bash
+       # Required
+       EBAY_CLIENT_ID=your_client_id
+       EBAY_CLIENT_SECRET=your_client_secret
+       EBAY_ENVIRONMENT=sandbox
+       EBAY_REDIRECT_URI=http://localhost:3000/callback
+
+       # Optional - User Tokens (for full API access)
+       EBAY_USER_ACCESS_TOKEN=your_access_token
+       EBAY_USER_REFRESH_TOKEN=your_refresh_token
+       EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+       ```
+
+    <Warning>
+      Without user tokens, the server will fall back to client credentials with limited rate limits (1,000 requests/day).
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Step 4: Test the Server
+
+Before connecting to an MCP client, verify the server works:
+
+<Steps>
+  <Step title="Run Tests">
+    ```bash
+    npm test
+    ```
+
+    You should see 870+ tests passing with high coverage.
+
+    <Tip>
+      If tests fail, check your `.env` configuration and internet connection.
+    </Tip>
+  </Step>
+
+  <Step title="Start the Server">
+    ```bash
+    npm start
+    ```
+
+    The server will start in STDIO mode, ready for MCP client connections.
+
+    <Info>
+      You should see initialization logs confirming the server is ready.
+    </Info>
+  </Step>
+
+  <Step title="Verify Authentication">
+    The server automatically validates your credentials on startup. Check the logs for:
+
+    - ✅ **Client credentials validated**
+    - ✅ **User tokens loaded** (if configured)
+    - ✅ **230+ tools registered**
+  </Step>
+</Steps>
+
+## Step 5: Connect to an MCP Client
+
+Choose your preferred AI assistant and follow the integration guide:
+
+<CardGroup cols={3}>
+  <Card title="Claude Desktop" icon="message" href="/mcp/claude-desktop">
+    Official Anthropic desktop app with native MCP support
+  </Card>
+
+  <Card title="Cursor" icon="c" href="/mcp/cursor">
+    AI-first code editor with MCP integration
+  </Card>
+
+  <Card title="Other Clients" icon="puzzle-piece" href="/mcp/other-clients">
+    Cline, Gemini, ChatGPT, and more
+  </Card>
+</CardGroup>
+
+### Quick Setup for Claude Desktop
+
+The most popular option - here's a quick guide:
+
+<Steps>
+  <Step title="Locate Claude Desktop Config">
+    The config file location depends on your OS:
+
+    **macOS:**
+    ```
+    ~/Library/Application Support/Claude/claude_desktop_config.json
+    ```
+
+    **Windows:**
+    ```
+    %APPDATA%\Claude\claude_desktop_config.json
+    ```
+
+    **Linux:**
+    ```
+    ~/.config/Claude/claude_desktop_config.json
+    ```
+  </Step>
+
+  <Step title="Add eBay MCP Server">
+    Edit the config file and add:
+
+    ```json
+    {
+      "mcpServers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "your_client_id",
+            "EBAY_CLIENT_SECRET": "your_client_secret",
+            "EBAY_ENVIRONMENT": "sandbox"
+          }
+        }
+      }
+    }
+    ```
+
+    <Warning>
+      Replace `/absolute/path/to/ebay-mcp-server` with the actual path where you cloned the repository.
+    </Warning>
+  </Step>
+
+  <Step title="Restart Claude Desktop">
+    1. Quit Claude Desktop completely
+    2. Reopen Claude Desktop
+    3. Look for the 🔨 tools icon - you should now see eBay tools available!
+  </Step>
+</Steps>
+
+## Step 6: Test Your First Command
+
+Let's verify everything works by testing a simple eBay API call:
+
+<Tabs>
+  <Tab title="In Claude Desktop">
+    Try asking Claude:
+
+    > "Can you list my eBay fulfillment policies?"
+
+    Claude will use the `getFulfillmentPolicies` tool and show you your configured policies.
+  </Tab>
+
+  <Tab title="In Cursor">
+    In a chat, type:
+
+    > "Show me my eBay inventory items"
+
+    Cursor will call the `getInventoryItems` tool and display your listings.
+  </Tab>
+
+  <Tab title="Testing Authentication">
+    Try a simple authentication check:
+
+    > "What's the status of my eBay user token?"
+
+    This will call `getUserTokenStatus` and confirm your authentication is working.
+  </Tab>
+</Tabs>
+
+<Check>
+  **Success!** You now have a fully functional eBay MCP Server.
+</Check>
+
+## Next Steps
+
+Now that your server is running, explore its capabilities:
+
+<CardGroup cols={2}>
+  <Card title="Create Your First Listing" icon="plus" href="/guides/first-listing">
+    Step-by-step guide to creating an eBay listing via MCP
+  </Card>
+
+  <Card title="Manage Orders" icon="box" href="/guides/managing-orders">
+    Learn how to fulfill orders and handle returns
+  </Card>
+
+  <Card title="Run Promotions" icon="megaphone" href="/guides/running-promotions">
+    Set up marketing campaigns and promoted listings
+  </Card>
+
+  <Card title="Explore All Features" icon="compass" href="/features/inventory-management">
+    Discover all 230+ tools and what they can do
+  </Card>
+</CardGroup>
+
+## Understanding Authentication Modes
+
+The server supports two authentication modes:
+
+<Accordion title="User Tokens (Recommended) - 10,000-50,000 requests/day">
+  **When to use:**
+  - You need full API access
+  - You're performing seller operations (listings, orders, etc.)
+  - You want higher rate limits
+
+  **Setup:**
+  - Requires OAuth 2.0 flow (handled by `npm run setup`)
+  - Tokens automatically refresh
+  - Configured via `.env` file
+
+  **Rate Limits:**
+  - 10,000-50,000 requests per day (varies by eBay account type)
+
+  <Tip>
+    The interactive setup wizard (`npm run setup`) handles user token generation automatically.
+  </Tip>
+</Accordion>
+
+<Accordion title="Client Credentials (Fallback) - 1,000 requests/day">
+  **When to use:**
+  - You only need app-level operations
+  - You're testing basic functionality
+  - You want zero-configuration authentication
+
+  **Setup:**
+  - Automatically used if no user tokens are present
+  - Only requires Client ID and Secret
+  - No OAuth flow needed
+
+  **Rate Limits:**
+  - 1,000 requests per day
+
+  **Limitations:**
+  - Cannot access user-specific data
+  - Limited to public/app-level operations
+
+  <Warning>
+    For most use cases, you'll want user tokens for full functionality.
+  </Warning>
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Error: Invalid Client Credentials">
+    **Cause:** Your Client ID or Client Secret is incorrect.
+
+    **Solution:**
+    1. Verify your credentials in the [eBay Developer Portal](https://developer.ebay.com)
+    2. Make sure you're using credentials from the correct environment (Sandbox vs Production)
+    3. Check for typos in your `.env` file
+    4. Ensure there are no extra spaces or quotes around the values
+  </Accordion>
+
+  <Accordion title="Error: Redirect URI Mismatch">
+    **Cause:** The redirect URI in your `.env` doesn't match what's configured in your eBay app.
+
+    **Solution:**
+    1. Go to your [eBay Developer Portal](https://developer.ebay.com)
+    2. Navigate to your application settings
+    3. Add `http://localhost:3000/callback` to OAuth Redirect URIs
+    4. Save and try again
+  </Accordion>
+
+  <Accordion title="MCP Client Can't Find the Server">
+    **Cause:** The path in your MCP client config is incorrect.
+
+    **Solution:**
+    1. Use an **absolute path** to the server (not relative)
+    2. Verify the path exists: `ls /path/to/ebay-mcp-server/build/index.js`
+    3. Check that you ran `npm run build` to create the build directory
+    4. Restart your MCP client after config changes
+  </Accordion>
+
+  <Accordion title="Rate Limit Errors">
+    **Cause:** You've exceeded your daily API request limit.
+
+    **Solution:**
+    - With client credentials: Upgrade to user tokens for higher limits
+    - With user tokens: Wait 24 hours or upgrade your eBay seller account
+    - Check your usage: Use the `getRateLimitStatus` tool (if available)
+
+    <Tip>
+      User tokens provide 10-50x more requests than client credentials.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Tests Failing During Installation">
+    **Cause:** Missing credentials or network issues.
+
+    **Solution:**
+    1. Configure your `.env` file before running tests
+    2. Check your internet connection
+    3. If using Sandbox, ensure your Sandbox credentials are valid
+    4. Try running a single test: `npm test -- --run getInventoryItems.test.ts`
+  </Accordion>
+</AccordionGroup>
+
+<Card title="More Help" icon="life-ring" href="/support/troubleshooting">
+  Visit our comprehensive troubleshooting guide for more solutions
+</Card>
+
+## Common Questions
+
+<AccordionGroup>
+  <Accordion title="Do I need an active eBay seller account?">
+    **For Sandbox:** No, you can test with just a developer account.
+
+    **For Production:** Yes, you need an active eBay seller account to use production APIs.
+
+    The Sandbox environment is perfect for development and testing without any seller requirements.
+  </Accordion>
+
+  <Accordion title="Can I use this for eBay buying (not selling)?">
+    No, this MCP server focuses on eBay's **Sell APIs**. It's designed for sellers to manage:
+    - Inventory and listings
+    - Orders and fulfillment
+    - Marketing campaigns
+    - Business analytics
+
+    For buying operations, you'd need eBay's Buy APIs (not currently supported).
+  </Accordion>
+
+  <Accordion title="What's the difference between Sandbox and Production?">
+    **Sandbox:**
+    - Test environment with fake data
+    - Free to use
+    - No real transactions
+    - Perfect for development
+
+    **Production:**
+    - Real eBay marketplace
+    - Real transactions and fees
+    - Requires active seller account
+    - Use after thorough testing in Sandbox
+
+    <Tip>
+      Always develop and test in Sandbox before switching to Production.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="How do I switch from Sandbox to Production?">
+    1. Create Production credentials in the [eBay Developer Portal](https://developer.ebay.com)
+    2. Update your `.env` file:
+       ```bash
+       EBAY_ENVIRONMENT=production
+       EBAY_CLIENT_ID=your_production_client_id
+       EBAY_CLIENT_SECRET=your_production_client_secret
+       ```
+    3. Run `npm run setup` to regenerate user tokens for production
+    4. Restart your MCP server
+
+    <Warning>
+      Production operations affect real listings and transactions. Test thoroughly in Sandbox first.
+    </Warning>
+  </Accordion>
+</AccordionGroup>
+
+<Card title="FAQ" icon="question" href="/support/faq">
+  See all frequently asked questions
+</Card>
+
+## What You've Accomplished
+
+<Check>
+  - ✅ Created an eBay Developer account and application
+  - ✅ Installed and configured the eBay MCP Server
+  - ✅ Set up authentication (user tokens or client credentials)
+  - ✅ Connected the server to your MCP client
+  - ✅ Tested your first eBay API call
+</Check>
+
+You're now ready to automate your eBay selling operations with AI!
+
+## Learn More
+
+<CardGroup cols={2}>
+  <Card title="Core Features" icon="star" href="/features/inventory-management">
+    Explore all capabilities in detail
+  </Card>
+
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Complete documentation of all 230+ tools
+  </Card>
+
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Tips for optimal usage and performance
+  </Card>
+
+  <Card title="Advanced Topics" icon="graduation-cap" href="/advanced/architecture">
+    Deep dive into architecture and internals
+  </Card>
+</CardGroup>
