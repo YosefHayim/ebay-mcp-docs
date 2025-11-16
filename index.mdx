@@ -1,97 +1,275 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "eBay MCP Server Documentation"
+description: "Comprehensive Model Context Protocol server for eBay's Sell APIs - 230+ tools, 99.1% API coverage"
 ---
 
-## Setting up
+<img
+  className="block"
+  src="/images/hero-light.svg"
+  alt="eBay MCP Server Hero"
+/>
 
-Get your documentation site up and running in minutes.
+## What is eBay MCP Server?
+
+The eBay MCP Server is a comprehensive **Model Context Protocol (MCP)** implementation that provides AI assistants with full access to eBay's Sell APIs through **230+ tools**. With **99.1% API coverage**, it enables AI-powered automation for inventory management, order fulfillment, marketing campaigns, analytics, and more.
+
+<CardGroup cols={2}>
+  <Card
+    title="99.1% API Coverage"
+    icon="chart-line"
+  >
+    Implementing 110 of 111 eBay Sell API endpoints across all major categories
+  </Card>
+  <Card
+    title="230+ eBay Tools"
+    icon="toolbox"
+  >
+    Comprehensive toolset for inventory, orders, marketing, analytics, and account management
+  </Card>
+  <Card
+    title="OAuth 2.0 Authentication"
+    icon="shield-check"
+  >
+    Full user token support with automatic refresh and fallback to client credentials
+  </Card>
+  <Card
+    title="870+ Tests"
+    icon="flask"
+  >
+    Extensively tested with 99%+ function coverage for reliability
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+Get up and running in minutes with our interactive setup wizard.
+
+<Steps>
+  <Step title="Install">
+    Clone and install the eBay MCP Server
+    ```bash
+    git clone https://github.com/YosefHayim/ebay-mcp-server.git
+    cd ebay-mcp-server
+    npm install
+    ```
+  </Step>
+
+  <Step title="Configure">
+    Run the interactive setup wizard
+    ```bash
+    npm run setup
+    ```
+    The wizard will guide you through eBay Developer credential configuration with real-time validation.
+  </Step>
+
+  <Step title="Connect">
+    Connect to your favorite MCP client (Claude Desktop, Cursor, etc.)
+
+    The server auto-detects and configures supported clients automatically.
+  </Step>
+</Steps>
 
 <Card
-  title="Start here"
+  title="Complete Quickstart Guide"
   icon="rocket"
   href="/quickstart"
   horizontal
 >
-  Follow our three step quickstart guide.
+  Follow our detailed guide for step-by-step setup instructions
 </Card>
 
-## Make it yours
+## Core Capabilities
 
-Design a docs site that looks great and empowers your users.
+Explore what you can do with eBay MCP Server.
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+<AccordionGroup>
+  <Accordion icon="box" title="Inventory Management (20 tools)">
+    - Create and manage inventory items
+    - Configure offers and pricing
+    - Manage inventory locations
+    - Bulk operations support
+    - Product compatibility and specifications
+  </Accordion>
 
-## Create beautiful pages
+  <Accordion icon="truck" title="Order Fulfillment (15 tools)">
+    - Retrieve and track orders
+    - Create shipping fulfillments
+    - Issue refunds and returns
+    - Handle payment disputes
+    - Manage shipping labels
+  </Accordion>
 
-Everything you need to create world-class documentation.
+  <Accordion icon="megaphone" title="Marketing & Promotions (30 tools)">
+    - Create and manage ad campaigns
+    - Configure promoted listings
+    - Set up item promotions
+    - Manage markdown sales
+    - Track advertising performance
+  </Accordion>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+  <Accordion icon="chart-bar" title="Analytics & Reporting (4 tools)">
+    - Generate traffic reports
+    - Access seller standards
+    - View customer service metrics
+    - Analyze sales performance
+  </Accordion>
 
-## Need inspiration?
+  <Accordion icon="user-gear" title="Account Management (36 tools)">
+    - Configure payment and return policies
+    - Manage fulfillment policies
+    - Set up sales tax
+    - Handle subscription status
+    - KYC verification
+  </Accordion>
+</AccordionGroup>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+## API Coverage by Category
+
+| Category | Endpoints | Coverage | Tools |
+|----------|-----------|----------|-------|
+| **Account API** | 36/37 | 97.3% | ✅ |
+| **Analytics API** | 4/4 | 100% | ✅ |
+| **Fulfillment API** | 15/15 | 100% | ✅ |
+| **Inventory API** | 20/20 | 100% | ✅ |
+| **Marketing API** | 30/30 | 100% | ✅ |
+| **Metadata API** | 5/5 | 100% | ✅ |
+
+## Why Choose eBay MCP Server?
+
+<CardGroup cols={2}>
+  <Card title="Smart Authentication" icon="key">
+    Automatic token refresh with fallback authentication ensures uninterrupted operation
+  </Card>
+
+  <Card title="Auto-Configuration" icon="wand-magic-sparkles">
+    Detects and configures MCP clients automatically - no manual setup required
+  </Card>
+
+  <Card title="Type-Safe" icon="code">
+    TypeScript with Zod validation and OpenAPI-generated types
+  </Card>
+
+  <Card title="Interactive Setup" icon="terminal">
+    Beautiful CLI wizard with step-by-step guidance and validation
+  </Card>
+
+  <Card title="Production Ready" icon="check-double">
+    Extensively tested with 870+ tests and 99%+ coverage
+  </Card>
+
+  <Card title="Well Documented" icon="book">
+    Comprehensive guides for both beginners and advanced users
+  </Card>
+</CardGroup>
+
+## MCP Client Support
+
+Works seamlessly with popular MCP clients:
+
+<CardGroup cols={3}>
+  <Card title="Claude Desktop" icon="message" href="/mcp/claude-desktop">
+    Official Anthropic desktop app
+  </Card>
+
+  <Card title="Cursor" icon="c" href="/mcp/cursor">
+    AI-first code editor
+  </Card>
+
+  <Card title="Other Clients" icon="puzzle-piece" href="/mcp/other-clients">
+    Cline, Gemini, ChatGPT, and more
+  </Card>
+</CardGroup>
+
+## For New Developers
+
+If you're new to MCP or eBay APIs, start here:
+
+<Steps>
+  <Step title="Understand MCP">
+    Learn about the Model Context Protocol and how it connects AI assistants to tools
+
+    <Card title="What is MCP?" href="https://modelcontextprotocol.io" icon="book-open">
+      Read the official MCP documentation
+    </Card>
+  </Step>
+
+  <Step title="Get eBay Credentials">
+    Create a developer account and get your API credentials
+
+    <Card title="eBay Developer Portal" href="https://developer.ebay.com" icon="globe">
+      Sign up and create your application
+    </Card>
+  </Step>
+
+  <Step title="Follow the Quickstart">
+    Our interactive quickstart guide walks you through everything step-by-step
+
+    <Card title="Quickstart Guide" href="/quickstart" icon="rocket">
+      Start here for complete setup instructions
+    </Card>
+  </Step>
+</Steps>
+
+## For Experienced Developers
+
+Jump straight into advanced topics:
+
+<CardGroup cols={2}>
+  <Card title="Architecture Overview" icon="diagram-project" href="/advanced/architecture">
+    Understand the system design and implementation details
+  </Card>
+
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Complete API documentation with all 230+ tools
+  </Card>
+
+  <Card title="Contributing" icon="code-pull-request" href="/advanced/contributing">
+    Learn how to contribute to the project
+  </Card>
+
+  <Card title="Testing Guide" icon="flask" href="/advanced/testing">
+    Run and write tests for the server
+  </Card>
+</CardGroup>
+
+## Authentication Methods
+
+Choose the authentication method that fits your needs:
+
+<CardGroup cols={2}>
+  <Card title="User Tokens (Recommended)" icon="user-check" href="/authentication/oauth-setup">
+    **Rate Limits:** 10,000-50,000 requests/day
+
+    Full API access with automatic token refresh
+  </Card>
+
+  <Card title="Client Credentials (Fallback)" icon="key" href="/authentication/client-credentials">
+    **Rate Limits:** 1,000 requests/day
+
+    Automatic authentication for app-level operations
+  </Card>
+</CardGroup>
+
+## Need Help?
+
+<CardGroup cols={2}>
+  <Card title="Troubleshooting" icon="wrench" href="/support/troubleshooting">
+    Common issues and solutions
+  </Card>
+
+  <Card title="FAQ" icon="question" href="/support/faq">
+    Frequently asked questions
+  </Card>
+
+  <Card title="GitHub Issues" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/issues">
+    Report bugs or request features
+  </Card>
+
+  <Card title="Changelog" icon="clock-rotate-left" href="/support/changelog">
+    See what's new in each release
+  </Card>
+</CardGroup>
+
+<Note>
+  This project is licensed under **Apache 2.0** and requires **Node.js 18+** with **TypeScript 5.9.3+**
+</Note>

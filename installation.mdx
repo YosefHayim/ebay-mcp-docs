@@ -1,0 +1,379 @@
+---
+title: "Installation"
+description: "Install the eBay MCP Server on your system"
+---
+
+This guide covers installing the eBay MCP Server on your local machine.
+
+## System Requirements
+
+Before installing, ensure your system meets these requirements:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    **Version 18.0.0 or higher**
+
+    Check your version: `node --version`
+  </Card>
+
+  <Card title="npm" icon="box">
+    **Version 8.0.0 or higher**
+
+    Check your version: `npm --version`
+  </Card>
+
+  <Card title="Git" icon="git-alt">
+    **Latest version recommended**
+
+    Check your version: `git --version`
+  </Card>
+
+  <Card title="Operating System" icon="computer">
+    **macOS, Linux, or Windows**
+
+    Windows users: Use WSL2 or PowerShell
+  </Card>
+</CardGroup>
+
+<Accordion title="Need to install Node.js?">
+  Download and install Node.js from [nodejs.org](https://nodejs.org)
+
+  **Recommended:** Use the LTS (Long Term Support) version
+
+  **Verify installation:**
+  ```bash
+  node --version
+  npm --version
+  ```
+</Accordion>
+
+## Installation Methods
+
+Choose the installation method that works best for you:
+
+<Tabs>
+  <Tab title="Standard Installation">
+    The recommended method for most users.
+
+    <Steps>
+      <Step title="Clone the Repository">
+        ```bash
+        git clone https://github.com/YosefHayim/ebay-mcp-server.git
+        ```
+
+        This creates an `ebay-mcp-server` directory with all source code.
+      </Step>
+
+      <Step title="Navigate to Directory">
+        ```bash
+        cd ebay-mcp-server
+        ```
+      </Step>
+
+      <Step title="Install Dependencies">
+        ```bash
+        npm install
+        ```
+
+        This installs:
+        - Model Context Protocol SDK
+        - eBay API client libraries
+        - TypeScript compiler
+        - Testing frameworks
+        - All development dependencies
+
+        <Note>
+          Installation typically takes 30-60 seconds. First-time installs may take longer.
+        </Note>
+      </Step>
+
+      <Step title="Build the Project">
+        ```bash
+        npm run build
+        ```
+
+        This compiles TypeScript to JavaScript in the `build/` directory.
+      </Step>
+
+      <Step title="Verify Installation">
+        ```bash
+        npm run version
+        ```
+
+        You should see the server version and environment information.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Development Installation">
+    For contributors and developers who want to modify the code.
+
+    <Steps>
+      <Step title="Fork the Repository">
+        1. Visit [github.com/YosefHayim/ebay-mcp-server](https://github.com/YosefHayim/ebay-mcp-server)
+        2. Click the **Fork** button in the top right
+        3. Clone your fork:
+           ```bash
+           git clone https://github.com/YOUR_USERNAME/ebay-mcp-server.git
+           cd ebay-mcp-server
+           ```
+      </Step>
+
+      <Step title="Install All Dependencies">
+        ```bash
+        npm install
+        ```
+
+        This includes dev dependencies for testing and development.
+      </Step>
+
+      <Step title="Set Up Development Environment">
+        ```bash
+        # Build in watch mode (auto-recompiles on changes)
+        npm run dev
+
+        # In another terminal, run tests in watch mode
+        npm run test:watch
+        ```
+      </Step>
+
+      <Step title="Create a Development Branch">
+        ```bash
+        git checkout -b feature/your-feature-name
+        ```
+      </Step>
+    </Steps>
+
+    <Card title="Contributing Guide" icon="code-pull-request" href="/advanced/contributing">
+      Learn more about contributing to the project
+    </Card>
+  </Tab>
+
+  <Tab title="Docker Installation">
+    Run the server in an isolated container (coming soon).
+
+    <Warning>
+      Docker support is currently in development. Use standard installation for now.
+    </Warning>
+
+    <Accordion title="Planned Docker Support">
+      We're working on official Docker images for easy deployment:
+
+      ```bash
+      # Planned usage (not yet available)
+      docker pull yosefhayim/ebay-mcp-server
+      docker run -e EBAY_CLIENT_ID=xxx ebay-mcp-server
+      ```
+
+      Track progress: [GitHub Issue #123](https://github.com/YosefHayim/ebay-mcp-server/issues)
+    </Accordion>
+  </Tab>
+</Tabs>
+
+## Post-Installation
+
+After installation, configure your credentials:
+
+<Steps>
+  <Step title="Run Setup Wizard">
+    ```bash
+    npm run setup
+    ```
+
+    The interactive wizard will guide you through configuration.
+  </Step>
+
+  <Step title="Verify Setup">
+    ```bash
+    npm test
+    ```
+
+    Run the test suite to ensure everything works correctly.
+  </Step>
+
+  <Step title="Start the Server">
+    ```bash
+    npm start
+    ```
+
+    The server starts in STDIO mode, ready for MCP client connections.
+  </Step>
+</Steps>
+
+<Card title="Configuration Guide" icon="gear" href="/configuration" horizontal>
+  Learn how to configure your eBay credentials
+</Card>
+
+## Directory Structure
+
+After installation, your project will have this structure:
+
+```
+ebay-mcp-server/
+├── src/                    # TypeScript source code
+│   ├── tools/             # Individual eBay API tool implementations
+│   ├── auth/              # Authentication logic
+│   ├── types/             # TypeScript type definitions
+│   └── index.ts           # Server entry point
+├── build/                 # Compiled JavaScript (generated)
+├── tests/                 # Test files
+├── .env.example           # Example environment variables
+├── package.json           # Project dependencies
+├── tsconfig.json          # TypeScript configuration
+└── README.md              # Project documentation
+```
+
+## Troubleshooting Installation
+
+<AccordionGroup>
+  <Accordion title="Error: Node version too old">
+    **Problem:** Your Node.js version is below 18.0.0
+
+    **Solution:**
+    1. Update Node.js from [nodejs.org](https://nodejs.org)
+    2. Or use a version manager like [nvm](https://github.com/nvm-sh/nvm):
+       ```bash
+       nvm install 18
+       nvm use 18
+       ```
+  </Accordion>
+
+  <Accordion title="Error: npm install fails">
+    **Problem:** Dependency installation errors
+
+    **Solutions:**
+    1. Clear npm cache:
+       ```bash
+       npm cache clean --force
+       npm install
+       ```
+
+    2. Delete `node_modules` and reinstall:
+       ```bash
+       rm -rf node_modules package-lock.json
+       npm install
+       ```
+
+    3. Check your internet connection and firewall settings
+  </Accordion>
+
+  <Accordion title="Error: Permission denied">
+    **Problem:** Insufficient permissions during installation
+
+    **Solutions:**
+
+    **macOS/Linux:**
+    ```bash
+    sudo chown -R $USER:$USER ebay-mcp-server
+    cd ebay-mcp-server
+    npm install
+    ```
+
+    **Windows:**
+    - Run PowerShell or Command Prompt as Administrator
+    - Or adjust folder permissions in File Explorer
+  </Accordion>
+
+  <Accordion title="Error: Build fails">
+    **Problem:** TypeScript compilation errors
+
+    **Solutions:**
+    1. Ensure TypeScript is installed:
+       ```bash
+       npm install -g typescript
+       npm run build
+       ```
+
+    2. Check for syntax errors in the output
+    3. Try a clean build:
+       ```bash
+       npm run clean
+       npm run build
+       ```
+  </Accordion>
+
+  <Accordion title="Git clone fails">
+    **Problem:** Cannot clone the repository
+
+    **Solutions:**
+    1. Check your internet connection
+    2. Verify Git is installed: `git --version`
+    3. Try using HTTPS instead of SSH:
+       ```bash
+       git clone https://github.com/YosefHayim/ebay-mcp-server.git
+       ```
+    4. Check if you're behind a corporate firewall
+  </Accordion>
+</AccordionGroup>
+
+## Updating the Server
+
+Keep your installation up to date:
+
+<Steps>
+  <Step title="Pull Latest Changes">
+    ```bash
+    cd ebay-mcp-server
+    git pull origin main
+    ```
+  </Step>
+
+  <Step title="Update Dependencies">
+    ```bash
+    npm install
+    ```
+
+    This updates any changed dependencies.
+  </Step>
+
+  <Step title="Rebuild">
+    ```bash
+    npm run build
+    ```
+  </Step>
+
+  <Step title="Run Tests">
+    ```bash
+    npm test
+    ```
+
+    Ensure everything still works after the update.
+  </Step>
+</Steps>
+
+<Tip>
+  Subscribe to the [GitHub repository](https://github.com/YosefHayim/ebay-mcp-server) to receive notifications about updates and releases.
+</Tip>
+
+## Uninstalling
+
+To remove the eBay MCP Server:
+
+```bash
+# Remove the directory
+cd ..
+rm -rf ebay-mcp-server
+
+# Optional: Remove from MCP client config
+# Edit your MCP client's config file and remove the ebay server entry
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/configuration">
+    Set up your eBay API credentials
+  </Card>
+
+  <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
+    Complete setup and connect to MCP client
+  </Card>
+
+  <Card title="Development Setup" icon="code" href="/development">
+    Set up for local development
+  </Card>
+
+  <Card title="Testing" icon="flask" href="/advanced/testing">
+    Run and write tests
+  </Card>
+</CardGroup>

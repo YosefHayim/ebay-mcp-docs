@@ -1,0 +1,148 @@
+# eBay MCP Server Documentation
+
+**Live Documentation:** https://ebaymcp.com
+**Repository:** https://github.com/YosefHayim/ebay-mcp-server
+**License:** Apache 2.0
+
+## Priority Pages
+
+### Getting Started (High Priority)
+- /: Homepage with overview and quick links
+- /quickstart: Complete setup guide for new users (10 minutes)
+- /installation: System requirements and installation steps
+- /configuration: API credential configuration guide
+
+### Authentication (High Priority)
+- /authentication/overview: Authentication methods comparison
+- /authentication/oauth-setup: OAuth 2.0 user token setup
+- /authentication/token-management: Token refresh and lifecycle
+- /authentication/client-credentials: Fallback authentication method
+
+### MCP Client Integration (High Priority)
+- /mcp/claude-desktop: Claude Desktop configuration guide
+- /mcp/cursor: Cursor IDE integration
+- /mcp/other-clients: Other MCP-compatible clients
+
+### Core Features (Medium Priority)
+- /features/inventory-management: 20 tools for inventory operations
+- /features/order-fulfillment: 15 tools for order processing
+- /features/marketing-campaigns: 30 tools for advertising
+- /features/analytics-reporting: 4 tools for business insights
+- /features/account-management: 36 tools for account settings
+
+### API Reference (Medium Priority)
+- /api-reference/introduction: API overview and structure
+- /api-reference/account/overview: Account API (36 endpoints, 97.3% coverage)
+- /api-reference/inventory/overview: Inventory API (20 endpoints, 100% coverage)
+- /api-reference/fulfillment/overview: Fulfillment API (15 endpoints, 100% coverage)
+- /api-reference/marketing/overview: Marketing API (30 endpoints, 100% coverage)
+- /api-reference/analytics/overview: Analytics API (4 endpoints, 100% coverage)
+
+### Practical Guides (Medium Priority)
+- /guides/first-listing: Step-by-step first eBay listing
+- /guides/managing-orders: Order fulfillment workflow
+- /guides/running-promotions: Marketing campaign setup
+- /guides/bulk-operations: Batch processing operations
+- /guides/best-practices: Optimization tips and patterns
+
+### Advanced Topics (Low Priority)
+- /advanced/architecture: System design and implementation
+- /advanced/error-handling: Error types and recovery
+- /advanced/rate-limits: API quota management
+- /advanced/testing: Test suite and coverage
+- /advanced/contributing: Development guidelines
+
+### Support (Medium Priority)
+- /support/troubleshooting: Common issues and solutions
+- /support/faq: Frequently asked questions
+- /support/changelog: Version history and updates
+
+## Key Concepts
+
+### Model Context Protocol (MCP)
+The eBay MCP Server implements the Model Context Protocol, enabling AI assistants to interact with eBay's Sell APIs through 230+ tools. MCP provides a standardized way for AI models to access external tools and data sources.
+
+### eBay Sell APIs
+eBay's suite of RESTful APIs for sellers, covering:
+- Account management (payment/return/fulfillment policies, sales tax)
+- Inventory (items, offers, locations)
+- Order fulfillment (orders, shipping, returns)
+- Marketing (campaigns, promotions, ads)
+- Analytics (traffic reports, seller standards)
+- Metadata (marketplace and policy information)
+
+### Authentication Methods
+**User Tokens (Recommended):**
+- OAuth 2.0 authorization flow
+- 10,000-50,000 requests/day rate limit
+- Full API access to all 230+ tools
+- Automatic token refresh
+
+**Client Credentials (Fallback):**
+- Application-level authentication
+- 1,000 requests/day rate limit
+- Limited to public/app operations
+- Zero-configuration option
+
+### API Coverage Statistics
+- Total: 99.1% coverage (110/111 endpoints)
+- Account API: 97.3% (36/37 endpoints)
+- Analytics API: 100% (4/4 endpoints)
+- Fulfillment API: 100% (15/15 endpoints)
+- Inventory API: 100% (20/20 endpoints)
+- Marketing API: 100% (30/30 endpoints)
+- Metadata API: 100% (5/5 endpoints)
+
+### System Requirements
+- Node.js 18.0.0 or higher
+- npm 8.0.0 or higher
+- TypeScript 5.9.3+
+- MCP 1.21.1 specification compliance
+- Operating System: macOS, Linux, or Windows
+
+### Quality Metrics
+- 870+ passing tests
+- 99%+ function coverage
+- 85%+ line coverage
+- Vitest test framework
+- CI/CD via GitHub Actions
+
+## Project Information
+
+**Repository:** https://github.com/YosefHayim/ebay-mcp-server
+**License:** Apache 2.0
+**Technology Stack:** TypeScript, MCP SDK, Zod validation, OpenAPI types
+**Environments:** Sandbox (testing) and Production
+**Transport:** STDIO (local MCP client integration)
+
+## Common User Journeys
+
+### New Developer Setup
+1. Read homepage (/) for overview
+2. Follow quickstart (/quickstart) for complete setup
+3. Install server (/installation)
+4. Configure credentials (/configuration)
+5. Connect MCP client (/mcp/claude-desktop or /mcp/cursor)
+6. Create first listing (/guides/first-listing)
+
+### Experienced Developer Integration
+1. Review API reference (/api-reference/introduction)
+2. Understand architecture (/advanced/architecture)
+3. Configure OAuth (/authentication/oauth-setup)
+4. Explore specific feature area (/features/*)
+5. Review best practices (/guides/best-practices)
+6. Consider contributing (/advanced/contributing)
+
+### Troubleshooting Flow
+1. Check troubleshooting guide (/support/troubleshooting)
+2. Review FAQ (/support/faq)
+3. Verify configuration (/configuration)
+4. Check authentication (/authentication/overview)
+5. Report issue on GitHub
+
+## Search Optimization Keywords
+
+Primary: eBay MCP Server, Model Context Protocol, eBay Sell APIs, AI automation, eBay integration
+Secondary: inventory management, order fulfillment, marketing automation, eBay developer, MCP tools
+Technical: OAuth 2.0, TypeScript, Node.js, API integration, rate limiting
+Client-specific: Claude Desktop, Cursor IDE, MCP client, AI assistant integration

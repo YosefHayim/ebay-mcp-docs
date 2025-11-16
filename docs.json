@@ -1,68 +1,145 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "theme": "venus",
+  "name": "eBay MCP Server",
+  "url": "https://ebaymcp.com",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#E53238",
+    "light": "#F5AF02",
+    "dark": "#0064D2",
+    "background": {
+      "light": "#FFFFFF",
+      "dark": "#0F1419"
+    },
+    "anchors": {
+      "from": "#E53238",
+      "to": "#0064D2"
+    }
   },
   "favicon": "/favicon.svg",
+  "modeToggle": {
+    "default": "light",
+    "isHidden": false
+  },
+  "stylesheet": "/styles.css",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
               "index",
               "quickstart",
-              "development"
+              "installation",
+              "configuration"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Authentication",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "authentication/overview",
+              "authentication/oauth-setup",
+              "authentication/token-management",
+              "authentication/client-credentials"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Core Features",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "features/inventory-management",
+              "features/order-fulfillment",
+              "features/marketing-campaigns",
+              "features/analytics-reporting",
+              "features/account-management"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Guides",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "guides/first-listing",
+              "guides/managing-orders",
+              "guides/running-promotions",
+              "guides/bulk-operations",
+              "guides/best-practices"
+            ]
+          },
+          {
+            "group": "MCP Integration",
+            "pages": [
+              "mcp/claude-desktop",
+              "mcp/cursor",
+              "mcp/other-clients"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/architecture",
+              "advanced/error-handling",
+              "advanced/rate-limits",
+              "advanced/testing",
+              "advanced/contributing"
+            ]
+          },
+          {
+            "group": "Support",
+            "pages": [
+              "support/troubleshooting",
+              "support/faq",
+              "support/changelog"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
             "pages": [
               "api-reference/introduction"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Account API",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/account/overview",
+              "api-reference/account/policies",
+              "api-reference/account/programs"
+            ]
+          },
+          {
+            "group": "Inventory API",
+            "pages": [
+              "api-reference/inventory/overview",
+              "api-reference/inventory/items",
+              "api-reference/inventory/offers",
+              "api-reference/inventory/locations"
+            ]
+          },
+          {
+            "group": "Fulfillment API",
+            "pages": [
+              "api-reference/fulfillment/overview",
+              "api-reference/fulfillment/orders",
+              "api-reference/fulfillment/shipping"
+            ]
+          },
+          {
+            "group": "Marketing API",
+            "pages": [
+              "api-reference/marketing/overview",
+              "api-reference/marketing/campaigns",
+              "api-reference/marketing/promotions"
+            ]
+          },
+          {
+            "group": "Analytics API",
+            "pages": [
+              "api-reference/analytics/overview",
+              "api-reference/analytics/traffic-reports"
             ]
           }
         ]
@@ -71,14 +148,19 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "GitHub Repository",
+          "href": "https://github.com/YosefHayim/ebay-mcp-server",
+          "icon": "github"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "eBay Developer Portal",
+          "href": "https://developer.ebay.com",
+          "icon": "globe"
+        },
+        {
+          "anchor": "MCP Documentation",
+          "href": "https://modelcontextprotocol.io",
+          "icon": "book-open"
         }
       ]
     }
@@ -90,14 +172,18 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "GitHub",
+        "href": "https://github.com/YosefHayim/ebay-mcp-server"
+      },
+      {
+        "label": "Issues",
+        "href": "https://github.com/YosefHayim/ebay-mcp-server/issues"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Get Started",
+      "href": "/quickstart"
     }
   },
   "contextual": {
@@ -114,9 +200,60 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/YosefHayim/ebay-mcp-server"
+    },
+    "copyright": "© 2025 eBay MCP Server. Licensed under Apache 2.0"
+  },
+  "metadata": {
+    "og:site_name": "eBay MCP Server Documentation",
+    "og:type": "website",
+    "og:url": "https://ebaymcp.com",
+    "og:description": "Comprehensive Model Context Protocol server for eBay's Sell APIs - 230+ tools, 99.1% API coverage",
+    "twitter:card": "summary_large_image",
+    "twitter:site": "@ebaymcp"
+  },
+  "analytics": {
+    "ga4": {
+      "measurementId": "G-XXXXXXXXXX"
     }
-  }
+  },
+  "seo": {
+    "indexHiddenPages": false,
+    "canonical": "https://ebaymcp.com"
+  },
+  "redirects": [
+    {
+      "source": "/docs/:path*",
+      "destination": "/:path*"
+    }
+  ],
+  "search": {
+    "prompt": "Search eBay MCP documentation..."
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true,
+    "raiseIssue": true
+  },
+  "backgroundImage": "/images/background-gradient.svg",
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/YosefHayim/ebay-mcp-server"
+    }
+  ],
+  "topbarCtaButton": {
+    "type": "github",
+    "url": "https://github.com/YosefHayim/ebay-mcp-server"
+  },
+  "tabs": [
+    {
+      "name": "Documentation",
+      "url": "/"
+    },
+    {
+      "name": "API Reference",
+      "url": "/api-reference"
+    }
+  ]
 }

@@ -1,0 +1,524 @@
+---
+title: "Configuration"
+description: "Configure your eBay MCP Server with API credentials"
+---
+
+This guide covers all configuration options for the eBay MCP Server.
+
+## Prerequisites
+
+Before configuring, you need:
+
+<Check>
+  - eBay Developer account ([Sign up here](https://developer.ebay.com))
+  - An eBay application with API credentials
+  - The server [installed](/installation) on your system
+</Check>
+
+<Card title="Need credentials?" icon="key" href="/quickstart#step-1-get-ebay-developer-credentials">
+  Follow Step 1 of the Quickstart Guide to get your eBay API credentials
+</Card>
+
+## Configuration Methods
+
+The eBay MCP Server supports three configuration methods:
+
+<CardGroup cols={3}>
+  <Card title="Interactive Setup" icon="terminal">
+    **Recommended for beginners**
+
+    Guided wizard with validation
+  </Card>
+
+  <Card title="Automatic Setup" icon="wand-magic-sparkles">
+    **For quick configuration**
+
+    Edit `.env` then run setup
+  </Card>
+
+  <Card title="Manual Setup" icon="gear">
+    **For advanced users**
+
+    Complete control over all settings
+  </Card>
+</CardGroup>
+
+## Method 1: Interactive Setup (Recommended)
+
+The easiest way to configure your server:
+
+```bash
+npm run setup
+```
+
+### What the Wizard Does
+
+<Steps>
+  <Step title="Environment Selection">
+    Choose your eBay environment:
+    - **Sandbox:** For testing (recommended initially)
+    - **Production:** For live operations
+
+    <Tip>
+      Always start with Sandbox for safe testing
+    </Tip>
+  </Step>
+
+  <Step title="Credential Input">
+    Enter your eBay credentials:
+    - **Client ID** (from eBay Developer Portal)
+    - **Client Secret** (from eBay Developer Portal)
+    - **Redirect URI** (default: `http://localhost:3000/callback`)
+
+    The wizard validates each input in real-time.
+  </Step>
+
+  <Step title="OAuth Flow (Optional)">
+    Generate user access tokens for full API access:
+
+    1. Wizard generates an authorization URL
+    2. Opens your browser automatically
+    3. You authorize the application on eBay
+    4. Wizard captures the OAuth code
+    5. Exchanges code for access and refresh tokens
+    6. Saves tokens securely in `.env`
+
+    <Info>
+      User tokens provide 10,000-50,000 requests/day vs 1,000 for client credentials
+    </Info>
+  </Step>
+
+  <Step title="Confirmation">
+    The wizard confirms successful configuration and shows:
+    - Environment (Sandbox/Production)
+    - Authentication method (User tokens/Client credentials)
+    - Expected rate limits
+  </Step>
+</Steps>
+
+## Method 2: Automatic Setup
+
+For users who prefer to edit configuration files:
+
+<Steps>
+  <Step title="Create .env File">
+    ```bash
+    cp .env.example .env
+    ```
+  </Step>
+
+  <Step title="Edit Configuration">
+    Open `.env` in your editor:
+
+    ```bash
+    # Required credentials
+    EBAY_CLIENT_ID=YourAppId-12345
+    EBAY_CLIENT_SECRET=YourCertId-67890
+    EBAY_ENVIRONMENT=sandbox
+    EBAY_REDIRECT_URI=http://localhost:3000/callback
+    ```
+
+    <Warning>
+      Replace the example values with your actual credentials from the eBay Developer Portal
+    </Warning>
+  </Step>
+
+  <Step title="Run Automatic Setup">
+    ```bash
+    npm run auto-setup
+    ```
+
+    This command:
+    - Validates your credentials
+    - Initiates OAuth flow for user tokens
+    - Tests API connectivity
+    - Confirms successful configuration
+  </Step>
+</Steps>
+
+## Method 3: Manual Configuration
+
+For complete control over all settings:
+
+<Steps>
+  <Step title="Create .env File">
+    ```bash
+    cp .env.example .env
+    ```
+  </Step>
+
+  <Step title="Configure All Variables">
+    Edit `.env` with all required and optional variables:
+
+    ```bash
+    # ============================================
+    # REQUIRED: eBay API Credentials
+    # ============================================
+    EBAY_CLIENT_ID=YourAppId-12345
+    EBAY_CLIENT_SECRET=YourCertId-67890
+
+    # Environment: sandbox or production
+    EBAY_ENVIRONMENT=sandbox
+
+    # OAuth redirect URI (must match eBay app settings)
+    EBAY_REDIRECT_URI=http://localhost:3000/callback
+
+    # ============================================
+    # OPTIONAL: User Access Tokens
+    # ============================================
+    # User access token (for full API access)
+    EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#...
+
+    # User refresh token (for automatic token renewal)
+    EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
+
+    # Token expiry timestamp (ISO 8601 format)
+    EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+
+    # ============================================
+    # OPTIONAL: Server Configuration
+    # ============================================
+    # MCP transport (default: stdio)
+    MCP_TRANSPORT=stdio
+
+    # Log level: error, warn, info, debug
+    LOG_LEVEL=info
+
+    # Enable request logging
+    LOG_REQUESTS=false
+    ```
+  </Step>
+
+  <Step title="Validate Configuration">
+    Test your configuration:
+
+    ```bash
+    npm run validate-config
+    ```
+
+    This checks:
+    - All required variables are set
+    - Credentials are valid format
+    - API connectivity works
+    - Tokens are valid (if provided)
+  </Step>
+</Steps>
+
+## Environment Variables Reference
+
+### Required Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `EBAY_CLIENT_ID` | Your eBay App ID | `YourAppName-YourApp-SBX-1234abcd-567890ab` |
+| `EBAY_CLIENT_SECRET` | Your eBay Cert ID | `SBX-1234abcd-5678-90ab-cdef-1234` |
+| `EBAY_ENVIRONMENT` | API environment | `sandbox` or `production` |
+| `EBAY_REDIRECT_URI` | OAuth redirect URI | `http://localhost:3000/callback` |
+
+### Optional Variables (User Tokens)
+
+| Variable | Description | Format |
+|----------|-------------|--------|
+| `EBAY_USER_ACCESS_TOKEN` | User access token | `v^1.1#i^1#...` (long string) |
+| `EBAY_USER_REFRESH_TOKEN` | User refresh token | `v^1.1#i^1#...` (long string) |
+| `EBAY_USER_TOKEN_EXPIRY` | Token expiry time | `2024-12-31T23:59:59.000Z` |
+
+### Optional Variables (Server Settings)
+
+| Variable | Description | Default | Options |
+|----------|-------------|---------|---------|
+| `MCP_TRANSPORT` | MCP transport type | `stdio` | `stdio`, `sse` |
+| `LOG_LEVEL` | Logging verbosity | `info` | `error`, `warn`, `info`, `debug` |
+| `LOG_REQUESTS` | Log all API requests | `false` | `true`, `false` |
+
+## Authentication Modes
+
+The server supports two authentication modes:
+
+### User Tokens (Recommended)
+
+<Tabs>
+  <Tab title="Overview">
+    **Best for:**
+    - Full API access (all 230+ tools)
+    - High rate limits (10,000-50,000 requests/day)
+    - Production usage
+    - Automated seller operations
+
+    **How it works:**
+    - Requires OAuth 2.0 authorization
+    - User authorizes your application
+    - Tokens automatically refresh
+    - Secure token storage in `.env`
+  </Tab>
+
+  <Tab title="Setup">
+    The interactive setup wizard handles user tokens automatically:
+
+    ```bash
+    npm run setup
+    ```
+
+    **Manual OAuth flow:**
+    1. Generate authorization URL:
+       ```bash
+       npm run generate-oauth-url
+       ```
+
+    2. Visit the URL in your browser
+    3. Authorize the application
+    4. Copy the authorization code from the redirect
+    5. Exchange code for tokens:
+       ```bash
+       npm run exchange-oauth-code YOUR_CODE_HERE
+       ```
+
+    6. Tokens are automatically saved to `.env`
+  </Tab>
+
+  <Tab title="Rate Limits">
+    **Daily Limits:**
+    - Basic seller: 10,000 requests/day
+    - Business seller: 25,000 requests/day
+    - Enterprise seller: 50,000 requests/day
+
+    **Per-second limits:**
+    - Varies by endpoint (typically 10-50/second)
+
+    <Tip>
+      Actual limits depend on your eBay seller account type
+    </Tip>
+  </Tab>
+</Tabs>
+
+### Client Credentials (Fallback)
+
+<Tabs>
+  <Tab title="Overview">
+    **Best for:**
+    - Testing basic functionality
+    - App-level operations only
+    - Development/testing
+    - No OAuth flow needed
+
+    **How it works:**
+    - Automatic authentication
+    - Only requires Client ID and Secret
+    - Used when no user tokens are present
+    - Limited API access
+  </Tab>
+
+  <Tab title="Setup">
+    Client credentials are automatically used if no user tokens are configured:
+
+    ```bash
+    # In .env, only set these:
+    EBAY_CLIENT_ID=your_client_id
+    EBAY_CLIENT_SECRET=your_client_secret
+    EBAY_ENVIRONMENT=sandbox
+    ```
+
+    The server automatically uses client credentials mode.
+  </Tab>
+
+  <Tab title="Limitations">
+    **Daily limit:**
+    - 1,000 requests/day (significantly lower)
+
+    **API restrictions:**
+    - Cannot access user-specific data
+    - Limited to public/app-level operations
+    - Some tools unavailable
+
+    **Available operations:**
+    - Public inventory queries
+    - Metadata retrieval
+    - Some analytics endpoints
+
+    <Warning>
+      For production use, always configure user tokens
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Switching Environments
+
+### Sandbox to Production
+
+<Steps>
+  <Step title="Create Production App">
+    1. Visit [eBay Developer Portal](https://developer.ebay.com)
+    2. Create a new application
+    3. Select **Production** environment
+    4. Note your production credentials
+  </Step>
+
+  <Step title="Update Configuration">
+    Edit `.env`:
+
+    ```bash
+    EBAY_ENVIRONMENT=production
+    EBAY_CLIENT_ID=YourProdAppId
+    EBAY_CLIENT_SECRET=YourProdCertId
+    ```
+
+    <Warning>
+      **Remove** sandbox tokens if present - they won't work in production
+    </Warning>
+  </Step>
+
+  <Step title="Generate Production Tokens">
+    ```bash
+    npm run setup
+    ```
+
+    Follow the OAuth flow to generate production user tokens.
+  </Step>
+
+  <Step title="Verify Production Setup">
+    ```bash
+    npm run validate-config
+    ```
+
+    Ensure production credentials are working.
+  </Step>
+</Steps>
+
+<Warning>
+  **Production operations affect real listings and transactions.** Always test thoroughly in Sandbox first.
+</Warning>
+
+## Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="Protect Your .env File" icon="shield">
+    **Never commit `.env` to version control:**
+
+    ```bash
+    # Verify .env is in .gitignore
+    cat .gitignore | grep .env
+    ```
+
+    **Set proper file permissions:**
+    ```bash
+    chmod 600 .env
+    ```
+
+    **For production deployments:**
+    - Use environment variables (not `.env` files)
+    - Use secret management services (AWS Secrets Manager, Azure Key Vault, etc.)
+  </Accordion>
+
+  <Accordion title="Rotate Credentials Regularly" icon="rotate">
+    **For production:**
+    1. Generate new credentials in eBay Developer Portal
+    2. Update your `.env` file
+    3. Regenerate user tokens: `npm run setup`
+    4. Delete old credentials from eBay portal
+
+    **Recommended schedule:**
+    - Rotate every 90 days minimum
+    - Immediately if credentials are compromised
+  </Accordion>
+
+  <Accordion title="Use Separate Credentials per Environment" icon="layer-group">
+    **Best practice:**
+    - Separate Sandbox credentials
+    - Separate Production credentials
+    - Never use production credentials for testing
+
+    **Organization:**
+    ```bash
+    # Use separate .env files
+    .env.sandbox
+    .env.production
+
+    # Load appropriate file:
+    cp .env.sandbox .env  # for testing
+    cp .env.production .env  # for production
+    ```
+  </Accordion>
+
+  <Accordion title="Monitor API Usage" icon="chart-line">
+    **Track your usage to prevent hitting limits:**
+
+    ```bash
+    # Enable request logging
+    LOG_REQUESTS=true
+    LOG_LEVEL=debug
+    ```
+
+    **Use eBay tools to check rate limits:**
+    - Monitor via eBay Developer Portal
+    - Check current usage with `getRateLimitStatus` tool
+    - Set up alerts before hitting limits
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Configuration validation fails">
+    **Check these common issues:**
+    1. Typos in Client ID or Secret
+    2. Extra spaces or quotes in `.env` values
+    3. Wrong environment (Sandbox credentials in Production mode)
+    4. Expired user tokens
+
+    **Solution:**
+    ```bash
+    # Re-run setup wizard
+    npm run setup
+
+    # Or validate manually
+    npm run validate-config
+    ```
+  </Accordion>
+
+  <Accordion title="OAuth flow fails">
+    **Common causes:**
+    1. Redirect URI mismatch
+    2. Application not configured for OAuth
+    3. Browser blocking popups
+
+    **Solutions:**
+    1. Verify redirect URI in [eBay Developer Portal](https://developer.ebay.com) matches `.env`
+    2. Add `http://localhost:3000/callback` to your app's OAuth settings
+    3. Allow popups from the setup wizard
+  </Accordion>
+
+  <Accordion title="Tokens expire immediately">
+    **Possible issues:**
+    1. System clock is incorrect
+    2. Token expiry timestamp is wrong format
+
+    **Solutions:**
+    ```bash
+    # Check system time
+    date
+
+    # Regenerate tokens
+    npm run setup
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Connect MCP Client" icon="plug" href="/mcp/claude-desktop">
+    Configure your MCP client to use the server
+  </Card>
+
+  <Card title="Authentication Guide" icon="shield-check" href="/authentication/overview">
+    Deep dive into authentication options
+  </Card>
+
+  <Card title="First Listing" icon="rocket" href="/guides/first-listing">
+    Create your first eBay listing
+  </Card>
+
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Tips for optimal configuration
+  </Card>
+</CardGroup>
