@@ -1,12 +1,533 @@
 ---
 title: "Managing Orders"
-description: "Documentation for Managing Orders"
+description: "Complete guide to order fulfillment, shipping, refunds, and dispute handling with the eBay MCP Server"
+icon: "box-check"
 ---
 
 # Managing Orders
 
-Documentation for this section is coming soon.
+Learn how to efficiently manage your eBay orders from receipt through fulfillment, including shipping, refunds, and dispute resolution using the eBay MCP Server.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+<Note>
+  **Prerequisites**
+  - eBay MCP Server installed with user OAuth token
+  - `sell.fulfillment` scope for write operations (or `sell.fulfillment.readonly` for viewing only)
+  - Active eBay listings with orders (use Sandbox environment for testing)
+</Note>
+
+## Order Management Workflow
+
+<Steps>
+  <Step title="Discover Orders">
+    Retrieve new orders filtered by status, date range, or buyer
+  </Step>
+
+  <Step title="Process Payment">
+    eBay handles payment processing automatically
+  </Step>
+
+  <Step title="Create Fulfillment">
+    Add shipping carrier, tracking number, and shipment details
+  </Step>
+
+  <Step title="Mark as Shipped">
+    Update order status and notify the buyer
+  </Step>
+
+  <Step title="Handle Issues">
+    Process refunds or manage disputes if needed
+  </Step>
+</Steps>
+
+## Retrieving Orders
+
+### Get All Orders
+
+View all orders with basic filtering:
+
+<Accordion title="Ask your AI assistant">
+```
+Show me all my eBay orders from the past 30 days
+```
+</Accordion>
+
+The server uses `ebay_get_orders` to retrieve orders with configurable filters:
+- **Date range**: Filter by creation or modification date
+- **Order status**: NOT_STARTED, IN_PROGRESS, SHIPPED, CANCELLED
+- **Limit and offset**: Pagination for large order volumes
+
+<Info>
+By default, eBay returns orders from the past 90 days. You can specify custom date ranges using ISO 8601 format (e.g., `2024-01-01T00:00:00Z`).
+</Info>
+
+### Filter by Status
+
+Focus on orders requiring action:
+
+<Tabs>
+  <Tab title="Unfulfilled Orders">
+    ```
+    Show me all orders that need shipping (status: NOT_STARTED or IN_PROGRESS)
+    ```
+    Use this to prioritize fulfillment tasks
+  </Tab>
+
+  <Tab title="Shipped Orders">
+    ```
+    Show me all orders I've marked as shipped in the past week
+    ```
+    Useful for tracking completed fulfillments
+  </Tab>
+
+  <Tab title="Cancelled Orders">
+    ```
+    Show me cancelled orders from the past month
+    ```
+    Review cancellations and refund status
+  </Tab>
+</Tabs>
+
+### Get Order Details
+
+View complete information for a specific order:
+
+<Accordion title="Ask your AI assistant">
+```
+Get full details for order ID "12-34567-89012"
+```
+</Accordion>
+
+The `ebay_get_order` tool returns comprehensive data:
+- **Buyer information**: Username, email, shipping address
+- **Line items**: Products ordered, quantities, prices, SKUs
+- **Payment details**: Total, payment method, transaction ID
+- **Fulfillment status**: Shipping requirements and current state
+- **Timestamps**: Order creation, payment, and modification dates
+
+## Fulfilling Orders
+
+### Understanding Fulfillment
+
+A fulfillment record contains:
+- **Shipping carrier**: USPS, FedEx, UPS, DHL, or other
+- **Tracking number**: Package tracking identifier
+- **Line items**: Which products are included in this shipment
+- **Shipment date**: When the package was shipped (defaults to current time)
+
+<Note>
+For orders with multiple items, you can create partial fulfillments by shipping items separately. Each fulfillment should specify which line items it includes.
+</Note>
+
+### Create Shipping Fulfillment
+
+Ship an order and add tracking information:
+
+<Accordion title="Ask your AI assistant">
+```
+Mark order "12-34567-89012" as shipped via USPS with tracking number "9405511899223456789012"
+Include all line items in this shipment
+```
+</Accordion>
+
+The server will:
+1. Use `ebay_create_shipping_fulfillment` to record shipment details
+2. Update order status to SHIPPED
+3. Send automatic notification to buyer with tracking information
+4. Return fulfillment ID for your records
+
+### Partial Fulfillment
+
+Ship items separately when needed:
+
+<Accordion title="Example: Multi-item order">
+```
+For order "12-34567-89012":
+1. Ship line item 1 via UPS tracking "1Z999AA10123456784"
+2. Keep line item 2 for separate shipment later
+```
+</Accordion>
+
+Benefits of partial fulfillment:
+- Ship available items immediately
+- Send out-of-stock items when restocked
+- Use different carriers for different items
+- Improve buyer satisfaction with faster delivery of available products
+
+### Supported Shipping Carriers
+
+The eBay MCP Server supports all major carriers:
+
+<Tabs>
+  <Tab title="US Carriers">
+    - **USPS** (United States Postal Service)
+    - **FedEx** (all services)
+    - **UPS** (all services)
+    - **DHL** (DHL Express, eCommerce)
+    - **OnTrac** (regional)
+  </Tab>
+
+  <Tab title="International">
+    - **Royal Mail** (UK)
+    - **Canada Post**
+    - **Australia Post**
+    - **Deutsche Post** (Germany)
+    - **La Poste** (France)
+    - And 50+ other international carriers
+  </Tab>
+
+  <Tab title="Custom Carriers">
+    If your carrier isn't listed, use:
+    ```
+    Carrier: OTHER
+    Tracking: [your tracking number]
+    ```
+    Provide carrier name in shipping notes
+  </Tab>
+</Tabs>
+
+### Retrieve Fulfillment History
+
+View all fulfillments for an order:
+
+<Accordion title="Ask your AI assistant">
+```
+Show me all shipping fulfillments for order "12-34567-89012"
+```
+</Accordion>
+
+The `ebay_get_shipping_fulfillments` tool returns:
+- Complete fulfillment history
+- Tracking numbers and carrier information
+- Line items included in each shipment
+- Shipment dates and delivery estimates
+
+## Handling Refunds
+
+### When to Issue Refunds
+
+Common refund scenarios:
+- **Buyer cancellation**: Before shipment
+- **Out of stock**: Cannot fulfill the order
+- **Damaged in transit**: Item arrived broken
+- **Wrong item shipped**: Seller error
+- **Buyer return**: Item returned per return policy
+
+### Issue Full Refund
+
+Refund the entire order amount:
+
+<Accordion title="Ask your AI assistant">
+```
+Issue a full refund for order "12-34567-89012"
+Reason: Item out of stock
+```
+</Accordion>
+
+The server uses `ebay_issue_order_refund` with:
+- **Reason code**: OUT_OF_STOCK, BUYER_CANCEL, DAMAGE, etc.
+- **Refund amount**: Automatically calculates full order total
+- **Optional message**: Explain the situation to the buyer
+
+<Warning>
+Refunds are final and cannot be reversed through the API. Double-check order ID and amount before issuing refunds.
+</Warning>
+
+### Issue Partial Refund
+
+Refund specific items or amounts:
+
+<Accordion title="Ask your AI assistant">
+```
+For order "12-34567-89012", issue a partial refund:
+- Refund line item 1 (damaged during shipping)
+- Keep line item 2 active
+- Include a $5 shipping refund for the inconvenience
+```
+</Accordion>
+
+Partial refunds are useful for:
+- Refunding individual items in multi-item orders
+- Offering price adjustments for minor defects
+- Compensating for shipping delays
+- Resolving buyer complaints without full cancellation
+
+### Refund Reasons
+
+eBay supports these refund reason codes:
+
+<AccordionGroup>
+  <Accordion title="BUYER_CANCEL">
+    Buyer requested cancellation before shipment. Use this for voluntary buyer cancellations.
+  </Accordion>
+
+  <Accordion title="OUT_OF_STOCK">
+    Item is no longer available. Triggers inventory warnings and may affect seller metrics.
+  </Accordion>
+
+  <Accordion title="DAMAGED">
+    Item was damaged in transit or during handling. Consider requiring return photos.
+  </Accordion>
+
+  <Accordion title="WRONG_ITEM">
+    Seller shipped incorrect product. May affect seller defect rate.
+  </Accordion>
+
+  <Accordion title="FOUND_BETTER_PRICE">
+    Buyer found a better deal elsewhere. Valid reason for returns within return window.
+  </Accordion>
+
+  <Accordion title="OTHER">
+    For situations not covered by standard reasons. Include detailed explanation in message.
+  </Accordion>
+</AccordionGroup>
+
+## Managing Payment Disputes
+
+### Understanding Disputes
+
+Payment disputes occur when:
+- Buyer claims item not received (INR)
+- Buyer claims item not as described (SNAD)
+- Payment processor flags transaction
+- Buyer initiates chargeback
+
+<Note>
+Disputes are separate from eBay's Money Back Guarantee cases. The eBay MCP Server provides tools for payment-related disputes. For eBay cases, use eBay's Resolution Center directly.
+</Note>
+
+### Retrieve Disputes
+
+View all active disputes:
+
+<Accordion title="Ask your AI assistant">
+```
+Show me all open payment disputes for my account
+```
+</Accordion>
+
+Filter options:
+- **Status**: OPEN, WAITING_FOR_SELLER, WAITING_FOR_BUYER, CLOSED
+- **Order ID**: Disputes for specific order
+- **Buyer username**: Disputes from specific buyer
+
+### Respond to Disputes
+
+You have two options when responding to disputes:
+
+<Tabs>
+  <Tab title="Accept Dispute">
+    Agree with the buyer's claim and process refund:
+
+    ```
+    Accept the dispute for order "12-34567-89012"
+    Issue full refund to buyer
+    ```
+
+    The server uses `ebay_accept_payment_dispute` to:
+    - Close the dispute in buyer's favor
+    - Process automatic refund
+    - Update seller metrics
+  </Tab>
+
+  <Tab title="Contest Dispute">
+    Challenge the claim with evidence:
+
+    ```
+    Contest the dispute for order "12-34567-89012"
+    I have proof of delivery and the buyer confirmed receipt
+    ```
+
+    The server uses `ebay_contest_payment_dispute` to:
+    - Submit your response to eBay
+    - Mark dispute as awaiting review
+    - Allow evidence submission
+  </Tab>
+</Tabs>
+
+### Submit Evidence
+
+Provide documentation to support your case:
+
+<Accordion title="Ask your AI assistant">
+```
+For dispute ID "5051234567", upload evidence:
+- Tracking shows delivered to buyer's address on [date]
+- Buyer sent message confirming receipt
+- Photos of item condition before shipping
+```
+</Accordion>
+
+Accepted evidence types:
+- **Proof of delivery**: Tracking confirmations, signatures
+- **Communications**: Messages with buyer, email confirmations
+- **Product documentation**: Photos, videos, serial numbers, receipts
+- **Shipping records**: Labels, weight certificates, customs forms
+
+The server uses `ebay_add_dispute_evidence` to attach files and descriptions.
+
+### Retrieve Dispute Activity
+
+View complete dispute history:
+
+<Accordion title="Ask your AI assistant">
+```
+Show me all activity for dispute ID "5051234567"
+```
+</Accordion>
+
+Returns chronological log of:
+- Dispute opening and reason
+- Seller and buyer responses
+- Evidence submissions
+- eBay reviewer actions
+- Final resolution and outcome
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Ship Promptly" icon="shipping-fast">
+    Ship within your stated handling time to maintain seller standards and improve buyer satisfaction.
+  </Card>
+
+  <Card title="Add Tracking Always" icon="map-location-dot">
+    Always use tracked shipping for seller protection. Tracking proves delivery in disputes.
+  </Card>
+
+  <Card title="Communicate Proactively" icon="messages">
+    Send updates to buyers about shipping delays, backorders, or issues before they open cases.
+  </Card>
+
+  <Card title="Document Everything" icon="camera">
+    Take photos of items before shipping, especially high-value products. Save all buyer communications.
+  </Card>
+</CardGroup>
+
+### Automation Opportunities
+
+Consider automating routine tasks:
+
+<Accordion title="Daily order processing workflow">
+```
+Daily at 9 AM:
+1. Get all unfulfilled orders from the past 24 hours
+2. For each order, retrieve full details
+3. Generate packing slips with line items
+4. Update internal inventory system
+5. At 5 PM, sync tracking numbers for shipped orders
+```
+</Accordion>
+
+The eBay MCP Server integrates seamlessly with automation tools and AI assistants for hands-free order management.
+
+## Common Issues and Solutions
+
+<AccordionGroup>
+  <Accordion title="Error: Invalid tracking number format">
+    **Problem:** Carrier rejected tracking number format
+
+    **Solution:**
+    - Verify tracking number matches carrier's format
+    - Remove spaces and special characters
+    - For USPS: 20-22 digits; UPS: 18 characters starting with "1Z"; FedEx: 12 digits
+    - Use carrier's website to validate tracking number first
+  </Accordion>
+
+  <Accordion title="Error: Line item already fulfilled">
+    **Problem:** Attempting to ship an item that's already been shipped
+
+    **Solution:**
+    - Check fulfillment history for the order
+    - Verify which line items remain unfulfilled
+    - For replacement shipments, contact buyer separately
+  </Accordion>
+
+  <Accordion title="Warning: Late shipment">
+    **Problem:** Shipping after handling time expired
+
+    **Solution:**
+    - Still create fulfillment (better late than never)
+    - Contact buyer proactively with apology and updated delivery date
+    - Consider offering partial refund or discount on future purchase
+    - Late shipments may affect seller defect rate
+  </Accordion>
+
+  <Accordion title="Error: Cannot refund shipped order">
+    **Problem:** eBay requires return before refund for shipped items
+
+    **Solution:**
+    - Request buyer to return item first
+    - Provide return shipping label if appropriate
+    - Issue refund after receiving returned item
+    - For exceptional cases, contact eBay seller support directly
+  </Accordion>
+</AccordionGroup>
+
+## Monitoring Seller Performance
+
+### Key Metrics to Track
+
+Use the eBay MCP Server to monitor:
+
+<Tabs>
+  <Tab title="Order Defect Rate">
+    ```
+    What is my current seller defect rate?
+    ```
+
+    Track transactions with:
+    - Item not as described cases
+    - Item not received cases
+    - Low detailed seller ratings
+
+    Target: Below 2%
+  </Tab>
+
+  <Tab title="Late Shipment Rate">
+    ```
+    How many orders did I ship late this month?
+    ```
+
+    Monitor shipping within handling time
+
+    Target: Below 4%
+  </Tab>
+
+  <Tab title="Cancellation Rate">
+    ```
+    What percentage of my orders were cancelled?
+    ```
+
+    Track seller-initiated cancellations
+
+    Target: Below 2.5%
+  </Tab>
+</Tabs>
+
+See [Analytics & Reporting](/features/analytics-reporting) for detailed performance tracking.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="First Listing" icon="list" href="/guides/first-listing">
+    Create listings that generate orders
+  </Card>
+
+  <Card title="Running Promotions" icon="bullhorn" href="/guides/running-promotions">
+    Drive more sales with marketing campaigns
+  </Card>
+
+  <Card title="Order Fulfillment API" icon="book-open" href="/api-reference/fulfillment/overview">
+    Complete API reference for fulfillment tools
+  </Card>
+
+  <Card title="Troubleshooting" icon="wrench" href="/support/troubleshooting">
+    Solve common order management issues
+  </Card>
+</CardGroup>
+
+## Related Topics
+
+- [Order Fulfillment Features](/features/order-fulfillment) - Detailed fulfillment documentation
+- [Account Management](/features/account-management) - Seller standards and metrics
+- [OAuth Setup](/authentication/oauth-setup) - Configure fulfillment scopes
+- [Rate Limits](/advanced/rate-limits) - Optimize order processing performance

@@ -1,12 +1,266 @@
 ---
-title: "First Listing"
-description: "Documentation for First Listing"
+title: "Creating Your First Listing"
+description: "Step-by-step guide to creating and publishing your first eBay listing using the eBay MCP Server"
+icon: "list"
 ---
 
-# First Listing
+# Creating Your First Listing
 
-Documentation for this section is coming soon.
+This guide walks you through creating and publishing your first eBay listing using the eBay MCP Server. You'll learn the complete workflow from inventory creation to live listing.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+<Note>
+  **Prerequisites**
+  - eBay MCP Server installed and configured
+  - User OAuth token with `sell.inventory` scope
+  - Start in **Sandbox environment** to avoid affecting real listings
+  - One or more fulfillment, payment, and return policies created (see [Account Management](/features/account-management))
+</Note>
+
+## Understanding the Listing Workflow
+
+eBay's modern Inventory API uses a three-step process:
+
+<Steps>
+  <Step title="Create Inventory Item">
+    Define your product with SKU, title, description, and condition
+  </Step>
+
+  <Step title="Create Offer">
+    Set pricing, quantity, marketplace, and business policies
+  </Step>
+
+  <Step title="Publish Offer">
+    Make your listing live on eBay with a preview of listing fees
+  </Step>
+</Steps>
+
+## Step 1: Create an Inventory Item
+
+An inventory item represents the physical product you're selling. Each item is uniquely identified by a SKU (Stock Keeping Unit).
+
+<Accordion title="Ask your AI assistant">
+```
+Create an inventory item with SKU "LAPTOP-001" for a Dell XPS 15 laptop.
+The product is in new condition, with the following details:
+- Title: Dell XPS 15 9520 Laptop - Intel i7, 16GB RAM, 512GB SSD
+- Description: Brand new Dell XPS 15 with 15.6" FHD display, Intel Core i7-12700H,
+  16GB DDR5 RAM, 512GB NVMe SSD, NVIDIA GeForce RTX 3050 Ti
+- Brand: Dell
+- MPN: XPS-9520-7032
+- Condition: NEW
+- Package weight: 5 lbs
+- Package dimensions: 18x12x3 inches
+- Availability: 5 units available
+```
+</Accordion>
+
+<Info>
+The MCP server will use the `ebay_create_or_replace_inventory_item` tool to create your inventory item. This tool is idempotent - you can safely run it multiple times with the same SKU.
+</Info>
+
+### What the Server Does
+
+When you request inventory item creation, the server:
+1. Validates all required fields (SKU, condition, availability)
+2. Constructs the proper eBay API request with product details
+3. Creates or updates the inventory item in your eBay account
+4. Returns confirmation with the SKU
+
+## Step 2: Create an Offer
+
+An offer connects your inventory item to eBay's marketplace with pricing and policies.
+
+<Accordion title="Ask your AI assistant">
+```
+Create an offer for SKU "LAPTOP-001" with these settings:
+- Marketplace: EBAY_US
+- Format: FIXED_PRICE
+- Price: $1299.99 USD
+- Quantity: 5
+- Use my default fulfillment policy
+- Use my default payment policy
+- Use my default return policy
+```
+</Accordion>
+
+<Note>
+Before creating offers, you must have at least one policy of each type (fulfillment, payment, return). If you don't have policies yet, ask your AI assistant: "Create default business policies for my eBay account"
+</Note>
+
+### Pricing Strategies
+
+You can configure different pricing models:
+
+<Tabs>
+  <Tab title="Fixed Price">
+    Most common for new listings. Set a single price buyers pay immediately.
+
+    ```
+    Format: FIXED_PRICE
+    Price: $1299.99
+    ```
+  </Tab>
+
+  <Tab title="Best Offer Enabled">
+    Allow buyers to negotiate. You can set minimum acceptable prices.
+
+    ```
+    Format: FIXED_PRICE
+    Price: $1299.99
+    Best Offer: Enabled
+    Auto-Accept Price: $1250
+    Auto-Decline Price: $1150
+    ```
+  </Tab>
+
+  <Tab title="Auction">
+    Note: Auction format requires different API endpoints not covered in this guide.
+  </Tab>
+</Tabs>
+
+## Step 3: Preview Listing Fees
+
+Before publishing, check what eBay will charge for this listing.
+
+<Accordion title="Ask your AI assistant">
+```
+What are the listing fees for the offer I just created for SKU "LAPTOP-001"?
+```
+</Accordion>
+
+The server uses `ebay_get_listing_fees` to retrieve:
+- **Insertion Fee**: Charged when listing is created (often free for first listings)
+- **Final Value Fee**: Percentage of sale price (charged when item sells)
+- **Optional Upgrade Fees**: Bold title, subtitle, gallery plus, etc.
+
+<Warning>
+Listing fees vary by category, seller tier, and marketplace. Always preview fees before publishing to avoid surprises.
+</Warning>
+
+## Step 4: Publish Your Offer
+
+Make your listing live on eBay.
+
+<Accordion title="Ask your AI assistant">
+```
+Publish the offer for SKU "LAPTOP-001" to eBay
+```
+</Accordion>
+
+The server will:
+1. Call `ebay_publish_offer` to activate the listing
+2. Return the listing ID (a unique eBay identifier like `v1|110123456789|0`)
+3. Provide a direct link to view your live listing on eBay
+
+<Check>
+**Success!** Your item is now live on eBay and buyers can purchase it. The listing ID is your reference for this specific offer.
+</Check>
+
+## Verify Your Listing
+
+After publishing, verify everything looks correct:
+
+<Accordion title="Ask your AI assistant">
+```
+Show me details for my published offer with SKU "LAPTOP-001"
+```
+</Accordion>
+
+The server will retrieve complete offer details including:
+- Current price and quantity
+- Publication status and marketplace
+- Listing ID and eBay URL
+- Associated policies
+- Creation and update timestamps
+
+## Common Issues and Solutions
+
+<AccordionGroup>
+  <Accordion title="Error: Missing business policies">
+    **Problem:** You don't have required fulfillment, payment, or return policies
+
+    **Solution:** Create default policies first
+    ```
+    Ask your AI: "Create default business policies for my eBay account"
+    ```
+    Or specify policy IDs if you have existing ones
+  </Accordion>
+
+  <Accordion title="Error: Invalid SKU format">
+    **Problem:** SKU contains unsupported characters
+
+    **Solution:** Use only alphanumeric characters, hyphens, and underscores. Max 50 characters.
+
+    Valid: `LAPTOP-001`, `DELL_XPS_15`, `SKU123`
+    Invalid: `LAPTOP#001`, `SKU@123`, `laptop 001` (spaces not allowed)
+  </Accordion>
+
+  <Accordion title="Error: Insufficient OAuth scopes">
+    **Problem:** Your OAuth token lacks `sell.inventory` scope
+
+    **Solution:** Regenerate your OAuth token with proper scopes
+    ```
+    Ask your AI: "Generate a new OAuth authorization URL with inventory scopes"
+    ```
+    Then complete the OAuth flow and update your `.env` file
+  </Accordion>
+
+  <Accordion title="Warning: High listing fees">
+    **Problem:** Unexpected fees for your category or listing upgrades
+
+    **Solution:**
+    - Check if your category has special fee structures
+    - Remove optional upgrade features you don't need
+    - Verify you're in the correct eBay marketplace
+    - Consider enrolling in store subscription for lower fees
+  </Accordion>
+</AccordionGroup>
+
+## Creating Variation Listings
+
+For products with multiple variants (size, color, etc.), use inventory item groups:
+
+<Accordion title="Example: T-Shirt with sizes">
+```
+Create an inventory item group for a t-shirt with these variations:
+- SKU Base: TSHIRT-001
+- Variants: Small, Medium, Large, XL
+- Colors: Black, White, Blue
+- Create individual SKUs for each combination
+- Price: $19.99 for all variants
+```
+</Accordion>
+
+The server will:
+1. Create an inventory item group to organize variants
+2. Generate individual inventory items for each size/color combination
+3. Create a single listing showing all variants in a dropdown
+
+See [Inventory Management](/features/inventory-management) for detailed variation listing instructions.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Manage Orders" icon="box-check" href="/guides/managing-orders">
+    Learn how to fulfill orders and handle shipping
+  </Card>
+
+  <Card title="Bulk Operations" icon="layer-group" href="/guides/bulk-operations">
+    Create multiple listings efficiently with bulk tools
+  </Card>
+
+  <Card title="Marketing Campaigns" icon="bullhorn" href="/guides/running-promotions">
+    Promote your listings with ads and discounts
+  </Card>
+
+  <Card title="Inventory Management" icon="warehouse" href="/features/inventory-management">
+    Deep dive into inventory features and operations
+  </Card>
+</CardGroup>
+
+## Related Topics
+
+- [OAuth Setup](/authentication/oauth-setup) - Configure authentication scopes
+- [Account Management](/features/account-management) - Create business policies
+- [Rate Limits](/advanced/rate-limits) - Optimize API usage
+- [Troubleshooting](/support/troubleshooting) - Common errors and solutions
