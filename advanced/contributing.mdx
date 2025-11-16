@@ -1,12 +1,710 @@
 ---
 title: "Contributing"
-description: "Documentation for Contributing"
+description: "Complete guide to contributing to the eBay MCP Server project - from setup to pull requests"
 ---
 
 # Contributing
 
-Documentation for this section is coming soon.
+Thank you for considering contributing to the eBay MCP Server! This guide will help you get started with development, understand our processes, and make meaningful contributions.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Ways to Contribute
+
+There are many ways to contribute to the project:
+
+<CardGroup cols={3}>
+  <Card title="Bug Fixes" icon="bug">
+    Find and fix bugs in the codebase
+  </Card>
+
+  <Card title="New Features" icon="sparkles">
+    Implement new eBay API tools or MCP capabilities
+  </Card>
+
+  <Card title="Documentation" icon="book">
+    Improve guides, examples, or API references
+  </Card>
+
+  <Card title="Tests" icon="flask">
+    Add or improve test coverage
+  </Card>
+
+  <Card title="Code Quality" icon="code">
+    Refactor code or improve performance
+  </Card>
+
+  <Card title="Ideas" icon="lightbulb">
+    Suggest new features or improvements
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+### Prerequisites
+
+Before you begin, ensure you have:
+
+- **Node.js** >= 18.0.0
+- **npm** or **pnpm** (both supported)
+- **Git** installed and configured
+- **eBay Developer Account** (for testing)
+- Basic understanding of TypeScript and Node.js
+
+### Development Setup
+
+<Steps>
+  <Step title="Fork the Repository">
+    Fork the [ebay-mcp-server](https://github.com/YosefHayim/ebay-mcp-server) repository to your GitHub account.
+  </Step>
+
+  <Step title="Clone Your Fork">
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/ebay-mcp-server.git
+    cd ebay-mcp-server
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    ```bash
+    npm install
+    # or
+    pnpm install
+    ```
+  </Step>
+
+  <Step title="Configure Environment">
+    ```bash
+    # Copy environment template
+    cp .env.example .env
+
+    # Edit .env with your eBay credentials
+    EBAY_CLIENT_ID=your_client_id
+    EBAY_CLIENT_SECRET=your_client_secret
+    EBAY_ENVIRONMENT=sandbox
+    EBAY_REDIRECT_URI=your_runame
+    ```
+
+    See [OAuth Setup](/authentication/oauth-setup) for detailed instructions.
+  </Step>
+
+  <Step title="Build the Project">
+    ```bash
+    npm run build
+    ```
+  </Step>
+
+  <Step title="Run Tests">
+    ```bash
+    npm test
+    ```
+
+    Ensure all tests pass before making changes.
+  </Step>
+</Steps>
+
+### Development Workflow
+
+```bash
+# Start development server (STDIO mode)
+npm run dev
+
+# Start development server (HTTP mode)
+npm run dev:http
+
+# Watch mode for TypeScript compilation
+npm run watch
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with UI dashboard
+npm run test:ui
+
+# Check code quality (typecheck + lint + format)
+npm run check
+
+# Format code
+npm run format
+
+# Generate types from OpenAPI specs
+npm run generate:types
+```
+
+## Project Structure
+
+Understanding the project structure helps you navigate and contribute effectively:
+
+```
+ebay-mcp-server/
+├── src/
+│   ├── api/              # eBay API implementations
+│   │   ├── client.ts     # HTTP client with interceptors
+│   │   ├── index.ts      # API facade
+│   │   └── [domain]/     # API categories
+│   ├── auth/             # OAuth & token management
+│   ├── tools/            # MCP tool definitions
+│   ├── types/            # TypeScript types & enums
+│   ├── utils/            # Zod validation schemas
+│   └── config/           # Environment configuration
+├── tests/
+│   ├── unit/             # Unit tests
+│   ├── integration/      # Integration tests
+│   └── helpers/          # Test utilities
+├── docs/                 # OpenAPI specifications
+└── scripts/              # Build and setup scripts
+```
+
+See [Architecture](/advanced/architecture) for detailed information.
+
+## Making Changes
+
+### Creating a Feature Branch
+
+```bash
+# Create and checkout a new branch
+git checkout -b feature/amazing-feature
+
+# Or for bug fixes
+git checkout -b fix/bug-description
+```
+
+### Branch Naming Conventions
+
+| Type | Format | Example |
+|------|--------|---------|
+| **Feature** | `feature/description` | `feature/add-bulk-update` |
+| **Bug Fix** | `fix/description` | `fix/token-refresh-error` |
+| **Documentation** | `docs/description` | `docs/improve-oauth-guide` |
+| **Refactoring** | `refactor/description` | `refactor/simplify-client` |
+| **Tests** | `test/description` | `test/add-inventory-tests` |
+
+### Development Guidelines
+
+#### 1. Code Style
+
+**TypeScript Best Practices:**
+
+```typescript
+// ✅ Good: Use types over interfaces
+type UserToken = {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+};
+
+// ✅ Good: Use native enums
+import { MarketplaceId } from '@/types/ebay-enums.js';
+
+// ✅ Good: Include JSDoc comments for complex functions
+/**
+ * Refresh the user access token using the refresh token
+ * @returns Promise that resolves when token is refreshed
+ * @throws Error if refresh token is expired or invalid
+ */
+async refreshUserToken(): Promise<void> {
+  // Implementation
+}
+
+// ✅ Good: Use path aliases
+import { EbayOAuthClient } from '@/auth/oauth.js';
+
+// ✅ Good: Include file extensions in imports
+import { validateSKU } from '@/utils/validation.js';
+```
+
+**Code Quality:**
+
+<Check>
+Use TypeScript strict mode - All code must compile with strict checks
+</Check>
+
+<Check>
+Validate inputs with Zod schemas - All external inputs must be validated
+</Check>
+
+<Check>
+Follow existing patterns - Maintain consistency with the codebase
+</Check>
+
+<Check>
+Keep functions small and focused - Each function should do one thing well
+</Check>
+
+#### 2. Writing Tests
+
+All new code must include tests. See [Testing Guide](/advanced/testing) for details.
+
+**Test Requirements:**
+
+- Maintain 90%+ coverage on critical paths
+- Test both success and error cases
+- Use descriptive test names
+- Follow AAA pattern (Arrange-Act-Assert)
+
+**Example Test:**
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest';
+import { EbayInventoryApi } from '@/api/listing-management/inventory.js';
+
+describe('EbayInventoryApi', () => {
+  let inventoryApi: EbayInventoryApi;
+
+  beforeEach(() => {
+    const mockClient = createMockClient();
+    inventoryApi = new EbayInventoryApi(mockClient);
+  });
+
+  describe('getInventoryItem', () => {
+    it('should fetch inventory item by SKU', async () => {
+      // Arrange
+      const sku = 'TEST-SKU-123';
+      const mockItem = { sku, condition: 'NEW' };
+      mockClient.get.mockResolvedValue(mockItem);
+
+      // Act
+      const result = await inventoryApi.getInventoryItem(sku);
+
+      // Assert
+      expect(result).toEqual(mockItem);
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `/sell/inventory/v1/inventory_item/${sku}`
+      );
+    });
+
+    it('should throw error for invalid SKU', async () => {
+      // Arrange & Act & Assert
+      await expect(
+        inventoryApi.getInventoryItem('')
+      ).rejects.toThrow('SKU is required');
+    });
+  });
+});
+```
+
+#### 3. Documentation
+
+Update documentation when making changes:
+
+<Check>
+Update README.md for major features
+</Check>
+
+<Check>
+Update CHANGELOG.md with your changes
+</Check>
+
+<Check>
+Add JSDoc comments for public APIs
+</Check>
+
+<Check>
+Update this documentation site if needed
+</Check>
+
+#### 4. Commit Messages
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Types:**
+- `feat:` - A new feature
+- `fix:` - A bug fix
+- `docs:` - Documentation only changes
+- `style:` - Code style changes (formatting, etc.)
+- `refactor:` - Code change that neither fixes a bug nor adds a feature
+- `perf:` - Performance improvements
+- `test:` - Adding or updating tests
+- `chore:` - Maintenance tasks
+
+**Examples:**
+
+```bash
+feat(inventory): add bulk update inventory items tool
+
+fix(auth): handle token refresh race condition
+
+docs(readme): update OAuth setup instructions
+
+test(marketing): add campaign status validation tests
+
+chore(deps): update @modelcontextprotocol/sdk to 1.21.1
+```
+
+**Good Commit Message:**
+```
+feat(inventory): add support for inventory item groups
+
+Implement getInventoryItemGroup and related operations:
+- Add getInventoryItemGroup method
+- Add createOrReplaceInventoryItemGroup method
+- Add deleteInventoryItemGroup method
+- Add Zod validation schemas
+- Add unit and integration tests
+
+Closes #123
+```
+
+## Submitting Changes
+
+### Pull Request Process
+
+<Steps>
+  <Step title="Ensure Quality">
+    Before submitting, ensure:
+
+    ```bash
+    # All tests pass
+    npm test
+
+    # Code is formatted
+    npm run format
+
+    # Linting passes
+    npm run lint
+
+    # Type checking passes
+    npm run typecheck
+
+    # Or run all checks
+    npm run check
+    ```
+  </Step>
+
+  <Step title="Update Changelog">
+    Add your changes to `CHANGELOG.md`:
+
+    ```markdown
+    ## [Unreleased]
+
+    ### Added
+    - Add bulk update inventory items tool (#123)
+
+    ### Fixed
+    - Fix token refresh race condition (#124)
+    ```
+  </Step>
+
+  <Step title="Push to Your Fork">
+    ```bash
+    git add .
+    git commit -m "feat: add amazing feature"
+    git push origin feature/amazing-feature
+    ```
+  </Step>
+
+  <Step title="Create Pull Request">
+    1. Go to the [repository](https://github.com/YosefHayim/ebay-mcp-server)
+    2. Click "New Pull Request"
+    3. Select your fork and branch
+    4. Fill out the PR template
+    5. Submit for review
+  </Step>
+</Steps>
+
+### Pull Request Template
+
+When creating a PR, include:
+
+```markdown
+## Description
+Brief description of what this PR does
+
+## Type of Change
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Documentation update
+
+## How Has This Been Tested?
+Describe the tests you ran to verify your changes
+
+## Checklist
+- [ ] My code follows the style guidelines of this project
+- [ ] I have performed a self-review of my own code
+- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] My changes generate no new warnings
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] New and existing unit tests pass locally with my changes
+- [ ] Any dependent changes have been merged and published
+- [ ] I have updated CHANGELOG.md
+
+## Related Issues
+Closes #(issue number)
+```
+
+### Review Process
+
+1. **Automated Checks** - CI runs tests and linting
+2. **Code Review** - Maintainers review your code
+3. **Feedback** - Address any requested changes
+4. **Approval** - PR is approved by maintainer
+5. **Merge** - PR is merged into main branch
+
+## Contribution Guidelines
+
+### Do's
+
+<Check>
+**Follow the code style** - Use the existing patterns and conventions
+</Check>
+
+<Check>
+**Write tests** - Maintain or improve test coverage
+</Check>
+
+<Check>
+**Document changes** - Update docs and comments
+</Check>
+
+<Check>
+**Keep PRs focused** - One feature or fix per PR
+</Check>
+
+<Check>
+**Be respectful** - Follow the code of conduct
+</Check>
+
+### Don'ts
+
+<Warning>
+**Don't skip tests** - All code must be tested
+</Warning>
+
+<Warning>
+**Don't break existing functionality** - Ensure backward compatibility
+</Warning>
+
+<Warning>
+**Don't ignore CI failures** - Fix all test and lint failures
+</Warning>
+
+<Warning>
+**Don't commit credentials** - Never commit secrets or tokens
+</Warning>
+
+## Adding New eBay APIs
+
+To add support for a new eBay API:
+
+<Steps>
+  <Step title="Create API Implementation">
+    Create a new file in the appropriate category:
+
+    ```typescript
+    // src/api/listing-management/product-compatibility.ts
+    import type { EbayApiClient } from '@/api/client.js';
+
+    export class EbayProductCompatibilityApi {
+      constructor(private client: EbayApiClient) {}
+
+      async getCompatibilityProperties(categoryTreeId: string) {
+        return this.client.get(
+          `/commerce/taxonomy/v1/category_tree/${categoryTreeId}/get_compatibility_properties`
+        );
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Add Validation Schema">
+    Create Zod schema for inputs:
+
+    ```typescript
+    // src/utils/product-compatibility-schemas.ts
+    import { z } from 'zod';
+
+    export const getCompatibilityPropertiesSchema = z.object({
+      categoryTreeId: z.string().min(1),
+    });
+    ```
+  </Step>
+
+  <Step title="Create Tool Definition">
+    Add tool in `src/tools/definitions/`:
+
+    ```typescript
+    // src/tools/definitions/product-compatibility-tools.ts
+    import { getCompatibilityPropertiesSchema } from '@/utils/product-compatibility-schemas.js';
+
+    export const productCompatibilityTools = [
+      {
+        name: 'ebay_get_compatibility_properties',
+        description: 'Get compatibility properties for a category',
+        inputSchema: getCompatibilityPropertiesSchema,
+        handler: 'productCompatibility.getCompatibilityProperties',
+      },
+    ];
+    ```
+  </Step>
+
+  <Step title="Register in API Facade">
+    Add to `src/api/index.ts`:
+
+    ```typescript
+    import { EbayProductCompatibilityApi } from './listing-management/product-compatibility.js';
+
+    export class EbaySellerApi {
+      public readonly productCompatibility: EbayProductCompatibilityApi;
+
+      constructor(config: EbayConfig) {
+        this.productCompatibility = new EbayProductCompatibilityApi(this.client);
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Write Tests">
+    Create comprehensive tests:
+
+    ```typescript
+    // tests/unit/api/product-compatibility.test.ts
+    describe('EbayProductCompatibilityApi', () => {
+      it('should get compatibility properties', async () => {
+        // Test implementation
+      });
+    });
+    ```
+  </Step>
+
+  <Step title="Update Documentation">
+    Document the new functionality and update API reference
+  </Step>
+</Steps>
+
+## Common Tasks
+
+### Updating Dependencies
+
+```bash
+# Check for outdated packages
+npm outdated
+
+# Update specific package
+npm update package-name
+
+# Update all packages (be careful)
+npm update
+
+# After updating, run tests
+npm test
+```
+
+### Generating Types from OpenAPI
+
+When eBay updates their API specifications:
+
+```bash
+# Generate TypeScript types from OpenAPI specs
+npm run generate:types
+
+# Verify generated types
+npm run typecheck
+```
+
+### Debugging
+
+```bash
+# Run tests with debugger
+node --inspect-brk ./node_modules/vitest/vitest.mjs run
+
+# Run server in debug mode
+npm run dev -- --inspect
+
+# Enable debug logging
+DEBUG=* npm run dev
+```
+
+## Getting Help
+
+### Resources
+
+<CardGroup cols={2}>
+  <Card title="Documentation" icon="book" href="/">
+    Browse the complete documentation
+  </Card>
+
+  <Card title="GitHub Issues" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/issues">
+    Search existing issues or create new ones
+  </Card>
+
+  <Card title="Discussions" icon="comments" href="https://github.com/YosefHayim/ebay-mcp-server/discussions">
+    Ask questions and share ideas
+  </Card>
+
+  <Card title="eBay Developer Portal" icon="globe" href="https://developer.ebay.com">
+    eBay API documentation
+  </Card>
+</CardGroup>
+
+### Communication
+
+- **Questions?** Open a [discussion](https://github.com/YosefHayim/ebay-mcp-server/discussions)
+- **Bug found?** Create an [issue](https://github.com/YosefHayim/ebay-mcp-server/issues)
+- **Feature idea?** Start a [discussion](https://github.com/YosefHayim/ebay-mcp-server/discussions)
+
+## Recognition
+
+Contributors are recognized in the following ways:
+
+- Listed in CHANGELOG.md for their contributions
+- Mentioned in release notes
+- Added to GitHub contributors list
+- Featured in project README
+
+## Code of Conduct
+
+This project follows a code of conduct to ensure a welcoming and inclusive environment:
+
+<Check>
+**Be respectful** - Treat everyone with respect and kindness
+</Check>
+
+<Check>
+**Be inclusive** - Welcome newcomers and diverse perspectives
+</Check>
+
+<Check>
+**Be constructive** - Provide helpful feedback and criticism
+</Check>
+
+<Check>
+**Be professional** - Maintain professional standards of communication
+</Check>
+
+Report unacceptable behavior to project maintainers.
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the Apache License 2.0.
+
+## Thank You!
+
+Your contributions help make this project better for everyone. Thank you for taking the time to contribute! 🎉
+
+## Related Topics
+
+<CardGroup cols={2}>
+  <Card title="Testing" icon="flask" href="/advanced/testing">
+    Learn about testing standards
+  </Card>
+
+  <Card title="Architecture" icon="sitemap" href="/advanced/architecture">
+    Understand the system design
+  </Card>
+
+  <Card title="Error Handling" icon="triangle-exclamation" href="/advanced/error-handling">
+    Error handling patterns
+  </Card>
+
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Development best practices
+  </Card>
+</CardGroup>

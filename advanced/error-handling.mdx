@@ -1,12 +1,681 @@
 ---
 title: "Error Handling"
-description: "Documentation for Error Handling"
+description: "Comprehensive guide to error handling strategies, recovery mechanisms, and troubleshooting in eBay MCP Server"
 ---
 
 # Error Handling
 
-Documentation for this section is coming soon.
+The eBay MCP Server implements robust error handling at every layer to ensure reliable operation and provide clear feedback when issues occur. This guide explains the error handling strategies, common error scenarios, and recovery mechanisms.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Error Handling Philosophy
+
+The server follows these principles for error handling:
+
+1. **Fail Fast** - Detect errors as early as possible
+2. **Clear Messages** - Provide actionable error messages with context
+3. **Automatic Recovery** - Attempt automatic recovery when possible (e.g., token refresh)
+4. **Graceful Degradation** - Fallback to alternative methods when primary method fails
+5. **Error Context** - Include relevant details for debugging
+
+## Error Handling Layers
+
+### 1. Input Validation Layer
+
+All tool inputs are validated using Zod schemas before processing.
+
+```typescript
+import { z } from 'zod';
+import { MarketplaceId, FormatType } from '@/types/ebay-enums.js';
+
+const createOfferSchema = z.object({
+  sku: z.string().min(1, 'SKU is required'),
+  marketplaceId: z.nativeEnum(MarketplaceId, {
+    errorMap: () => ({ message: 'Invalid marketplace ID' })
+  }),
+  format: z.nativeEnum(FormatType),
+  price: z.object({
+    value: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Invalid price format'),
+    currency: z.string().length(3, 'Currency must be 3 characters'),
+  }),
+});
+
+// Validation happens automatically
+try {
+  const validated = createOfferSchema.parse(input);
+} catch (error) {
+  // Zod provides detailed error with field-specific messages
+  throw new Error(`Validation failed: ${error.message}`);
+}
+```
+
+**Benefits:**
+- Catches invalid inputs before making API calls
+- Provides field-specific error messages
+- Prevents unnecessary API rate limit consumption
+- Type-safe validation
+
+### 2. Authentication Error Handling
+
+The OAuth client implements automatic token refresh and fallback strategies.
+
+#### 401 Unauthorized Errors
+
+When a 401 error occurs, the server automatically attempts to refresh the access token.
+
+```typescript
+// Response interceptor in src/api/client.ts (lines 106-165)
+this.httpClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      const retryCount = config?.__authRetryCount || 0;
+
+      // Only retry once to avoid infinite loops
+      if (retryCount === 0 && config) {
+        config.__authRetryCount = 1;
+
+        console.error(
+          'eBay API authentication error (401). Attempting to refresh user token...'
+        );
+
+        try {
+          // Force token refresh
+          const newToken = await this.authClient.getAccessToken();
+          config.headers.Authorization = `Bearer ${newToken}`;
+
+          console.error('Token refreshed successfully. Retrying request...');
+
+          // Retry the request with new token
+          return await this.httpClient.request(config);
+        } catch (refreshError) {
+          console.error('Failed to refresh token:', refreshError);
+
+          throw new Error(
+            `Authentication failed. Token refresh failed: ${refreshError.message}. ` +
+            `Please use the ebay_set_user_tokens_with_expiry tool to provide valid tokens.`
+          );
+        }
+      }
+
+      // If retry already attempted, provide helpful error message
+      throw new Error(
+        `Authentication failed. Automatic token refresh failed. ` +
+        `Please use the ebay_set_user_tokens_with_expiry tool to provide valid tokens.`
+      );
+    }
+
+    // Other error handling...
+  }
+);
+```
+
+**Error Flow:**
+1. API returns 401 Unauthorized
+2. Server attempts to refresh access token
+3. If refresh succeeds, request is retried automatically
+4. If refresh fails, clear error message guides user to provide new tokens
+
+#### Token Expiry Handling
+
+The OAuth client checks token expiry before making requests (src/auth/oauth.ts:93-128).
+
+```typescript
+async getAccessToken(): Promise<string> {
+  // Try to use user token first
+  if (this.userTokens) {
+    // Check if access token is still valid
+    if (!this.isUserAccessTokenExpired(this.userTokens)) {
+      return this.userTokens.userAccessToken;
+    }
+
+    // Try to refresh if refresh token is valid
+    if (!this.isUserRefreshTokenExpired(this.userTokens)) {
+      try {
+        await this.refreshUserToken();
+        return this.userTokens.userAccessToken;
+      } catch (error) {
+        console.error('Failed to refresh user token, falling back to app access token:', error);
+        this.userTokens = null;
+      }
+    } else {
+      // Refresh token expired
+      console.error('User refresh token expired. User needs to re-authorize.');
+      this.userTokens = null;
+      throw new Error(
+        'User authorization expired. Please update EBAY_USER_REFRESH_TOKEN in .env with a new refresh token.'
+      );
+    }
+  }
+
+  // Fallback to app access token (client credentials)
+  if (this.appAccessToken && Date.now() < this.appAccessTokenExpiry) {
+    return this.appAccessToken;
+  }
+
+  await this.getOrRefreshAppAccessToken();
+  return this.appAccessToken!;
+}
+```
+
+**Fallback Strategy:**
+1. **Primary:** User access token (if valid)
+2. **Secondary:** Refresh user token (if access token expired)
+3. **Tertiary:** App access token from client credentials
+
+### 3. Rate Limit Error Handling
+
+The server handles rate limits at two levels:
+
+#### Client-Side Rate Limiting
+
+Prevents requests when approaching rate limits (src/api/client.ts:15-44).
+
+```typescript
+class RateLimitTracker {
+  private requestTimestamps: number[] = [];
+  private readonly windowMs = 60000; // 1 minute window
+  private readonly maxRequests = 5000; // Conservative limit
+
+  canMakeRequest(): boolean {
+    const now = Date.now();
+    // Remove timestamps older than window
+    this.requestTimestamps = this.requestTimestamps.filter(
+      (timestamp) => now - timestamp < this.windowMs
+    );
+    return this.requestTimestamps.length < this.maxRequests;
+  }
+
+  recordRequest(): void {
+    this.requestTimestamps.push(Date.now());
+  }
+}
+
+// Check before making request
+if (!this.rateLimitTracker.canMakeRequest()) {
+  const stats = this.rateLimitTracker.getStats();
+  throw new Error(
+    `Rate limit exceeded: ${stats.current}/${stats.max} requests in ${stats.windowMs}ms window. ` +
+    `Please wait before making more requests.`
+  );
+}
+```
+
+#### Server-Side Rate Limit Handling (429)
+
+When eBay API returns 429, the server provides clear guidance (src/api/client.ts:168-176).
+
+```typescript
+if (error.response?.status === 429) {
+  const retryAfter = error.response.headers['retry-after'];
+  const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 60000;
+
+  throw new Error(
+    `eBay API rate limit exceeded. Retry after ${waitTime / 1000} seconds. ` +
+    `Consider reducing request frequency or upgrading to user tokens for higher limits.`
+  );
+}
+```
+
+### 4. Server Error Handling (5xx)
+
+The server implements automatic retry with exponential backoff for server errors (src/api/client.ts:179-194).
+
+```typescript
+if (error.response?.status && error.response.status >= 500 && config) {
+  const retryCount = config.__retryCount || 0;
+
+  if (retryCount < 3) {
+    config.__retryCount = retryCount + 1;
+    const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+
+    console.error(
+      `eBay API server error (${error.response.status}). ` +
+      `Retrying in ${delay}ms (attempt ${retryCount + 1}/3)...`
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, Math.min(delay, 5000)));
+    return await this.httpClient.request(config);
+  }
+}
+```
+
+**Retry Strategy:**
+- **Attempt 1:** Immediate retry (0ms delay)
+- **Attempt 2:** 2 second delay
+- **Attempt 3:** 4 second delay
+- **Maximum delay:** 5 seconds (capped)
+
+### 5. eBay API Error Handling
+
+eBay API errors are transformed into clear, actionable messages (src/api/client.ts:196-204).
+
+```typescript
+if (axios.isAxiosError(error) && error.response?.data) {
+  const ebayError = error.response.data as EbayApiError;
+  const errorMessage =
+    ebayError.errors?.[0]?.longMessage ||
+    ebayError.errors?.[0]?.message ||
+    error.message;
+  throw new Error(`eBay API Error: ${errorMessage}`);
+}
+```
+
+**eBay Error Format:**
+```json
+{
+  "errors": [
+    {
+      "errorId": 123,
+      "domain": "API_INVENTORY",
+      "category": "REQUEST",
+      "message": "Invalid SKU format",
+      "longMessage": "The SKU 'test sku' contains invalid characters. SKUs must be alphanumeric.",
+      "parameters": [
+        {
+          "name": "sku",
+          "value": "test sku"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 6. MCP Tool Error Handling
+
+The MCP server wraps all tool executions with error handling (src/index.ts:42-66).
+
+```typescript
+this.server.registerTool(
+  toolDef.name,
+  {
+    description: toolDef.description,
+    inputSchema: toolDef.inputSchema,
+  },
+  async (args: Record<string, unknown>) => {
+    try {
+      const result = await executeTool(this.api, toolDef.name, args);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ error: errorMessage }, null, 2),
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+```
+
+**Error Response Format:**
+```json
+{
+  "error": "eBay API Error: The SKU 'test sku' contains invalid characters."
+}
+```
+
+## Common Error Scenarios
+
+### 1. Missing Access Token
+
+**Error:**
+```
+Access token is missing. Please provide your access token and refresh token by calling ebay_set_user_tokens tool in order to perform API requests.
+```
+
+**Cause:**
+No user tokens configured.
+
+**Solutions:**
+
+<Tabs>
+  <Tab title="Via .env File (Recommended)">
+    ```bash
+    # Add to .env file
+    EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
+    EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#...
+
+    # Run auto-setup
+    npm run auto-setup
+
+    # Restart MCP client
+    ```
+  </Tab>
+
+  <Tab title="Via MCP Tool">
+    ```
+    Use the ebay_set_user_tokens_with_expiry tool with:
+    - accessToken: Your user access token
+    - refreshToken: Your user refresh token
+    - accessTokenExpiry: Token expiration timestamp
+    ```
+
+    Note: Tokens set via tool are memory-only and lost on restart
+  </Tab>
+
+  <Tab title="Generate New Tokens">
+    ```
+    1. Use ebay_get_oauth_url tool to generate authorization URL
+    2. Open URL in browser and authorize
+    3. Exchange authorization code for tokens
+    4. Add tokens to .env file
+    ```
+  </Tab>
+</Tabs>
+
+### 2. Expired Refresh Token
+
+**Error:**
+```
+User authorization expired. Please update EBAY_USER_REFRESH_TOKEN in .env with a new refresh token.
+```
+
+**Cause:**
+Refresh token has expired (typically after 18 months).
+
+**Solution:**
+1. Generate new OAuth URL with `ebay_get_oauth_url` tool
+2. Complete authorization flow
+3. Update `.env` file with new refresh token
+4. Restart server
+
+### 3. Invalid SKU Format
+
+**Error:**
+```
+eBay API Error: The SKU 'test sku' contains invalid characters. SKUs must be alphanumeric.
+```
+
+**Cause:**
+SKU contains spaces or special characters.
+
+**Solution:**
+Use alphanumeric SKUs without spaces:
+```typescript
+// ❌ Bad
+sku: "test sku"
+sku: "test-sku!"
+
+// ✅ Good
+sku: "TEST_SKU_001"
+sku: "TESTSKU001"
+```
+
+### 4. Rate Limit Exceeded
+
+**Error:**
+```
+Rate limit exceeded: 5000/5000 requests in 60000ms window. Please wait before making more requests.
+```
+
+**Cause:**
+Too many requests in short time period.
+
+**Solutions:**
+- Wait for rate limit window to reset
+- Upgrade to user tokens (10,000-50,000 req/day vs. 1,000 with client credentials)
+- Reduce request frequency
+- Implement request batching
+
+### 5. Network Timeout
+
+**Error:**
+```
+timeout of 30000ms exceeded
+```
+
+**Cause:**
+Request took longer than 30 seconds.
+
+**Solutions:**
+- Check network connectivity
+- Try again later (may be temporary eBay API issue)
+- For bulk operations, break into smaller batches
+
+### 6. Validation Errors
+
+**Error:**
+```
+Validation failed: Invalid type: expected string, received number at "price.value"
+```
+
+**Cause:**
+Input doesn't match expected schema.
+
+**Solution:**
+Ensure all inputs match the expected types:
+```typescript
+// ❌ Bad
+{
+  price: {
+    value: 19.99,  // Number
+    currency: "USD"
+  }
+}
+
+// ✅ Good
+{
+  price: {
+    value: "19.99",  // String
+    currency: "USD"
+  }
+}
+```
+
+## Error Recovery Strategies
+
+### Automatic Recovery
+
+The server automatically recovers from:
+
+1. **Expired Access Tokens** - Automatically refreshes using refresh token
+2. **Server Errors (5xx)** - Retries with exponential backoff (up to 3 attempts)
+3. **Network Timeouts** - Can be retried manually
+
+### Manual Recovery
+
+Some errors require manual intervention:
+
+1. **Expired Refresh Tokens** - Requires new OAuth authorization
+2. **Invalid Credentials** - Update `.env` file with correct credentials
+3. **Validation Errors** - Fix input data
+4. **Permission Errors** - Update eBay app scopes
+
+### Graceful Degradation
+
+The server implements fallback strategies:
+
+1. **User Token → App Token** - Falls back to client credentials if user token unavailable
+2. **Partial Data** - Returns partial results when bulk operations partially fail
+3. **Default Values** - Uses sensible defaults when optional parameters missing
+
+## Error Logging
+
+The server logs errors to stderr for monitoring:
+
+```typescript
+// Authentication errors
+console.error('eBay API authentication error (401). Attempting to refresh user token...');
+console.error('Token refreshed successfully. Retrying request...');
+console.error('Failed to refresh token:', refreshError);
+
+// Rate limit warnings
+console.error(`eBay Rate Limit: ${remaining}/${limit} remaining`);
+
+// Server errors
+console.error(
+  `eBay API server error (${status}). Retrying in ${delay}ms (attempt ${retryCount + 1}/3)...`
+);
+```
+
+**Log Levels:**
+- **Error:** Authentication failures, API errors, rate limits
+- **Warning:** Token refresh, retry attempts
+- **Info:** Server startup, configuration validation
+
+## Debugging Errors
+
+### Enable Debug Mode
+
+```bash
+# In .env file
+EBAY_DEBUG=true
+```
+
+This provides additional logging for:
+- Request/response details
+- Token expiry timestamps
+- Rate limit statistics
+- Retry attempts
+
+### Check Token Status
+
+```typescript
+// Use ebay_get_token_status tool
+{
+  "hasUserTokens": true,
+  "tokenType": "User",
+  "accessTokenExpiry": "2025-11-16T12:00:00.000Z",
+  "refreshTokenExpiry": "2027-05-16T10:00:00.000Z",
+  "scopes": [
+    "https://api.ebay.com/oauth/api_scope/sell.account",
+    "https://api.ebay.com/oauth/api_scope/sell.inventory"
+  ]
+}
+```
+
+### Check Rate Limit Statistics
+
+```typescript
+// Get rate limit stats from client
+const stats = client.getRateLimitStats();
+// {
+//   current: 4523,
+//   max: 5000,
+//   windowMs: 60000
+// }
+```
+
+### Review Error Context
+
+All errors include context:
+```json
+{
+  "error": "eBay API Error: Invalid SKU format",
+  "details": {
+    "errorId": 25002,
+    "domain": "API_INVENTORY",
+    "category": "REQUEST",
+    "parameters": [
+      { "name": "sku", "value": "test sku" }
+    ]
+  }
+}
+```
+
+## Best Practices
+
+### 1. Always Handle Errors
+
+```typescript
+// ✅ Good
+try {
+  const result = await api.inventory.getInventoryItem(sku);
+  return result;
+} catch (error) {
+  console.error('Failed to get inventory item:', error);
+  // Handle error appropriately
+  throw error;
+}
+
+// ❌ Bad
+const result = await api.inventory.getInventoryItem(sku);
+return result;
+```
+
+### 2. Validate Inputs Early
+
+```typescript
+// ✅ Good
+const schema = z.object({
+  sku: z.string().min(1),
+  quantity: z.number().int().min(0),
+});
+
+const validated = schema.parse(input);
+await api.inventory.createInventoryItem(validated.sku, validated);
+
+// ❌ Bad
+await api.inventory.createInventoryItem(input.sku, input);
+```
+
+### 3. Provide Context in Errors
+
+```typescript
+// ✅ Good
+throw new Error(`Failed to create offer for SKU "${sku}": ${error.message}`);
+
+// ❌ Bad
+throw new Error(error.message);
+```
+
+### 4. Use Appropriate Error Types
+
+```typescript
+class RateLimitError extends Error {
+  constructor(message: string, public retryAfter: number) {
+    super(message);
+    this.name = 'RateLimitError';
+  }
+}
+
+class AuthenticationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AuthenticationError';
+  }
+}
+```
+
+### 5. Don't Expose Sensitive Information
+
+```typescript
+// ✅ Good
+throw new Error('Authentication failed. Please check credentials.');
+
+// ❌ Bad
+throw new Error(`Authentication failed. Client ID: ${clientId}, Secret: ${clientSecret}`);
+```
+
+## Related Topics
+
+<CardGroup cols={2}>
+  <Card title="Architecture" icon="sitemap" href="/advanced/architecture">
+    Understand the error handling architecture
+  </Card>
+
+  <Card title="Rate Limits" icon="gauge-high" href="/advanced/rate-limits">
+    Learn about rate limiting and strategies
+  </Card>
+
+  <Card title="Troubleshooting" icon="wrench" href="/support/troubleshooting">
+    Common issues and solutions
+  </Card>
+
+  <Card title="OAuth Setup" icon="lock" href="/authentication/oauth-setup">
+    Configure authentication properly
+  </Card>
+</CardGroup>

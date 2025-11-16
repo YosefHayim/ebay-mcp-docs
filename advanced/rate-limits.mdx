@@ -1,12 +1,657 @@
 ---
 title: "Rate Limits"
-description: "Documentation for Rate Limits"
+description: "Understanding eBay API rate limits, client-side rate limiting strategies, and best practices for high-volume operations"
 ---
 
 # Rate Limits
 
-Documentation for this section is coming soon.
+eBay enforces rate limits on API requests to ensure fair usage and system stability. Understanding these limits and implementing appropriate strategies is critical for building reliable applications. This guide covers eBay's rate limit policies, the server's rate limiting implementation, and best practices.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
+## eBay API Rate Limits
+
+eBay implements different rate limits based on your authentication method and marketplace.
+
+### User Token Limits (Recommended)
+
+When using user access tokens (OAuth 2.0 with user authorization):
+
+<CardGroup cols={3}>
+  <Card title="Standard Tier" icon="gauge">
+    **10,000 requests/day**
+
+    Default for most sellers
+  </Card>
+
+  <Card title="Premium Tier" icon="gauge-high">
+    **25,000 requests/day**
+
+    Available to Power Sellers
+  </Card>
+
+  <Card title="Enterprise Tier" icon="rocket">
+    **50,000 requests/day**
+
+    Available to Top Rated Sellers
+  </Card>
+</CardGroup>
+
+**Rate Window:** 24 hours (rolling window)
+
+**Scopes:**
+```
+https://api.ebay.com/oauth/api_scope/sell.account
+https://api.ebay.com/oauth/api_scope/sell.inventory
+https://api.ebay.com/oauth/api_scope/sell.fulfillment
+https://api.ebay.com/oauth/api_scope/sell.marketing
+https://api.ebay.com/oauth/api_scope/sell.analytics.readonly
+```
+
+### Client Credentials Limits (Fallback)
+
+When using application tokens (OAuth 2.0 Client Credentials flow):
+
+<Card title="Basic Tier" icon="gauge-simple">
+  **1,000 requests/day**
+
+  Application-level operations only
 </Card>
+
+**Limitations:**
+- Limited API access (no seller-specific operations)
+- Lower rate limits
+- No access to private seller data
+
+<Warning>
+Client credentials should only be used as a fallback. Always prefer user tokens for production workloads.
+</Warning>
+
+## Rate Limit Headers
+
+eBay includes rate limit information in response headers:
+
+```http
+HTTP/1.1 200 OK
+X-eBay-C-RateLimit-Limit: 5000
+X-eBay-C-RateLimit-Remaining: 4523
+X-eBay-C-RateLimit-Reset: 2025-11-16T00:00:00Z
+```
+
+| Header | Description | Example |
+|--------|-------------|---------|
+| `X-eBay-C-RateLimit-Limit` | Total requests allowed in window | `5000` |
+| `X-eBay-C-RateLimit-Remaining` | Requests remaining in current window | `4523` |
+| `X-eBay-C-RateLimit-Reset` | When the rate limit window resets | `2025-11-16T00:00:00Z` |
+
+## Client-Side Rate Limiting
+
+The eBay MCP Server implements client-side rate limiting to prevent exceeding eBay's limits before making requests.
+
+### RateLimitTracker Implementation
+
+The server tracks request timestamps and enforces conservative limits (src/api/client.ts:15-44):
+
+```typescript
+class RateLimitTracker {
+  private requestTimestamps: number[] = [];
+  private readonly windowMs = 60000; // 1 minute window
+  private readonly maxRequests = 5000; // Conservative limit
+
+  /**
+   * Check if a request can be made within rate limits
+   */
+  canMakeRequest(): boolean {
+    const now = Date.now();
+
+    // Remove timestamps older than the window
+    this.requestTimestamps = this.requestTimestamps.filter(
+      (timestamp) => now - timestamp < this.windowMs
+    );
+
+    return this.requestTimestamps.length < this.maxRequests;
+  }
+
+  /**
+   * Record a request timestamp
+   */
+  recordRequest(): void {
+    this.requestTimestamps.push(Date.now());
+  }
+
+  /**
+   * Get current rate limit statistics
+   */
+  getStats(): { current: number; max: number; windowMs: number } {
+    const now = Date.now();
+
+    this.requestTimestamps = this.requestTimestamps.filter(
+      (timestamp) => now - timestamp < this.windowMs
+    );
+
+    return {
+      current: this.requestTimestamps.length,
+      max: this.maxRequests,
+      windowMs: this.windowMs,
+    };
+  }
+}
+```
+
+### How It Works
+
+<Steps>
+  <Step title="Pre-Request Check">
+    Before making an API call, the HTTP client checks if the rate limit allows the request:
+
+    ```typescript
+    if (!this.rateLimitTracker.canMakeRequest()) {
+      const stats = this.rateLimitTracker.getStats();
+      throw new Error(
+        `Rate limit exceeded: ${stats.current}/${stats.max} requests in ${stats.windowMs}ms window`
+      );
+    }
+    ```
+  </Step>
+
+  <Step title="Token Injection">
+    If rate limit check passes, the request proceeds with authentication token injection
+  </Step>
+
+  <Step title="Request Recording">
+    After successful rate limit check, the request timestamp is recorded:
+
+    ```typescript
+    this.rateLimitTracker.recordRequest();
+    ```
+  </Step>
+
+  <Step title="Window Cleanup">
+    Old timestamps outside the rate limit window are automatically removed to keep memory usage low
+  </Step>
+</Steps>
+
+### Configuration
+
+The rate limiter uses conservative default values:
+
+| Parameter | Default Value | Description |
+|-----------|---------------|-------------|
+| `windowMs` | `60000` (1 minute) | Rolling time window for rate limiting |
+| `maxRequests` | `5000` | Maximum requests allowed in window |
+
+<Note>
+The 5,000 requests per minute limit is conservative. For user tokens with 10,000-50,000 daily limits, this allows sustained operation while preventing burst-related issues.
+</Note>
+
+## Server-Side Rate Limit Handling
+
+When eBay API returns a 429 (Too Many Requests) status, the server provides clear guidance:
+
+```typescript
+// Response interceptor (src/api/client.ts:168-176)
+if (error.response?.status === 429) {
+  const retryAfter = error.response.headers['retry-after'];
+  const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 60000;
+
+  throw new Error(
+    `eBay API rate limit exceeded. Retry after ${waitTime / 1000} seconds. ` +
+    `Consider reducing request frequency or upgrading to user tokens for higher limits.`
+  );
+}
+```
+
+**Response includes:**
+- Exact wait time from `Retry-After` header
+- Actionable advice (reduce frequency, upgrade to user tokens)
+- Clear error message
+
+## Rate Limit Monitoring
+
+### Header Tracking
+
+The server logs rate limit information from eBay response headers (src/api/client.ts:94-104):
+
+```typescript
+this.httpClient.interceptors.response.use(
+  (response) => {
+    // Extract rate limit info from headers
+    const remaining = response.headers['x-ebay-c-ratelimit-remaining'];
+    const limit = response.headers['x-ebay-c-ratelimit-limit'];
+
+    if (remaining && limit) {
+      console.error(`eBay Rate Limit: ${remaining}/${limit} remaining`);
+    }
+
+    return response;
+  }
+);
+```
+
+**Output Example:**
+```
+eBay Rate Limit: 4523/5000 remaining
+eBay Rate Limit: 4522/5000 remaining
+eBay Rate Limit: 4521/5000 remaining
+```
+
+### Statistics API
+
+Get current client-side rate limit statistics:
+
+```typescript
+const stats = client.getRateLimitStats();
+
+console.log(stats);
+// {
+//   current: 127,
+//   max: 5000,
+//   windowMs: 60000
+// }
+```
+
+## Rate Limiting Strategies
+
+### 1. Use User Tokens
+
+<Note>
+**Most Important:** Always use user tokens for production workloads.
+</Note>
+
+User tokens provide 10-50x higher rate limits compared to client credentials.
+
+**Setup:**
+```bash
+# Add to .env file
+EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
+
+# Run auto-setup
+npm run auto-setup
+
+# Restart server
+```
+
+See [OAuth Setup](/authentication/oauth-setup) for detailed instructions.
+
+### 2. Batch Operations
+
+Group multiple operations into batch API calls when available:
+
+```typescript
+// ❌ Bad: Individual calls (uses 100 requests)
+for (const sku of skus) {
+  await api.inventory.getInventoryItem(sku);
+}
+
+// ✅ Good: Batch call (uses 1 request)
+await api.inventory.bulkGetInventoryItem({ skus });
+```
+
+**Available Batch Operations:**
+- `bulkCreateOrReplaceInventoryItem` - Create/update multiple inventory items
+- `bulkCreateOffer` - Create multiple offers
+- `bulkPublishOffer` - Publish multiple offers
+- `bulkMigrateListing` - Migrate multiple listings
+
+### 3. Implement Caching
+
+Cache frequently accessed, rarely changing data:
+
+```typescript
+// Cache categories, policies, and metadata
+const cache = new Map<string, { data: any; timestamp: number }>();
+
+async function getCategoryTree(categoryTreeId: string) {
+  const cached = cache.get(categoryTreeId);
+  const TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+  if (cached && Date.now() - cached.timestamp < TTL) {
+    return cached.data;
+  }
+
+  const data = await api.metadata.getCategoryTree(categoryTreeId);
+  cache.set(categoryTreeId, { data, timestamp: Date.now() });
+
+  return data;
+}
+```
+
+**Good Candidates for Caching:**
+- Category trees
+- Fulfillment/payment/return policies
+- Marketplace metadata
+- Seller standards profiles (refresh daily)
+
+### 4. Request Throttling
+
+For high-volume operations, throttle requests to stay within limits:
+
+```typescript
+class RequestThrottler {
+  private queue: Array<() => Promise<any>> = [];
+  private processing = false;
+  private requestsPerSecond: number;
+
+  constructor(requestsPerSecond: number = 10) {
+    this.requestsPerSecond = requestsPerSecond;
+  }
+
+  async add<T>(fn: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          const result = await fn();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      this.processQueue();
+    });
+  }
+
+  private async processQueue() {
+    if (this.processing || this.queue.length === 0) return;
+
+    this.processing = true;
+
+    while (this.queue.length > 0) {
+      const task = this.queue.shift()!;
+      await task();
+      await this.delay(1000 / this.requestsPerSecond);
+    }
+
+    this.processing = false;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+
+// Usage
+const throttler = new RequestThrottler(10); // 10 requests/second
+
+for (const sku of skus) {
+  await throttler.add(() => api.inventory.getInventoryItem(sku));
+}
+```
+
+### 5. Exponential Backoff
+
+When rate limited, use exponential backoff before retrying:
+
+```typescript
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3
+): Promise<T> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (error.message.includes('rate limit') && i < maxRetries - 1) {
+        const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+        console.log(`Rate limited. Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        throw error;
+      }
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+
+// Usage
+const item = await retryWithBackoff(() => api.inventory.getInventoryItem(sku));
+```
+
+### 6. Prioritize Critical Operations
+
+When approaching rate limits, prioritize essential operations:
+
+```typescript
+enum Priority {
+  CRITICAL = 1,  // Order fulfillment, customer service
+  HIGH = 2,      // Inventory updates, pricing changes
+  MEDIUM = 3,    // Analytics, reports
+  LOW = 4,       // Bulk operations, background tasks
+}
+
+class PriorityQueue {
+  private queues = new Map<Priority, Array<() => Promise<any>>>();
+
+  add(priority: Priority, fn: () => Promise<any>) {
+    if (!this.queues.has(priority)) {
+      this.queues.set(priority, []);
+    }
+    this.queues.get(priority)!.push(fn);
+  }
+
+  async processNext() {
+    // Process in priority order
+    for (const priority of [Priority.CRITICAL, Priority.HIGH, Priority.MEDIUM, Priority.LOW]) {
+      const queue = this.queues.get(priority);
+      if (queue && queue.length > 0) {
+        const task = queue.shift()!;
+        return await task();
+      }
+    }
+  }
+}
+```
+
+## Rate Limit Best Practices
+
+### Do's
+
+<Check>
+**Use user tokens for production** - 10-50x higher limits than client credentials
+</Check>
+
+<Check>
+**Monitor rate limit headers** - Track remaining requests and adjust behavior
+</Check>
+
+<Check>
+**Implement client-side rate limiting** - Prevent hitting eBay limits
+</Check>
+
+<Check>
+**Cache static data** - Reduce unnecessary API calls
+</Check>
+
+<Check>
+**Use batch operations** - Minimize request count
+</Check>
+
+<Check>
+**Handle 429 errors gracefully** - Implement exponential backoff
+</Check>
+
+### Don'ts
+
+<Warning>
+**Don't burst requests** - Spread requests over time to avoid hitting minute-level limits
+</Warning>
+
+<Warning>
+**Don't ignore rate limit headers** - Use them to adjust request frequency
+</Warning>
+
+<Warning>
+**Don't retry immediately after 429** - Respect the `Retry-After` header
+</Warning>
+
+<Warning>
+**Don't use client credentials for high-volume** - Upgrade to user tokens
+</Warning>
+
+## Troubleshooting Rate Limits
+
+### Symptom: Frequent Rate Limit Errors
+
+**Causes:**
+1. Using client credentials (1,000 req/day limit)
+2. Burst requests without throttling
+3. Not using batch operations
+
+**Solutions:**
+1. Switch to user tokens
+2. Implement request throttling
+3. Use batch APIs for bulk operations
+4. Cache frequently accessed data
+
+### Symptom: Inconsistent Rate Limits
+
+**Causes:**
+1. Mixed use of user and app tokens
+2. Multiple server instances sharing same credentials
+3. External tools using same credentials
+
+**Solutions:**
+1. Ensure consistent token usage
+2. Implement distributed rate limiting if running multiple instances
+3. Use separate credentials for different applications
+
+### Symptom: Rate Limit Warnings in Logs
+
+**Example:**
+```
+eBay Rate Limit: 47/5000 remaining
+eBay Rate Limit: 46/5000 remaining
+eBay Rate Limit: 45/5000 remaining
+```
+
+**Causes:**
+Approaching daily or hourly limit
+
+**Solutions:**
+1. Reduce request frequency
+2. Defer non-critical operations
+3. Check for inefficient code (redundant API calls)
+
+## Rate Limit Tiers
+
+eBay offers different rate limit tiers based on seller performance:
+
+| Tier | Daily Limit | Requirements |
+|------|-------------|--------------|
+| **Standard** | 10,000 | Default for all sellers |
+| **Premium** | 25,000 | Power Sellers (varies by marketplace) |
+| **Enterprise** | 50,000 | Top Rated Sellers |
+| **Custom** | Negotiated | Contact eBay for custom limits |
+
+<Tip>
+Maintain good seller performance to qualify for higher rate limit tiers. See [eBay Seller Standards](https://www.ebay.com/help/policies/selling-policies/seller-performance-policy) for details.
+</Tip>
+
+## Comparing Token Types
+
+<Tabs>
+  <Tab title="User Tokens">
+    **Advantages:**
+    - 10,000-50,000 requests/day
+    - Full API access
+    - Seller-specific operations
+    - Automatic token refresh
+
+    **Disadvantages:**
+    - Requires OAuth authorization
+    - Tokens expire (refresh every 2 hours)
+    - User must grant permissions
+
+    **Best For:**
+    - Production applications
+    - High-volume operations
+    - Seller-specific data access
+  </Tab>
+
+  <Tab title="Client Credentials">
+    **Advantages:**
+    - No user authorization required
+    - Simple setup
+    - Automatic token management
+
+    **Disadvantages:**
+    - Only 1,000 requests/day
+    - Limited API access
+    - No seller-specific operations
+
+    **Best For:**
+    - Testing and development
+    - Public data access
+    - Low-volume operations
+    - Fallback authentication
+  </Tab>
+</Tabs>
+
+## Example: High-Volume Operation
+
+Here's how to efficiently process a large inventory update:
+
+```typescript
+async function updateLargeInventory(items: InventoryItem[]) {
+  const BATCH_SIZE = 25;
+  const RATE_LIMIT_PER_SECOND = 10;
+
+  // Split into batches
+  const batches = [];
+  for (let i = 0; i < items.length; i += BATCH_SIZE) {
+    batches.push(items.slice(i, i + BATCH_SIZE));
+  }
+
+  console.log(`Processing ${items.length} items in ${batches.length} batches`);
+
+  const throttler = new RequestThrottler(RATE_LIMIT_PER_SECOND);
+  const results = [];
+
+  for (const batch of batches) {
+    const result = await throttler.add(async () => {
+      return await api.inventory.bulkCreateOrReplaceInventoryItem({
+        requests: batch.map(item => ({
+          sku: item.sku,
+          product: item.product,
+          condition: item.condition,
+          availability: item.availability,
+        })),
+      });
+    });
+
+    results.push(result);
+
+    // Log progress
+    console.log(
+      `Processed ${results.length}/${batches.length} batches ` +
+      `(${results.length * BATCH_SIZE}/${items.length} items)`
+    );
+  }
+
+  return results;
+}
+```
+
+**This approach:**
+- Uses batch API (25 items per request)
+- Throttles to 10 requests/second
+- Provides progress feedback
+- Handles 10,000 items using only 400 requests
+
+## Related Topics
+
+<CardGroup cols={2}>
+  <Card title="Error Handling" icon="triangle-exclamation" href="/advanced/error-handling">
+    Handle rate limit errors effectively
+  </Card>
+
+  <Card title="OAuth Setup" icon="lock" href="/authentication/oauth-setup">
+    Configure user tokens for higher limits
+  </Card>
+
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    General best practices for eBay MCP Server
+  </Card>
+
+  <Card title="Bulk Operations" icon="layer-group" href="/guides/bulk-operations">
+    Efficient batch processing strategies
+  </Card>
+</CardGroup>
