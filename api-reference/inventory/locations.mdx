@@ -1,0 +1,89 @@
+---
+title: "Inventory Locations"
+description: "Manage warehouse and fulfillment center locations for your inventory"
+---
+
+# Inventory Locations
+
+Inventory locations represent physical warehouses or fulfillment centers where your products are stored. Locations are required for certain eBay programs like In-Store Pickup.
+
+## Creating a Location
+
+```javascript
+const location = await mcp.useTool('inventory_createInventoryLocation', {
+  merchant_location_key: 'warehouse-main',
+  location: {
+    address: {
+      addressLine1: '123 Warehouse St',
+      city: 'Los Angeles',
+      stateOrProvince: 'CA',
+      postalCode: '90001',
+      country: 'US'
+    }
+  },
+  location_types: ['WAREHOUSE'],
+  name: 'Main Warehouse - LA',
+  merchant_location_status: 'ENABLED'
+});
+
+console.log(`✅ Location created: ${location.merchantLocationKey}`);
+```
+
+## Location Types
+
+- `WAREHOUSE` - Storage/fulfillment center
+- `STORE` - Physical retail store (for in-store pickup)
+
+## Managing Locations
+
+### Get All Locations
+
+```javascript
+const locations = await mcp.useTool('inventory_getInventoryLocations', {
+  limit: 100
+});
+
+locations.locations.forEach(loc => {
+  console.log(`${loc.name}: ${loc.merchantLocationStatus}`);
+});
+```
+
+### Update Location
+
+```javascript
+await mcp.useTool('inventory_updateInventoryLocation', {
+  merchant_location_key: 'warehouse-main',
+  location: {
+    address: {
+      addressLine1: '456 New Address St',
+      city: 'Los Angeles',
+      stateOrProvince: 'CA',
+      postalCode: '90002',
+      country: 'US'
+    }
+  }
+});
+```
+
+### Disable/Enable Location
+
+```javascript
+await mcp.useTool('inventory_disableInventoryLocation', {
+  merchant_location_key: 'warehouse-temp'
+});
+
+await mcp.useTool('inventory_enableInventoryLocation', {
+  merchant_location_key: 'warehouse-temp'
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Inventory Overview" icon="box" href="/api-reference/inventory/overview">
+    Back to Inventory API overview
+  </Card>
+  <Card title="Fulfillment API" icon="truck" href="/api-reference/fulfillment/overview">
+    Process and ship orders
+  </Card>
+</CardGroup>

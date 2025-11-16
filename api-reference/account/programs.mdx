@@ -1,0 +1,457 @@
+---
+title: "eBay Seller Programs"
+description: "Manage enrollment in eBay seller programs and fulfillment services"
+---
+
+# eBay Seller Programs
+
+eBay offers various seller programs that provide benefits like reduced fees, increased visibility, and access to premium features. The Account API allows you to programmatically manage your program enrollments.
+
+## Available Programs
+
+<CardGroup cols={2}>
+  <Card title="Top Rated Seller" icon="star" color="#E53238">
+    Elite seller status with fee discounts and visibility boost
+  </Card>
+  <Card title="eBay Guaranteed Delivery" icon="shipping-fast" color="#0064D2">
+    Promise delivery by specific dates for faster sales
+  </Card>
+  <Card title="Promoted Listings" icon="bullhorn" color="#F5AF02">
+    Advertising program to boost listing visibility
+  </Card>
+  <Card title="Global Shipping Program" icon="globe" color="#86B817">
+    Simplified international shipping management
+  </Card>
+</CardGroup>
+
+## Managing Programs
+
+### Get All Programs
+
+Retrieve all available programs and your enrollment status:
+
+```javascript
+const programs = await mcp.useTool('account_getPrograms', {
+  marketplace_id: 'EBAY_US'
+});
+
+console.log('Available Programs:');
+programs.programs.forEach(program => {
+  console.log(`${program.programType}: ${program.programStatus}`);
+});
+```
+
+### Opt In to a Program
+
+Enroll in an eBay seller program:
+
+```javascript
+// Opt in to Out of Stock Control
+const response = await mcp.useTool('account_optInToProgram', {
+  marketplace_id: 'EBAY_US',
+  program_type: 'OUT_OF_STOCK_CONTROL'
+});
+
+if (response.programStatus === 'OPTED_IN') {
+  console.log('✅ Successfully enrolled in Out of Stock Control');
+}
+```
+
+### Opt Out of a Program
+
+Leave a seller program:
+
+```javascript
+await mcp.useTool('account_optOutOfProgram', {
+  marketplace_id: 'EBAY_US',
+  program_type: 'OUT_OF_STOCK_CONTROL'
+});
+
+console.log('Opted out of program');
+```
+
+## Program Types
+
+### 1. Out of Stock Control
+
+**Program Type:** `OUT_OF_STOCK_CONTROL`
+
+**Description:** Hide out-of-stock listings instead of ending them. Preserves search ranking and item specifics.
+
+**Benefits:**
+- Maintain listing search ranking
+- Preserve item history and reviews
+- Automatically republish when back in stock
+- Save time recreating listings
+
+**Eligibility:**
+- All sellers
+- No minimum requirements
+
+**Example:**
+
+```javascript
+// Enable out of stock control
+await mcp.useTool('account_optInToProgram', {
+  marketplace_id: 'EBAY_US',
+  program_type: 'OUT_OF_STOCK_CONTROL'
+});
+
+// When item is out of stock, set quantity to 0
+// Listing will be hidden automatically
+await mcp.useTool('inventory_updateInventoryItem', {
+  sku: 'ITEM-001',
+  availability: {
+    shipToLocationAvailability: {
+      quantity: 0
+    }
+  }
+});
+```
+
+### 2. Top Rated Seller Program
+
+**Program Type:** `TOP_RATED_SELLER`
+
+**Description:** Elite seller status with benefits for maintaining high performance standards.
+
+**Benefits:**
+- 10% final value fee discount on eligible items
+- "Top Rated Plus" badge on listings
+- Higher search ranking
+- Increased buyer confidence
+
+**Requirements:**
+- At least 100 transactions and $1,000 in sales in past 12 months (US)
+- Transaction defect rate < 0.5%
+- Late shipment rate < 3%
+- Cases closed without seller resolution < 0.3%
+- Tracking uploaded on time > 95%
+
+**Example:**
+
+```javascript
+// Check Top Rated Seller status
+const programs = await mcp.useTool('account_getPrograms', {
+  marketplace_id: 'EBAY_US'
+});
+
+const trsProgram = programs.programs.find(
+  p => p.programType === 'TOP_RATED_SELLER'
+);
+
+console.log(`Top Rated Status: ${trsProgram.programStatus}`);
+console.log(`Eligible: ${trsProgram.waiveOverride ? 'Yes' : 'No'}`);
+```
+
+### 3. eBay Guaranteed Delivery
+
+**Program Type:** `EBAY_GUARANTEED_DELIVERY`
+
+**Description:** Promise delivery by a specific date for faster conversions.
+
+**Benefits:**
+- "Guaranteed Delivery" badge on listings
+- Higher conversion rates
+- Improved search visibility
+- Competitive advantage
+
+**Requirements:**
+- Top Rated Seller status
+- 1-day handling time
+- Same-day or next-day shipping
+- Use of specific shipping services (USPS Priority, FedEx, UPS)
+
+**Example:**
+
+```javascript
+// Check eligibility
+const programs = await mcp.useTool('account_getPrograms', {
+  marketplace_id: 'EBAY_US'
+});
+
+const egdProgram = programs.programs.find(
+  p => p.programType === 'EBAY_GUARANTEED_DELIVERY'
+);
+
+if (egdProgram.programStatus === 'ELIGIBLE') {
+  // Opt in
+  await mcp.useTool('account_optInToProgram', {
+    marketplace_id: 'EBAY_US',
+    program_type: 'EBAY_GUARANTEED_DELIVERY'
+  });
+}
+```
+
+### 4. Global Shipping Program
+
+**Program Type:** `GLOBAL_SHIPPING_PROGRAM`
+
+**Description:** eBay manages international shipping for you. You ship domestically to eBay's shipping center, and eBay handles the rest.
+
+**Benefits:**
+- Simplified international selling
+- eBay handles customs and import charges
+- Protection from international shipping issues
+- Expand to 100+ countries easily
+
+**How It Works:**
+1. You ship item to eBay's US shipping center
+2. eBay handles international shipping, customs, taxes
+3. You're protected from international claims/returns
+
+**Example:**
+
+```javascript
+// Opt in to Global Shipping Program
+await mcp.useTool('account_optInToProgram', {
+  marketplace_id: 'EBAY_US',
+  program_type: 'GLOBAL_SHIPPING_PROGRAM'
+});
+
+// Your fulfillment policy automatically applies to international buyers
+// You only ship domestically to eBay's shipping center
+```
+
+### 5. Promoted Listings Standard
+
+**Program Type:** `PROMOTED_LISTINGS_STANDARD`
+
+**Description:** Pay-per-sale advertising to boost listing visibility in search results.
+
+**Benefits:**
+- Appear higher in search results
+- Pay only when item sells
+- Set your own ad rate (1-20%)
+- Increase visibility without upfront cost
+
+**Example:**
+
+```javascript
+// Check program status
+const programs = await mcp.useTool('account_getPrograms', {
+  marketplace_id: 'EBAY_US'
+});
+
+const plProgram = programs.programs.find(
+  p => p.programType === 'PROMOTED_LISTINGS_STANDARD'
+);
+
+console.log(`Promoted Listings: ${plProgram.programStatus}`);
+
+// Opt in if not already
+if (plProgram.programStatus !== 'OPTED_IN') {
+  await mcp.useTool('account_optInToProgram', {
+    marketplace_id: 'EBAY_US',
+    program_type: 'PROMOTED_LISTINGS_STANDARD'
+  });
+}
+```
+
+## Program Status Values
+
+| Status | Description |
+|--------|-------------|
+| `OPTED_IN` | Currently enrolled in the program |
+| `OPTED_OUT` | Not enrolled, but eligible |
+| `ELIGIBLE` | Eligible but haven't opted in yet |
+| `NOT_ELIGIBLE` | Don't meet program requirements |
+
+## Complete Program Management Example
+
+```javascript
+async function manageSellerPrograms() {
+  const marketplace = 'EBAY_US';
+
+  // Get all programs
+  const { programs } = await mcp.useTool('account_getPrograms', {
+    marketplace_id: marketplace
+  });
+
+  console.log('📊 Program Status Report:\n');
+
+  // Analyze each program
+  for (const program of programs) {
+    console.log(`Program: ${program.programType}`);
+    console.log(`Status: ${program.programStatus}`);
+
+    // Auto opt-in to beneficial programs if eligible
+    if (program.programStatus === 'ELIGIBLE') {
+      const beneficialPrograms = [
+        'OUT_OF_STOCK_CONTROL',
+        'PROMOTED_LISTINGS_STANDARD'
+      ];
+
+      if (beneficialPrograms.includes(program.programType)) {
+        console.log(`✅ Auto-enrolling in ${program.programType}...`);
+
+        await mcp.useTool('account_optInToProgram', {
+          marketplace_id: marketplace,
+          program_type: program.programType
+        });
+
+        console.log(`Enrolled successfully!`);
+      }
+    }
+
+    console.log('---\n');
+  }
+
+  // Check Top Rated Seller status specifically
+  const trsProgram = programs.find(p => p.programType === 'TOP_RATED_SELLER');
+
+  if (trsProgram?.programStatus === 'OPTED_IN') {
+    console.log('🌟 You are a Top Rated Seller!');
+    console.log('Benefits: 10% FVF discount, Top Rated badge, higher ranking');
+  } else if (trsProgram?.programStatus === 'ELIGIBLE') {
+    console.log('⭐ You are eligible for Top Rated Seller!');
+    console.log('Program is automatic - maintain your metrics to keep this status.');
+  } else {
+    console.log('📈 Work towards Top Rated Seller status:');
+    console.log('- Maintain <0.5% transaction defect rate');
+    console.log('- Achieve <3% late shipment rate');
+    console.log('- Upload tracking on time >95%');
+  }
+}
+
+await manageSellerPrograms();
+```
+
+## Program Optimization Tips
+
+<AccordionGroup>
+  <Accordion title="Achieving Top Rated Seller">
+    **Key Metrics to Monitor:**
+
+    ```javascript
+    // Monitor your seller metrics
+    const sellerStandards = await mcp.useTool('account_getSellerStandards', {
+      marketplace_id: 'EBAY_US'
+    });
+
+    console.log('Performance Metrics:');
+    console.log(`Transaction Defect Rate: ${sellerStandards.defectRate}%`);
+    console.log(`Late Shipment Rate: ${sellerStandards.lateShipmentRate}%`);
+    ```
+
+    **Best Practices:**
+    - Ship within 1 business day
+    - Always upload tracking numbers
+    - Respond to messages within 24 hours
+    - Resolve issues before buyers open cases
+    - Describe items accurately to reduce returns
+  </Accordion>
+
+  <Accordion title="Maximizing Promoted Listings ROI">
+    **Ad Rate Strategy:**
+    - Start with 5% ad rate
+    - Increase to 8-10% for high-profit items
+    - Monitor conversion rates weekly
+    - Pause ads on slow-moving items
+
+    **Best Items to Promote:**
+    - New listings (first 30 days)
+    - High-margin products
+    - Competitive categories
+    - Seasonal items during peak periods
+
+    ```javascript
+    // Example: Promote high-value items automatically
+    const items = await mcp.useTool('inventory_getInventoryItems', {
+      limit: 100
+    });
+
+    for (const item of items.inventoryItems) {
+      // Promote items with price > $50
+      if (parseFloat(item.offers[0]?.pricingSummary?.price?.value) > 50) {
+        await mcp.useTool('marketing_createCampaign', {
+          campaign_name: `Promoted - ${item.sku}`,
+          ad_rate: 8, // 8% ad rate for high-value items
+          marketplace_id: 'EBAY_US',
+          funding_strategy: 'COST_PER_SALE',
+          inventory_reference_id: item.sku
+        });
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Global Shipping Best Practices">
+    **When to Use GSP:**
+    - You want to sell internationally without hassle
+    - Items under 5 lbs and under $2,500 value
+    - You don't want to handle customs paperwork
+
+    **When NOT to Use GSP:**
+    - Very large or heavy items (freight shipping)
+    - High-value items >$2,500
+    - You offer better international shipping rates
+
+    **Setup:**
+    ```javascript
+    // Opt in to Global Shipping Program
+    await mcp.useTool('account_optInToProgram', {
+      marketplace_id: 'EBAY_US',
+      program_type: 'GLOBAL_SHIPPING_PROGRAM'
+    });
+
+    // Fulfillment policy automatically enables international shipping
+    // You only ship to eBay's US shipping center
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+### Program Not Available
+
+```javascript
+const programs = await mcp.useTool('account_getPrograms', {
+  marketplace_id: 'EBAY_US'
+});
+
+const program = programs.programs.find(
+  p => p.programType === 'DESIRED_PROGRAM_TYPE'
+);
+
+if (!program) {
+  console.error('Program not available in your marketplace');
+} else if (program.programStatus === 'NOT_ELIGIBLE') {
+  console.error('You do not meet the requirements for this program');
+  console.error('Reason:', program.ineligibilityReasons);
+}
+```
+
+### Opt-In Failed
+
+```javascript
+try {
+  await mcp.useTool('account_optInToProgram', {
+    marketplace_id: 'EBAY_US',
+    program_type: 'TOP_RATED_SELLER'
+  });
+} catch (error) {
+  if (error.code === 'NOT_ELIGIBLE') {
+    console.error('You do not meet the program requirements');
+  } else if (error.code === 'ALREADY_OPTED_IN') {
+    console.log('Already enrolled in this program');
+  }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Account Policies" icon="file-contract" href="/api-reference/account/policies">
+    Manage return, payment, and shipping policies
+  </Card>
+  <Card title="Marketing API" icon="bullhorn" href="/api-reference/marketing/overview">
+    Create promoted listings campaigns
+  </Card>
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Optimize your seller performance
+  </Card>
+  <Card title="Account Overview" icon="home" href="/api-reference/account/overview">
+    Back to Account API overview
+  </Card>
+</CardGroup>

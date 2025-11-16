@@ -1,0 +1,91 @@
+---
+title: "Order Management"
+description: "Retrieve, process, and manage eBay orders"
+---
+
+# Order Management
+
+Retrieve and manage customer orders through the Fulfillment API.
+
+## Getting Orders
+
+```javascript
+// Get unfulfilled orders
+const { orders } = await mcp.useTool('fulfillment_getOrders', {
+  filter: 'orderfulfillmentstatus:{NOT_STARTED}',
+  limit: 50
+});
+
+// Get specific order
+const order = await mcp.useTool('fulfillment_getOrder', {
+  order_id: '12-34567-89012'
+});
+
+console.log(`Order ID: ${order.orderId}`);
+console.log(`Buyer: ${order.buyer.username}`);
+console.log(`Total: ${order.pricingSummary.total.value}`);
+```
+
+## Order Filters
+
+| Filter | Description |
+|--------|-------------|
+| `orderfulfillmentstatus:{NOT_STARTED}` | New unfulfilled orders |
+| `orderfulfillmentstatus:{IN_PROGRESS}` | Partially fulfilled |
+| `orderfulfillmentstatus:{FULFILLED}` | Fully shipped |
+| `creationdate:[2024-01-01T00:00:00.000Z..2024-01-31T23:59:59.999Z]` | Date range |
+| `lastmodifieddate:[date..date]` | Modified in range |
+
+## Order Structure
+
+```javascript
+{
+  orderId: '12-34567-89012',
+  orderFulfillmentStatus: 'NOT_STARTED',
+  buyer: {
+    username: 'buyer123',
+    taxAddress: { /* ... */ }
+  },
+  pricingSummary: {
+    total: { value: '59.99', currency: 'USD' },
+    priceSubtotal: { value: '49.99', currency: 'USD' },
+    deliveryCost: { value: '10.00', currency: 'USD' }
+  },
+  lineItems: [
+    {
+      lineItemId: 'item1',
+      sku: 'WIDGET-001',
+      title: 'Blue Widget',
+      quantity: 2,
+      lineItemCost: { value: '49.99', currency: 'USD' }
+    }
+  ],
+  fulfillmentStartInstructions: [
+    {
+      shippingStep: {
+        shipTo: {
+          fullName: 'John Doe',
+          contactAddress: {
+            addressLine1: '123 Main St',
+            city: 'Anytown',
+            stateOrProvince: 'CA',
+            postalCode: '90210',
+            countryCode: 'US'
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Shipping & Tracking" icon="truck" href="/api-reference/fulfillment/shipping">
+    Ship orders and upload tracking
+  </Card>
+  <Card title="Fulfillment Overview" icon="home" href="/api-reference/fulfillment/overview">
+    Back to Fulfillment API overview
+  </Card>
+</CardGroup>

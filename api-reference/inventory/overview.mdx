@@ -1,0 +1,524 @@
+---
+title: "Inventory API Overview"
+description: "Manage your eBay inventory including items, offers, locations, and product compatibility"
+---
+
+# Inventory API Overview
+
+The Inventory API is the backbone of your eBay selling operations. It provides **80+ tools** to manage inventory items, create offers, publish listings, and handle product variations.
+
+## Core Concepts
+
+<CardGroup cols={2}>
+  <Card title="Inventory Items" icon="box" color="#E53238">
+    Products you have available to sell (SKU-based management)
+  </Card>
+  <Card title="Offers" icon="tag" color="#0064D2">
+    Listing configurations (price, quantity, format) for inventory items
+  </Card>
+  <Card title="Inventory Locations" icon="warehouse" color="#F5AF02">
+    Physical locations where inventory is stored
+  </Card>
+  <Card title="Product Compatibility" icon="puzzle-piece" color="#86B817">
+    Specify which vehicles/products your items are compatible with
+  </Card>
+</CardGroup>
+
+## Inventory Management Workflow
+
+<Steps>
+  <Step title="Create Inventory Items">
+    Define products using SKUs:
+    ```javascript
+    await mcp.useTool('inventory_createOrReplaceInventoryItem', {
+      sku: 'WIDGET-001',
+      product: {
+        title: 'Premium Widget',
+        aspects: { Brand: ['WidgetCo'], Color: ['Blue'] },
+        description: 'High-quality widget for all your needs'
+      },
+      availability: {
+        shipToLocationAvailability: {
+          quantity: 100
+        }
+      }
+    });
+    ```
+  </Step>
+
+  <Step title="Create Offers">
+    Set pricing and format:
+    ```javascript
+    await mcp.useTool('inventory_createOffer', {
+      sku: 'WIDGET-001',
+      marketplace_id: 'EBAY_US',
+      format: 'FIXED_PRICE',
+      listing_duration: 'GTC',
+      pricingSummary: {
+        price: { value: '29.99', currency: 'USD' }
+      },
+      categoryId: '12345'
+    });
+    ```
+  </Step>
+
+  <Step title="Publish Listings">
+    Make offers live on eBay:
+    ```javascript
+    await mcp.useTool('inventory_publishOffer', {
+      offer_id: 'offer_id_here'
+    });
+    ```
+  </Step>
+</Steps>
+
+## Available Tools
+
+### Inventory Item Tools (30+)
+
+| Tool Name | Description | Common Use |
+|-----------|-------------|------------|
+| `inventory_createOrReplaceInventoryItem` | Create/update inventory item | Add new products |
+| `inventory_getInventoryItem` | Get single inventory item | Check product details |
+| `inventory_getInventoryItems` | Get all inventory items | Bulk inventory review |
+| `inventory_deleteInventoryItem` | Delete inventory item | Remove discontinued products |
+| `inventory_bulkCreateOrReplaceInventoryItem` | Batch create/update | Import product catalog |
+| `inventory_bulkUpdatePriceQuantity` | Update price/quantity in bulk | Price adjustments |
+
+### Offer Tools (25+)
+
+| Tool Name | Description | Common Use |
+|-----------|-------------|------------|
+| `inventory_createOffer` | Create listing offer | List new item |
+| `inventory_getOffer` | Get offer details | Check listing config |
+| `inventory_getOffers` | Get all offers | Review all listings |
+| `inventory_updateOffer` | Modify offer | Update price/quantity |
+| `inventory_deleteOffer` | Remove offer | Delist item |
+| `inventory_publishOffer` | Make offer live | Publish listing |
+| `inventory_publishOfferByInventoryItemGroup` | Publish variation listing | Publish multi-variation |
+| `inventory_withdrawOffer` | End listing | Remove from eBay |
+
+### Location Tools (10+)
+
+| Tool Name | Description | Common Use |
+|-----------|-------------|------------|
+| `inventory_createInventoryLocation` | Add warehouse location | Setup fulfillment center |
+| `inventory_getInventoryLocation` | Get location details | Check location info |
+| `inventory_getInventoryLocations` | Get all locations | Review warehouses |
+| `inventory_updateInventoryLocation` | Modify location | Update address/hours |
+| `inventory_deleteInventoryLocation` | Remove location | Close warehouse |
+
+### Product Compatibility Tools
+
+| Tool Name | Description | Common Use |
+|-----------|-------------|------------|
+| `inventory_createOrReplaceProductCompatibility` | Set compatible products | Auto parts compatibility |
+| `inventory_getProductCompatibility` | Get compatibility list | View compatible vehicles |
+| `inventory_deleteProductCompatibility` | Remove compatibility | Update fitment data |
+
+## Quick Start Examples
+
+### Single Item Listing
+
+```javascript
+// Complete flow: item → offer → publish
+async function listSingleItem() {
+  const sku = 'WIDGET-001';
+
+  // 1. Create inventory item
+  await mcp.useTool('inventory_createOrReplaceInventoryItem', {
+    sku,
+    product: {
+      title: 'Premium Blue Widget - Model X',
+      description: 'High-quality widget perfect for home and office use',
+      aspects: {
+        Brand: ['WidgetCo'],
+        Color: ['Blue'],
+        Model: ['X'],
+        Condition: ['New']
+      },
+      imageUrls: [
+        'https://example.com/widget-front.jpg',
+        'https://example.com/widget-side.jpg'
+      ]
+    },
+    condition: 'NEW',
+    availability: {
+      shipToLocationAvailability: {
+        quantity: 50
+      }
+    }
+  });
+
+  // 2. Create offer
+  const offer = await mcp.useTool('inventory_createOffer', {
+    sku,
+    marketplace_id: 'EBAY_US',
+    format: 'FIXED_PRICE',
+    listing_duration: 'GTC', // Good 'Til Cancelled
+    available_quantity: 50,
+    category_id: '1234', // eBay category ID
+    listing_policies: {
+      payment_policy_id: 'payment_policy_id',
+      return_policy_id: 'return_policy_id',
+      fulfillment_policy_id: 'fulfillment_policy_id'
+    },
+    pricingSummary: {
+      price: {
+        value: '29.99',
+        currency: 'USD'
+      }
+    }
+  });
+
+  // 3. Publish offer
+  const listing = await mcp.useTool('inventory_publishOffer', {
+    offer_id: offer.offerId
+  });
+
+  console.log(`✅ Listed successfully! Listing ID: ${listing.listingId}`);
+  return listing;
+}
+
+await listSingleItem();
+```
+
+### Bulk Inventory Upload
+
+```javascript
+// Upload 100+ items efficiently
+async function bulkUploadInventory(products) {
+  const requests = products.map(product => ({
+    sku: product.sku,
+    product: {
+      title: product.title,
+      description: product.description,
+      aspects: product.aspects,
+      imageUrls: product.images
+    },
+    condition: product.condition || 'NEW',
+    availability: {
+      shipToLocationAvailability: {
+        quantity: product.quantity
+      }
+    }
+  }));
+
+  // Upload in batches of 25 (API limit)
+  const batchSize = 25;
+  const results = [];
+
+  for (let i = 0; i < requests.length; i += batchSize) {
+    const batch = requests.slice(i, i + batchSize);
+
+    const response = await mcp.useTool('inventory_bulkCreateOrReplaceInventoryItem', {
+      requests: batch
+    });
+
+    results.push(...response.responses);
+    console.log(`Uploaded batch ${i / batchSize + 1} of ${Math.ceil(requests.length / batchSize)}`);
+  }
+
+  const successful = results.filter(r => r.statusCode === 200).length;
+  console.log(`✅ Successfully uploaded ${successful}/${products.length} items`);
+
+  return results;
+}
+```
+
+### Variation Listing (Multiple SKUs)
+
+```javascript
+// Create a variation listing (e.g., T-shirt in multiple sizes/colors)
+async function createVariationListing() {
+  const baseTitle = 'Premium Cotton T-Shirt';
+
+  // 1. Create inventory items for each variation
+  const sizes = ['S', 'M', 'L', 'XL'];
+  const colors = ['Red', 'Blue', 'Green'];
+  const variations = [];
+
+  for (const size of sizes) {
+    for (const color of colors) {
+      const sku = `TSHIRT-${color.toUpperCase()}-${size}`;
+
+      await mcp.useTool('inventory_createOrReplaceInventoryItem', {
+        sku,
+        product: {
+          title: `${baseTitle} - ${color} ${size}`,
+          aspects: {
+            Size: [size],
+            Color: [color],
+            Brand: ['YourBrand']
+          },
+          imageUrls: [`https://example.com/tshirt-${color.toLowerCase()}.jpg`]
+        },
+        condition: 'NEW',
+        availability: {
+          shipToLocationAvailability: {
+            quantity: 25
+          }
+        }
+      });
+
+      variations.push({ sku, size, color });
+    }
+  }
+
+  // 2. Create inventory item group
+  const group = await mcp.useTool('inventory_createOrReplaceInventoryItemGroup', {
+    inventory_item_group_key: 'TSHIRT-GROUP',
+    title: baseTitle,
+    description: 'Premium quality cotton t-shirt available in multiple sizes and colors',
+    imageUrls: [
+      'https://example.com/tshirt-main.jpg',
+      'https://example.com/tshirt-detail.jpg'
+    ],
+    variesBy: {
+      specifications: [
+        { name: 'Size', values: sizes },
+        { name: 'Color', values: colors }
+      ]
+    },
+    variantSKUs: variations.map(v => v.sku)
+  });
+
+  // 3. Create offer for the group
+  const offer = await mcp.useTool('inventory_createOffer', {
+    sku: variations[0].sku, // Use first variation SKU
+    marketplace_id: 'EBAY_US',
+    format: 'FIXED_PRICE',
+    category_id: '15687', // T-shirts category
+    listing_policies: {
+      payment_policy_id: 'payment_policy_id',
+      return_policy_id: 'return_policy_id',
+      fulfillment_policy_id: 'fulfillment_policy_id'
+    },
+    pricingSummary: {
+      price: { value: '19.99', currency: 'USD' }
+    }
+  });
+
+  // 4. Publish variation listing
+  const listing = await mcp.useTool('inventory_publishOfferByInventoryItemGroup', {
+    inventory_item_group_key: 'TSHIRT-GROUP',
+    marketplace_id: 'EBAY_US'
+  });
+
+  console.log(`✅ Variation listing published! ${variations.length} variations`);
+  return listing;
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="SKU Management">
+    **Use descriptive, consistent SKUs:**
+    - ✅ Good: `TSHIRT-RED-L`, `WIDGET-PRO-001`
+    - ❌ Bad: `SKU1`, `TEMP123`
+
+    **SKU naming conventions:**
+    ```
+    [CATEGORY]-[ATTRIBUTE]-[IDENTIFIER]
+    Examples:
+    - SHOE-NIKE-AIR-MAX-10.5
+    - BOOK-FICTION-THRILLER-001
+    - ELECTRONICS-PHONE-CASE-IPHONE14
+    ```
+
+    **Benefits:**
+    - Easy inventory tracking
+    - Quick product identification
+    - Simplified reordering
+    - Better reporting
+  </Accordion>
+
+  <Accordion title="Inventory Sync & Accuracy">
+    **Keep inventory synchronized:**
+    ```javascript
+    // Update inventory every hour
+    setInterval(async () => {
+      const updates = await getInventoryFromWarehouse();
+
+      await mcp.useTool('inventory_bulkUpdatePriceQuantity', {
+        requests: updates.map(item => ({
+          sku: item.sku,
+          shipToLocationAvailability: {
+            quantity: item.quantity
+          }
+        }))
+      });
+    }, 3600000); // Every hour
+    ```
+
+    **Prevent overselling:**
+    - Set safety stock levels (reserve 5-10% inventory)
+    - Update quantities immediately after sales
+    - Use inventory management software
+    - Enable out-of-stock control program
+  </Accordion>
+
+  <Accordion title="Product Descriptions & SEO">
+    **Optimize titles for search:**
+    ```javascript
+    // ✅ Good title (60 characters, keyword-rich)
+    const title = 'Apple iPhone 14 Pro Max 256GB Unlocked - Deep Purple - NEW';
+
+    // ❌ Bad title (vague, no keywords)
+    const badTitle = 'Great Phone for Sale';
+    ```
+
+    **Title structure:**
+    1. Brand/Manufacturer
+    2. Model/Product name
+    3. Key features (size, color, capacity)
+    4. Condition
+    5. Unique selling points
+
+    **Description best practices:**
+    - Use HTML formatting
+    - Include detailed specifications
+    - Add warranty information
+    - List what's included
+    - Use bullet points for readability
+  </Accordion>
+
+  <Accordion title="Image Requirements">
+    **Image specifications:**
+    - Minimum 500px on longest side
+    - Recommended: 1600px or larger
+    - White or light background (preferred)
+    - Product fills 85% of frame
+    - Format: JPG, PNG, GIF
+    - Maximum 12 images per listing
+
+    **Image order importance:**
+    1. Main product image (white background)
+    2. Product in use/lifestyle shot
+    3. Detail shots (features, materials)
+    4. Size/scale reference
+    5. Package contents
+    6. Additional angles
+
+    ```javascript
+    const imageUrls = [
+      'https://cdn.example.com/product-main-1600px.jpg',      // Main
+      'https://cdn.example.com/product-lifestyle.jpg',        // In use
+      'https://cdn.example.com/product-detail-closeup.jpg',   // Details
+      'https://cdn.example.com/product-scale.jpg',            // Size reference
+      'https://cdn.example.com/product-package.jpg'           // What's included
+    ];
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Common Workflows
+
+### Daily Inventory Sync
+
+```javascript
+async function syncInventoryDaily() {
+  // 1. Get all eBay inventory
+  const ebayInventory = await mcp.useTool('inventory_getInventoryItems', {
+    limit: 100
+  });
+
+  // 2. Get warehouse inventory
+  const warehouseInventory = await getWarehouseInventory();
+
+  // 3. Find discrepancies
+  const updates = [];
+
+  for (const ebayItem of ebayInventory.inventoryItems) {
+    const warehouseItem = warehouseInventory.find(w => w.sku === ebayItem.sku);
+
+    if (warehouseItem && warehouseItem.quantity !== ebayItem.availability.shipToLocationAvailability.quantity) {
+      updates.push({
+        sku: ebayItem.sku,
+        shipToLocationAvailability: {
+          quantity: warehouseItem.quantity
+        }
+      });
+    }
+  }
+
+  // 4. Bulk update quantities
+  if (updates.length > 0) {
+    await mcp.useTool('inventory_bulkUpdatePriceQuantity', {
+      requests: updates
+    });
+
+    console.log(`✅ Updated ${updates.length} inventory quantities`);
+  } else {
+    console.log('✅ Inventory is in sync');
+  }
+}
+```
+
+### Seasonal Price Adjustments
+
+```javascript
+async function seasonalPriceAdjustment(discountPercentage) {
+  // Get all active offers
+  const offers = await mcp.useTool('inventory_getOffers', {
+    limit: 100,
+    marketplace_id: 'EBAY_US'
+  });
+
+  const updates = [];
+
+  for (const offer of offers.offers) {
+    const currentPrice = parseFloat(offer.pricingSummary.price.value);
+    const newPrice = (currentPrice * (1 - discountPercentage / 100)).toFixed(2);
+
+    updates.push({
+      offerId: offer.offerId,
+      pricingSummary: {
+        price: {
+          value: newPrice,
+          currency: 'USD'
+        },
+        // Set original price for strike-through display
+        originalRetailPrice: {
+          value: currentPrice.toFixed(2),
+          currency: 'USD'
+        }
+      }
+    });
+  }
+
+  // Update prices in batches
+  for (const update of updates) {
+    await mcp.useTool('inventory_updateOffer', update);
+  }
+
+  console.log(`✅ Applied ${discountPercentage}% discount to ${updates.length} listings`);
+}
+
+// Apply 20% off for holiday sale
+await seasonalPriceAdjustment(20);
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Inventory Items" icon="box" href="/api-reference/inventory/items">
+    Detailed inventory item management guide
+  </Card>
+  <Card title="Offers & Listings" icon="tag" href="/api-reference/inventory/offers">
+    Create and manage eBay offers
+  </Card>
+  <Card title="Inventory Locations" icon="warehouse" href="/api-reference/inventory/locations">
+    Setup warehouse and fulfillment locations
+  </Card>
+  <Card title="First Listing Guide" icon="rocket" href="/guides/first-listing">
+    Step-by-step tutorial for your first listing
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Inventory API Documentation](https://developer.ebay.com/api-docs/sell/inventory/overview.html)
+- [Inventory Management Guide](/features/inventory-management)
+- [Bulk Operations Guide](/guides/bulk-operations)

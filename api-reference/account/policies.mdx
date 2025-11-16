@@ -1,0 +1,460 @@
+---
+title: "Account Policies"
+description: "Complete guide to eBay return, payment, and fulfillment policies"
+---
+
+# Account Policies
+
+Manage your eBay seller policies including returns, payments, and fulfillment. Policies are reusable templates that you can apply to multiple listings.
+
+## Policy Types
+
+<CardGroup cols={3}>
+  <Card title="Return Policies" icon="rotate-left" color="#E53238">
+    Define how buyers can return items
+  </Card>
+  <Card title="Payment Policies" icon="credit-card" color="#0064D2">
+    Configure accepted payment methods
+  </Card>
+  <Card title="Fulfillment Policies" icon="truck" color="#F5AF02">
+    Set shipping options and costs
+  </Card>
+</CardGroup>
+
+## Return Policies
+
+Return policies define the terms under which buyers can return items.
+
+### Creating a Return Policy
+
+```javascript
+const returnPolicy = await mcp.useTool('account_createReturnPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Standard 30-Day Returns',
+  description: 'Items can be returned within 30 days of receipt',
+
+  // Return period
+  return_period: {
+    value: 30,
+    unit: 'DAY'
+  },
+
+  // Return settings
+  returns_accepted: true,
+  refund_method: 'MONEY_BACK',
+  return_shipping_cost_payer: 'BUYER',
+
+  // Extended holiday returns (optional)
+  extended_holiday_returns_offered: true,
+
+  // International returns (optional)
+  international_override: {
+    returns_accepted: true,
+    return_period: {
+      value: 30,
+      unit: 'DAY'
+    },
+    return_shipping_cost_payer: 'BUYER'
+  }
+});
+
+console.log(`Return policy created with ID: ${returnPolicy.returnPolicyId}`);
+```
+
+### Return Policy Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `marketplace_id` | string | ✅ | Target marketplace (e.g., `EBAY_US`) |
+| `name` | string | ✅ | Policy name (max 80 characters) |
+| `description` | string | ⬜ | Detailed policy description |
+| `return_period` | object | ✅ | Return window timeframe |
+| `returns_accepted` | boolean | ✅ | Whether returns are accepted |
+| `refund_method` | string | ✅ | `MONEY_BACK` or `MERCHANDISE_CREDIT` |
+| `return_shipping_cost_payer` | string | ✅ | `BUYER` or `SELLER` |
+| `extended_holiday_returns_offered` | boolean | ⬜ | Enable extended holiday returns |
+
+### Managing Return Policies
+
+```javascript
+// Get all return policies
+const policies = await mcp.useTool('account_getReturnPolicies', {
+  marketplace_id: 'EBAY_US'
+});
+
+// Get specific policy by ID
+const policy = await mcp.useTool('account_getReturnPolicy', {
+  return_policy_id: 'policy_id_here'
+});
+
+// Update return policy
+const updated = await mcp.useTool('account_updateReturnPolicy', {
+  return_policy_id: 'policy_id_here',
+  name: 'Updated 60-Day Returns',
+  return_period: {
+    value: 60,
+    unit: 'DAY'
+  }
+});
+
+// Delete return policy
+await mcp.useTool('account_deleteReturnPolicy', {
+  return_policy_id: 'policy_id_here'
+});
+```
+
+## Payment Policies
+
+Payment policies specify which payment methods you accept and related terms.
+
+### Creating a Payment Policy
+
+```javascript
+const paymentPolicy = await mcp.useTool('account_createPaymentPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Standard Payment - Immediate',
+  description: 'PayPal and credit cards accepted',
+
+  // Payment methods
+  payment_methods: [
+    {
+      paymentMethodType: 'PAYPAL',
+      recipientAccountReference: {
+        referenceId: 'seller@example.com',
+        referenceType: 'PAYPAL_EMAIL'
+      }
+    },
+    {
+      paymentMethodType: 'CREDIT_CARD'
+    }
+  ],
+
+  // Require immediate payment
+  immediate_pay: true,
+
+  // Payment instructions for buyer
+  payment_instructions: 'Payment must be received within 4 days'
+});
+
+console.log(`Payment policy created: ${paymentPolicy.paymentPolicyId}`);
+```
+
+### Payment Policy Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `marketplace_id` | string | ✅ | Target marketplace |
+| `name` | string | ✅ | Policy name |
+| `payment_methods` | array | ✅ | Accepted payment methods |
+| `immediate_pay` | boolean | ⬜ | Require immediate payment (recommended) |
+| `payment_instructions` | string | ⬜ | Instructions for buyers |
+
+### Payment Method Types
+
+- `PAYPAL` - PayPal payments
+- `CREDIT_CARD` - Credit/debit cards through eBay Managed Payments
+- `APPLE_PAY` - Apple Pay (if enabled)
+- `GOOGLE_PAY` - Google Pay (if enabled)
+
+## Fulfillment Policies
+
+Fulfillment policies define shipping options, costs, and handling times.
+
+### Creating a Fulfillment Policy
+
+```javascript
+const fulfillmentPolicy = await mcp.useTool('account_createFulfillmentPolicy', {
+  marketplace_id: 'EBAY_US',
+  name: 'Fast Shipping - Multiple Options',
+  description: 'We ship within 1 business day',
+
+  // Handling time
+  handling_time: {
+    value: 1,
+    unit: 'BUSINESS_DAY'
+  },
+
+  // Shipping options
+  shipping_options: [
+    {
+      option_type: 'DOMESTIC',
+      cost_type: 'FLAT_RATE',
+      shipping_services: [
+        {
+          shipping_carrier_code: 'USPS',
+          shipping_service_code: 'USPSPriority',
+          ship_to_locations: {
+            region_included: [
+              { region_name: 'US', region_type: 'COUNTRY' }
+            ]
+          },
+          shipping_cost: {
+            value: '8.99',
+            currency: 'USD'
+          },
+          additional_shipping_cost: {
+            value: '2.00',
+            currency: 'USD'
+          },
+          free_shipping: false,
+          sort_order: 1
+        },
+        {
+          shipping_carrier_code: 'USPS',
+          shipping_service_code: 'USPSMedia',
+          ship_to_locations: {
+            region_included: [
+              { region_name: 'US', region_type: 'COUNTRY' }
+            ]
+          },
+          shipping_cost: {
+            value: '4.99',
+            currency: 'USD'
+          },
+          free_shipping: false,
+          sort_order: 2
+        }
+      ]
+    },
+    {
+      option_type: 'INTERNATIONAL',
+      cost_type: 'FLAT_RATE',
+      shipping_services: [
+        {
+          shipping_carrier_code: 'USPS',
+          shipping_service_code: 'USPSPriorityMailInternational',
+          ship_to_locations: {
+            region_included: [
+              { region_name: 'WORLDWIDE', region_type: 'WORLD_REGION' }
+            ],
+            region_excluded: [
+              { region_name: 'RU', region_type: 'COUNTRY' }
+            ]
+          },
+          shipping_cost: {
+            value: '24.99',
+            currency: 'USD'
+          }
+        }
+      ]
+    }
+  ],
+
+  // Pickup options (optional)
+  local_pickup: false,
+
+  // Freight shipping (for large items)
+  freight_shipping: false
+});
+
+console.log(`Fulfillment policy created: ${fulfillmentPolicy.fulfillmentPolicyId}`);
+```
+
+### Fulfillment Policy Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `marketplace_id` | string | ✅ | Target marketplace |
+| `name` | string | ✅ | Policy name |
+| `handling_time` | object | ✅ | Time to ship after payment |
+| `shipping_options` | array | ✅ | Shipping services offered |
+| `local_pickup` | boolean | ⬜ | Offer local pickup option |
+| `freight_shipping` | boolean | ⬜ | For freight items only |
+
+### Common Shipping Carriers
+
+**USPS Services:**
+- `USPSPriority` - USPS Priority Mail
+- `USPSPriorityMailExpress` - USPS Priority Mail Express
+- `USPSMedia` - USPS Media Mail
+- `USPSFirstClass` - USPS First Class
+
+**FedEx Services:**
+- `FedEx2Day` - FedEx 2Day
+- `FedExExpressSaver` - FedEx Express Saver
+- `FedExGround` - FedEx Ground
+- `FedExHomeDelivery` - FedEx Home Delivery
+
+**UPS Services:**
+- `UPSGround` - UPS Ground
+- `UPS3DaySelect` - UPS 3 Day Select
+- `UPS2ndDayAir` - UPS 2nd Day Air
+- `UPSNextDayAir` - UPS Next Day Air
+
+## Policy Best Practices
+
+<AccordionGroup>
+  <Accordion title="Optimize Return Policies">
+    **Higher conversion rates with generous returns:**
+    - Offer 30-60 day return windows
+    - Consider free return shipping for items over $50
+    - Enable extended holiday returns (Nov-Jan)
+    - Clearly state condition requirements
+
+    **Example winning strategy:**
+    ```javascript
+    {
+      return_period: { value: 60, unit: 'DAY' },
+      return_shipping_cost_payer: 'SELLER', // For items > $50
+      extended_holiday_returns_offered: true
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Payment Policy Tips">
+    **Maximize conversions:**
+    - Enable `immediate_pay: true` to reduce non-paying buyers
+    - Accept all major payment methods
+    - Provide clear payment instructions
+
+    **Best practice configuration:**
+    ```javascript
+    {
+      immediate_pay: true,
+      payment_methods: [
+        { paymentMethodType: 'PAYPAL' },
+        { paymentMethodType: 'CREDIT_CARD' },
+        { paymentMethodType: 'APPLE_PAY' },
+        { paymentMethodType: 'GOOGLE_PAY' }
+      ]
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Shipping Strategy">
+    **Competitive advantage:**
+    - Fast handling time (1 business day)
+    - Multiple shipping options (economy + expedited)
+    - Free shipping for orders over threshold
+    - International shipping to expand market
+
+    **Profitable shipping setup:**
+    ```javascript
+    {
+      handling_time: { value: 1, unit: 'BUSINESS_DAY' },
+      shipping_options: [
+        {
+          option_type: 'DOMESTIC',
+          shipping_services: [
+            // Free shipping tier
+            {
+              shipping_service_code: 'USPSPriority',
+              shipping_cost: { value: '0.00', currency: 'USD' },
+              free_shipping: true,
+              // Use Buy It Now price > $35 for free shipping
+            },
+            // Economy option
+            { shipping_service_code: 'USPSMedia', ... },
+            // Expedited option
+            { shipping_service_code: 'USPSPriorityMailExpress', ... }
+          ]
+        }
+      ]
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Policy Reuse & Organization">
+    **Efficient policy management:**
+    - Create policy templates for different product categories
+    - Use descriptive names: `"Electronics - 30Day - Free Returns"`
+    - Maintain 3-5 policies max per type
+    - Review and update policies quarterly
+
+    **Organization example:**
+    ```
+    Return Policies:
+    - "High-Value Items - 60Day Free Returns"
+    - "Standard Items - 30Day Buyer Pays"
+    - "Final Sale - No Returns"
+
+    Fulfillment Policies:
+    - "Small Items - Fast Shipping"
+    - "Large Items - Freight"
+    - "Fragile Items - Special Handling"
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Complete Example: New Seller Setup
+
+Set up all policies for a new eBay seller:
+
+```javascript
+async function setupSellerPolicies() {
+  const marketplace = 'EBAY_US';
+
+  // 1. Create return policy
+  const returnPolicy = await mcp.useTool('account_createReturnPolicy', {
+    marketplace_id: marketplace,
+    name: 'Buyer Friendly 30-Day Returns',
+    description: 'We accept returns within 30 days, no questions asked',
+    return_period: { value: 30, unit: 'DAY' },
+    returns_accepted: true,
+    refund_method: 'MONEY_BACK',
+    return_shipping_cost_payer: 'BUYER',
+    extended_holiday_returns_offered: true
+  });
+
+  // 2. Create payment policy
+  const paymentPolicy = await mcp.useTool('account_createPaymentPolicy', {
+    marketplace_id: marketplace,
+    name: 'All Payment Methods - Immediate',
+    payment_methods: [
+      { paymentMethodType: 'PAYPAL' },
+      { paymentMethodType: 'CREDIT_CARD' }
+    ],
+    immediate_pay: true
+  });
+
+  // 3. Create fulfillment policy
+  const fulfillmentPolicy = await mcp.useTool('account_createFulfillmentPolicy', {
+    marketplace_id: marketplace,
+    name: 'Fast 1-Day Handling',
+    handling_time: { value: 1, unit: 'BUSINESS_DAY' },
+    shipping_options: [{
+      option_type: 'DOMESTIC',
+      cost_type: 'FLAT_RATE',
+      shipping_services: [{
+        shipping_carrier_code: 'USPS',
+        shipping_service_code: 'USPSPriority',
+        ship_to_locations: {
+          region_included: [{ region_name: 'US', region_type: 'COUNTRY' }]
+        },
+        shipping_cost: { value: '8.99', currency: 'USD' }
+      }]
+    }]
+  });
+
+  console.log('✅ All policies created successfully!');
+  console.log(`Return Policy ID: ${returnPolicy.returnPolicyId}`);
+  console.log(`Payment Policy ID: ${paymentPolicy.paymentPolicyId}`);
+  console.log(`Fulfillment Policy ID: ${fulfillmentPolicy.fulfillmentPolicyId}`);
+
+  return {
+    returnPolicyId: returnPolicy.returnPolicyId,
+    paymentPolicyId: paymentPolicy.paymentPolicyId,
+    fulfillmentPolicyId: fulfillmentPolicy.fulfillmentPolicyId
+  };
+}
+
+// Use these IDs when creating listings
+const policyIds = await setupSellerPolicies();
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Programs Guide" icon="award" href="/api-reference/account/programs">
+    Explore eBay seller programs
+  </Card>
+  <Card title="Create Your First Listing" icon="plus" href="/guides/first-listing">
+    Use policies in your first listing
+  </Card>
+  <Card title="Best Practices" icon="star" href="/guides/best-practices">
+    Optimize your seller account
+  </Card>
+  <Card title="Account Overview" icon="home" href="/api-reference/account/overview">
+    Back to Account API overview
+  </Card>
+</CardGroup>

@@ -1,0 +1,105 @@
+---
+title: "Fulfillment API Overview"
+description: "Process orders, manage shipping, and handle fulfillment operations"
+---
+
+# Fulfillment API Overview
+
+The Fulfillment API provides **50+ tools** to manage the entire order fulfillment process, from order retrieval to shipping label generation and tracking updates.
+
+<CardGroup cols={2}>
+  <Card title="Order Management" icon="shopping-cart" color="#E53238">
+    Retrieve and process customer orders
+  </Card>
+  <Card title="Shipping Labels" icon="tag" color="#0064D2">
+    Generate and print shipping labels
+  </Card>
+  <Card title="Tracking Updates" icon="location-dot" color="#F5AF02">
+    Upload tracking numbers and shipment info
+  </Card>
+  <Card title="Cancellations & Returns" icon="rotate-left" color="#86B817">
+    Handle order cancellations and returns
+  </Card>
+</CardGroup>
+
+## Order Fulfillment Workflow
+
+<Steps>
+  <Step title="Retrieve Orders">
+    Get new orders from eBay
+    ```javascript
+    const orders = await mcp.useTool('fulfillment_getOrders', {
+      filter: 'orderfulfillmentstatus:{NOT_STARTED}'
+    });
+    ```
+  </Step>
+
+  <Step title="Process Payment">
+    Verify payment received (handled by eBay Managed Payments)
+  </Step>
+
+  <Step title="Ship Items">
+    Pack and ship the order
+    ```javascript
+    await mcp.useTool('fulfillment_createShippingFulfillment', {
+      order_id: 'order_id_here',
+      tracking_number: '1Z999AA10123456784',
+      shipping_carrier_code: 'UPS'
+    });
+    ```
+  </Step>
+
+  <Step title="Mark as Shipped">
+    Upload tracking information
+  </Step>
+</Steps>
+
+## Common Use Cases
+
+### Daily Order Processing
+
+```javascript
+async function processOrders() {
+  // Get unfulfilled orders
+  const { orders } = await mcp.useTool('fulfillment_getOrders', {
+    filter: 'orderfulfillmentstatus:{NOT_STARTED}',
+    limit: 50
+  });
+
+  for (const order of orders) {
+    console.log(`Processing order: ${order.orderId}`);
+    console.log(`Buyer: ${order.buyer.username}`);
+    console.log(`Total: ${order.pricingSummary.total.value} ${order.pricingSummary.total.currency}`);
+
+    // Get items to ship
+    order.lineItems.forEach(item => {
+      console.log(`  - ${item.title} (SKU: ${item.sku}) x${item.quantity}`);
+    });
+  }
+}
+
+await processOrders();
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Order Management" icon="shopping-cart" href="/api-reference/fulfillment/orders">
+    Detailed order management guide
+  </Card>
+  <Card title="Shipping & Tracking" icon="truck" href="/api-reference/fulfillment/shipping">
+    Ship orders and upload tracking
+  </Card>
+  <Card title="Managing Orders Guide" icon="book" href="/guides/managing-orders">
+    Complete order fulfillment tutorial
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    All API tools
+  </Card>
+</CardGroup>
+
+## Resources
+
+- [eBay Fulfillment API Documentation](https://developer.ebay.com/api-docs/sell/fulfillment/overview.html)
+- [Order Fulfillment Guide](/guides/managing-orders)
+- [Shipping Best Practices](/guides/best-practices)
