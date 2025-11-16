@@ -1,12 +1,611 @@
 ---
 title: "Order Fulfillment"
-description: "Documentation for Order Fulfillment"
+description: "Process orders, manage shipments, handle refunds, and resolve payment disputes with 14 specialized tools"
 ---
 
 # Order Fulfillment
 
-Documentation for this section is coming soon.
+The eBay MCP Server provides complete order management capabilities through the **Fulfillment API**, enabling you to process orders, create shipments, issue refunds, and manage payment disputes with 14 specialized tools.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Overview
+
+The Fulfillment API handles everything from order retrieval to shipping fulfillment and dispute resolution. It's designed to streamline your post-sale operations and maintain excellent customer service.
+
+<Info>
+**Key Workflow:** Orders → Fulfillment → Tracking → Resolution
+1. Retrieve orders waiting for fulfillment
+2. Create shipping fulfillments with tracking
+3. Handle refunds and returns when needed
+4. Manage payment disputes with evidence
+</Info>
+
+## Core Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Order Management" icon="list-check">
+    Retrieve and track all your eBay orders
+  </Card>
+  <Card title="Shipping Fulfillment" icon="truck">
+    Create fulfillments with tracking numbers
+  </Card>
+  <Card title="Refunds & Returns" icon="rotate-left">
+    Issue full or partial refunds to buyers
+  </Card>
+  <Card title="Payment Disputes" icon="scale-balanced">
+    Contest or accept buyer claims with evidence
+  </Card>
+</CardGroup>
+
+## Order Management
+
+Retrieve and monitor orders across all your eBay listings.
+
+### Retrieving Orders
+
+<Steps>
+  <Step title="Get All Orders">
+    Retrieve orders with optional filtering:
+
+    ```typescript
+    // Get all unfulfilled orders
+    {
+      "filter": "orderfulfillmentstatus:{NOT_STARTED}",
+      "limit": 50
+    }
+    ```
+
+    **Common Filters:**
+    - `orderfulfillmentstatus:{NOT_STARTED}` - Awaiting fulfillment
+    - `orderfulfillmentstatus:{IN_PROGRESS}` - Partially shipped
+    - `orderfulfillmentstatus:{FULFILLED}` - Fully shipped
+    - `creationdate:[2025-01-01T00:00:00.000Z..2025-01-31T23:59:59.999Z]` - Date range
+
+    **Tool:** `ebay_get_orders`
+  </Step>
+
+  <Step title="Get Specific Order">
+    Retrieve complete details for a single order:
+
+    ```typescript
+    {
+      "orderId": "12-34567-89012"
+    }
+    ```
+
+    **Returns:**
+    - Buyer information
+    - Line items with SKUs
+    - Shipping address
+    - Payment details
+    - Fulfillment status
+
+    **Tool:** `ebay_get_order`
+  </Step>
+</Steps>
+
+### Understanding Order Structure
+
+<Accordion title="Order Response Example">
+
+```json
+{
+  "orderId": "12-34567-89012",
+  "creationDate": "2025-01-15T10:30:00.000Z",
+  "orderFulfillmentStatus": "NOT_STARTED",
+  "orderPaymentStatus": "PAID",
+  "buyer": {
+    "username": "buyer123",
+    "buyerRegistrationAddress": {
+      "contactAddress": {
+        "addressLine1": "123 Main St",
+        "city": "New York",
+        "stateOrProvince": "NY",
+        "postalCode": "10001",
+        "countryCode": "US"
+      },
+      "fullName": "John Doe"
+    }
+  },
+  "pricingSummary": {
+    "total": {
+      "value": "159.99",
+      "currency": "USD"
+    }
+  },
+  "lineItems": [
+    {
+      "lineItemId": "10987654321",
+      "sku": "LAPTOP-XPS13-001",
+      "title": "Dell XPS 13 Laptop",
+      "quantity": 1,
+      "total": {
+        "value": "149.99",
+        "currency": "USD"
+      }
+    }
+  ]
+}
+```
+
+</Accordion>
+
+## Shipping Fulfillment
+
+Create shipping fulfillments to mark orders as shipped and provide tracking information to buyers.
+
+### Creating Fulfillments
+
+<Steps>
+  <Step title="Ship Complete Order">
+    Create a fulfillment for all items in an order:
+
+    ```typescript
+    {
+      "orderId": "12-34567-89012",
+      "fulfillment": {
+        "lineItems": [
+          {
+            "lineItemId": "10987654321",
+            "quantity": 1
+          }
+        ],
+        "shippedDate": "2025-01-16T14:00:00.000Z",
+        "shippingCarrierCode": "USPS",
+        "trackingNumber": "9400111899562537717456"
+      }
+    }
+    ```
+
+    **Supported Carriers:**
+    - USPS, UPS, FedEx, DHL
+    - USPS_PRIORITY, USPS_FIRST_CLASS
+    - UPS_GROUND, UPS_NEXT_DAY_AIR
+    - FEDEX_GROUND, FEDEX_2DAY
+
+    **Tool:** `ebay_create_shipping_fulfillment`
+  </Step>
+
+  <Step title="Get Fulfillment Status">
+    Check all fulfillments for an order:
+
+    ```typescript
+    {
+      "orderId": "12-34567-89012"
+    }
+    ```
+
+    **Tools:**
+    - `ebay_get_shipping_fulfillments` - All fulfillments for order
+    - `ebay_get_shipping_fulfillment` - Specific fulfillment by ID
+  </Step>
+</Steps>
+
+<Warning>
+**Important:** Always provide tracking numbers when available. Orders with tracking have lower dispute rates and better buyer satisfaction.
+</Warning>
+
+### Partial Shipments
+
+For orders with multiple items shipped separately:
+
+<Accordion title="Example: Split Shipment">
+
+```typescript
+// Ship first item
+{
+  "orderId": "12-34567-89012",
+  "fulfillment": {
+    "lineItems": [
+      {
+        "lineItemId": "10987654321",
+        "quantity": 1
+      }
+    ],
+    "shippedDate": "2025-01-16T14:00:00.000Z",
+    "shippingCarrierCode": "USPS",
+    "trackingNumber": "9400111899562537717456"
+  }
+}
+
+// Ship second item later
+{
+  "orderId": "12-34567-89012",
+  "fulfillment": {
+    "lineItems": [
+      {
+        "lineItemId": "10987654322",
+        "quantity": 1
+      }
+    ],
+    "shippedDate": "2025-01-17T10:00:00.000Z",
+    "shippingCarrierCode": "FEDEX",
+    "trackingNumber": "779876543210"
+  }
+}
+```
+
+**Result:** Order status becomes `FULFILLED` after all items are shipped.
+
+</Accordion>
+
+## Refunds and Returns
+
+Issue full or partial refunds to buyers for returned items or order cancellations.
+
+### Issuing Refunds
+
+<Tabs>
+  <Tab title="Full Order Refund">
+    ```typescript
+    {
+      "orderId": "12-34567-89012",
+      "refundData": {
+        "reasonForRefund": "BUYER_CANCEL",
+        "comment": "Canceled at buyer request before shipping",
+        "orderLevelRefundAmount": {
+          "value": "159.99",
+          "currency": "USD"
+        }
+      }
+    }
+    ```
+
+    **Use when:** Canceling entire order or issuing total refund
+  </Tab>
+
+  <Tab title="Partial/Line Item Refund">
+    ```typescript
+    {
+      "orderId": "12-34567-89012",
+      "refundData": {
+        "reasonForRefund": "ITEM_DAMAGED",
+        "comment": "Item arrived damaged, partial refund issued",
+        "refundItems": [
+          {
+            "lineItemId": "10987654321",
+            "refundAmount": {
+              "value": "50.00",
+              "currency": "USD"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+    **Use when:** Refunding specific items or partial amounts
+  </Tab>
+</Tabs>
+
+### Refund Reason Codes
+
+<AccordionGroup>
+  <Accordion title="Buyer-Initiated Reasons">
+    - `BUYER_CANCEL` - Buyer requested cancellation
+    - `FOUND_CHEAPER_PRICE` - Buyer found better price
+  </Accordion>
+
+  <Accordion title="Seller-Initiated Reasons">
+    - `OUT_OF_STOCK` - Item no longer available
+    - `SELLER_CANCEL` - Seller canceled order
+    - `INCORRECT_PRICE` - Listing had wrong price
+  </Accordion>
+
+  <Accordion title="Problem Reasons">
+    - `ITEM_DAMAGED` - Item arrived damaged
+    - `ITEM_DEFECTIVE` - Item doesn't work
+    - `LOST_IN_TRANSIT` - Package lost during shipping
+  </Accordion>
+
+  <Accordion title="Other Reasons">
+    - `MUTUALLY_AGREED` - Both parties agreed to refund
+  </Accordion>
+</AccordionGroup>
+
+<Info>
+**Tool:** `ebay_issue_refund`
+
+**Note:** Refunds must include a valid reason code. The comment field is optional but recommended for clarity.
+</Info>
+
+## Payment Disputes
+
+Handle buyer-opened payment disputes, including item not received (INR) and significantly not as described (SNAD) claims.
+
+### Dispute Workflow
+
+<Steps>
+  <Step title="Monitor Disputes">
+    Retrieve open disputes requiring attention:
+
+    ```typescript
+    {
+      "openFilter": true,
+      "limit": 50
+    }
+    ```
+
+    **Filter Options:**
+    - `orderFilter: "orderid:12-34567-89012"` - Specific order
+    - `buyerFilter: "buyer_username:buyer123"` - Specific buyer
+    - `openFilter: true` - Only open disputes
+    - `openFilter: false` - Only closed disputes
+
+    **Tool:** `ebay_get_payment_dispute_summaries`
+  </Step>
+
+  <Step title="Review Dispute Details">
+    Get complete information about a dispute:
+
+    ```typescript
+    {
+      "paymentDisputeId": "5130000001"
+    }
+    ```
+
+    **Returns:**
+    - Dispute reason (INR, SNAD, etc.)
+    - Buyer's claim details
+    - Order information
+    - Response deadline
+    - Current status
+
+    **Tools:**
+    - `ebay_get_payment_dispute` - Full dispute details
+    - `ebay_get_payment_dispute_activities` - Activity history
+  </Step>
+
+  <Step title="Respond to Dispute">
+    Choose your response strategy (see below for details)
+  </Step>
+</Steps>
+
+### Accepting Disputes
+
+When you agree with the buyer's claim:
+
+```typescript
+{
+  "paymentDisputeId": "5130000001",
+  "returnAddress": {
+    "addressLine1": "123 Returns Dept",
+    "city": "Brooklyn",
+    "stateOrProvince": "NY",
+    "postalCode": "11201",
+    "countryCode": "US"
+  },
+  "revisionNumber": 1
+}
+```
+
+**When to Accept:**
+- Item was not received and you can't prove delivery
+- Item is significantly different from description
+- Faster resolution desired
+
+**Tool:** `ebay_accept_payment_dispute`
+
+### Contesting Disputes
+
+When you disagree with the buyer's claim:
+
+```typescript
+{
+  "paymentDisputeId": "5130000001",
+  "returnAddress": {
+    "addressLine1": "123 Returns Dept",
+    "city": "Brooklyn",
+    "stateOrProvince": "NY",
+    "postalCode": "11201",
+    "countryCode": "US"
+  },
+  "revisionNumber": 1
+}
+```
+
+**When to Contest:**
+- You have proof of delivery (tracking shows delivered)
+- Item matches description exactly
+- You have evidence supporting your case
+
+**Tool:** `ebay_contest_payment_dispute`
+
+<Warning>
+**Important:** Contesting requires evidence. After contesting, you must add supporting evidence within the deadline.
+</Warning>
+
+### Adding Evidence
+
+Strengthen your case with supporting documentation:
+
+<Steps>
+  <Step title="Upload Evidence Files">
+    Upload photos, receipts, or tracking documents:
+
+    ```typescript
+    {
+      "paymentDisputeId": "5130000001",
+      "file": {
+        "data": "base64-encoded-file-content",
+        "filename": "tracking-receipt.pdf"
+      }
+    }
+    ```
+
+    **Supported Files:**
+    - Images (JPG, PNG, GIF)
+    - PDFs
+    - Max 1.5MB per file
+
+    **Tool:** `ebay_upload_payment_dispute_evidence_file`
+  </Step>
+
+  <Step title="Attach Evidence to Dispute">
+    Link uploaded files to your case:
+
+    ```typescript
+    {
+      "paymentDisputeId": "5130000001",
+      "evidenceType": "PROOF_OF_DELIVERY",
+      "files": [
+        {
+          "fileId": "file_12345"
+        }
+      ],
+      "lineItems": [
+        {
+          "lineItemId": "10987654321"
+        }
+      ]
+    }
+    ```
+
+    **Evidence Types:**
+    - `PROOF_OF_DELIVERY` - Tracking showing delivery
+    - `PROOF_OF_AUTHENTICITY` - Item authenticity docs
+    - `PROOF_OF_REFUND` - Refund receipt
+    - `ADDITIONAL_INFORMATION` - Other supporting docs
+
+    **Tool:** `ebay_add_payment_dispute_evidence`
+  </Step>
+
+  <Step title="Update Evidence">
+    Modify existing evidence submissions:
+
+    **Tool:** `ebay_update_payment_dispute_evidence`
+  </Step>
+</Steps>
+
+### Downloading Evidence
+
+Review evidence files submitted to disputes:
+
+```typescript
+{
+  "paymentDisputeId": "5130000001",
+  "evidenceId": "evidence_123",
+  "fileId": "file_456"
+}
+```
+
+**Tool:** `ebay_fetch_payment_dispute_evidence_content`
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Daily Order Processing">
+    **Recommended workflow:**
+
+    1. Get unfulfilled orders: `ebay_get_orders` with filter `orderfulfillmentstatus:{NOT_STARTED}`
+    2. Print shipping labels and pack items
+    3. Create fulfillments: `ebay_create_shipping_fulfillment` with tracking
+    4. Buyers automatically receive tracking emails
+  </Accordion>
+
+  <Accordion title="Handling Buyer Cancellation Requests">
+    **Before shipping:**
+
+    1. Verify order hasn't shipped: `ebay_get_order`
+    2. Issue full refund: `ebay_issue_refund` with `BUYER_CANCEL` reason
+    3. Order status updates automatically
+
+    **After shipping:**
+
+    1. Explain to buyer item has shipped
+    2. Direct buyer to initiate return through eBay
+    3. Process return and refund when item received
+  </Accordion>
+
+  <Accordion title="Damaged Item Report">
+    **Process:**
+
+    1. Request photos from buyer
+    2. Determine partial vs. full refund
+    3. Issue refund: `ebay_issue_refund` with `ITEM_DAMAGED` reason
+    4. Choose whether buyer needs to return item
+  </Accordion>
+
+  <Accordion title="Item Not Received Dispute">
+    **With tracking showing delivery:**
+
+    1. Get dispute details: `ebay_get_payment_dispute`
+    2. Contest dispute: `ebay_contest_payment_dispute`
+    3. Upload tracking proof: `ebay_upload_payment_dispute_evidence_file`
+    4. Add evidence: `ebay_add_payment_dispute_evidence` with `PROOF_OF_DELIVERY`
+
+    **Without tracking/not delivered:**
+
+    1. Accept dispute: `ebay_accept_payment_dispute`
+    2. Refund issued automatically
+    3. Consider requiring signature confirmation for future orders
+  </Accordion>
+</AccordionGroup>
+
+## Tool Reference
+
+### Orders (2 tools)
+- `ebay_get_orders` - Retrieve multiple orders with filters
+- `ebay_get_order` - Get specific order details
+
+### Shipping Fulfillments (3 tools)
+- `ebay_create_shipping_fulfillment` - Create fulfillment with tracking
+- `ebay_get_shipping_fulfillments` - All fulfillments for an order
+- `ebay_get_shipping_fulfillment` - Specific fulfillment details
+
+### Refunds (1 tool)
+- `ebay_issue_refund` - Issue full or partial refunds
+
+### Payment Disputes (8 tools)
+- `ebay_get_payment_dispute_summaries` - List all disputes
+- `ebay_get_payment_dispute` - Dispute details
+- `ebay_get_payment_dispute_activities` - Dispute activity log
+- `ebay_accept_payment_dispute` - Accept buyer's claim
+- `ebay_contest_payment_dispute` - Contest buyer's claim
+- `ebay_add_payment_dispute_evidence` - Submit evidence
+- `ebay_update_payment_dispute_evidence` - Modify evidence
+- `ebay_upload_payment_dispute_evidence_file` - Upload supporting files
+- `ebay_fetch_payment_dispute_evidence_content` - Download evidence files
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Always Add Tracking" icon="route">
+    Include tracking numbers in fulfillments to reduce disputes and improve buyer confidence
+  </Card>
+  <Card title="Ship Within 24-48 Hours" icon="clock">
+    Fast shipping improves seller performance metrics and customer satisfaction
+  </Card>
+  <Card title="Respond to Disputes Quickly" icon="bolt">
+    Reply within 3 business days to avoid automatic resolution against you
+  </Card>
+  <Card title="Keep Evidence Ready" icon="folder-open">
+    Maintain proof of delivery and item condition for dispute protection
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Managing Orders Guide" href="/guides/managing-orders" icon="list-check">
+    Complete order processing workflow
+  </Card>
+  <Card title="Inventory Management" href="/features/inventory-management" icon="box">
+    Manage your product catalog
+  </Card>
+  <Card title="Fulfillment API Reference" href="/api-reference/fulfillment/overview" icon="book">
+    Complete API documentation
+  </Card>
+  <Card title="Account Management" href="/features/account-management" icon="user">
+    Set up policies and programs
+  </Card>
+</CardGroup>
+
+## Rate Limits
+
+<Info>
+**User Tokens:** 10,000-50,000 requests/day depending on seller tier
+
+**Recommendation:** Use user tokens for all fulfillment operations
+</Info>
+
+See [Rate Limits](/advanced/rate-limits) for detailed information.

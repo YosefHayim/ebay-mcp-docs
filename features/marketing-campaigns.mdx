@@ -1,12 +1,812 @@
 ---
 title: "Marketing Campaigns"
-description: "Documentation for Marketing Campaigns"
+description: "Drive sales with 68 powerful marketing tools for campaigns, ads, promotions, and performance reporting"
 ---
 
 # Marketing Campaigns
 
-Documentation for this section is coming soon.
+The eBay MCP Server provides comprehensive marketing capabilities through the **Marketing API**, offering 68 specialized tools to create campaigns, manage ads, optimize bids, and run promotions.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Overview
+
+eBay's Marketing API supports two main advertising models: **Promoted Listings** (CPS/CPC campaigns) and **Item Promotions** (discounts and sales). Combined, these tools help you increase visibility and drive more sales.
+
+<Info>
+**Two Marketing Models:**
+1. **Promoted Listings**: Pay-per-sale (CPS) or pay-per-click (CPC) advertising
+2. **Item Promotions**: Order discounts, volume pricing, shipping deals
+</Info>
+
+## Core Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Campaign Management" icon="megaphone">
+    Create and manage CPS/CPC advertising campaigns
+  </Card>
+  <Card title="Ad Operations" icon="rectangle-ad">
+    Bulk create, update, and optimize ads
+  </Card>
+  <Card title="Keyword Targeting" icon="magnifying-glass">
+    Manual keyword targeting for CPC campaigns
+  </Card>
+  <Card title="Promotions" icon="percent">
+    Run sales, discounts, and special offers
+  </Card>
+</CardGroup>
+
+## Campaign Management
+
+Campaigns are the foundation of your advertising strategy on eBay. You can run Cost Per Sale (CPS) or Cost Per Click (CPC) campaigns.
+
+### Campaign Types
+
+<Tabs>
+  <Tab title="CPS (Cost Per Sale)">
+    **Pay only when items sell**
+
+    - Recommended for most sellers
+    - Set ad rate as percentage of sale price
+    - 2-20% typical range
+    - Lower risk, easier to manage
+
+    ```typescript
+    {
+      "campaign": {
+        "campaignName": "Summer Sale 2025",
+        "marketplaceId": "EBAY_US",
+        "fundingStrategy": {
+          "fundingModel": "COST_PER_SALE",
+          "bidPercentage": "10.5"  // 10.5% of sale price
+        },
+        "startDate": "2025-06-01T00:00:00.000Z",
+        "endDate": "2025-08-31T23:59:59.999Z"
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="CPC (Cost Per Click)">
+    **Pay per click on your ads**
+
+    - More control over targeting
+    - Requires keyword management
+    - Manual or automatic targeting
+    - Best for experienced advertisers
+
+    ```typescript
+    {
+      "campaign": {
+        "campaignName": "Electronics CPC Campaign",
+        "marketplaceId": "EBAY_US",
+        "fundingStrategy": {
+          "fundingModel": "COST_PER_CLICK"
+        },
+        "startDate": "2025-06-01T00:00:00.000Z"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Creating and Managing Campaigns
+
+<Steps>
+  <Step title="Create Campaign">
+    ```typescript
+    {
+      "campaign": {
+        "campaignName": "Holiday Sale 2025",
+        "marketplaceId": "EBAY_US",
+        "fundingStrategy": {
+          "fundingModel": "COST_PER_SALE",
+          "bidPercentage": "12.0"
+        },
+        "startDate": "2025-11-01T00:00:00.000Z",
+        "endDate": "2025-12-31T23:59:59.999Z"
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_create_campaign` - Create new campaign
+    - `ebay_get_campaigns` - List all campaigns
+    - `ebay_get_campaign` - Get campaign details
+    - `ebay_get_campaign_by_name` - Find by name
+  </Step>
+
+  <Step title="Manage Campaign Status">
+    Control campaign lifecycle:
+
+    **Tools:**
+    - `ebay_pause_campaign` - Temporarily stop campaign
+    - `ebay_resume_campaign` - Restart paused campaign
+    - `ebay_end_campaign` - Permanently end campaign (irreversible)
+  </Step>
+
+  <Step title="Clone or Update Campaign">
+    Reuse successful campaigns:
+
+    **Tools:**
+    - `ebay_clone_campaign` - Duplicate with new settings
+    - `ebay_update_campaign_identification` - Rename or update details
+  </Step>
+</Steps>
+
+<AccordionGroup>
+  <Accordion title="Campaign Status Filters">
+    - `RUNNING` - Active campaigns
+    - `PAUSED` - Temporarily stopped
+    - `ENDED` - Permanently finished
+    - `ARCHIVED` - Removed from active view
+  </Accordion>
+
+  <Accordion title="Campaign Lifecycle">
+    1. **Created** → Campaign set up but not started
+    2. **Running** → Actively showing ads
+    3. **Paused** → Temporarily stopped (can resume)
+    4. **Ended** → Permanently finished (cannot restart)
+  </Accordion>
+</AccordionGroup>
+
+## Ad Operations
+
+Ads connect your listings to campaigns. eBay provides powerful bulk operations for managing thousands of ads efficiently.
+
+### Single Ad Operations
+
+<Steps>
+  <Step title="Create Individual Ad">
+    ```typescript
+    {
+      "campaignId": "12345",
+      "ad": {
+        "listingId": "123456789012",
+        "bidPercentage": "15.0"  // Optional: override campaign default
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_create_ad` - Create single ad
+    - `ebay_get_ad` - Get ad details
+    - `ebay_get_ads` - List campaign ads
+    - `ebay_delete_ad` - Remove ad
+    - `ebay_clone_ad` - Duplicate ad
+    - `ebay_update_ad_bid` - Change bid percentage
+  </Step>
+
+  <Step title="Get Ads by Reference">
+    Find ads using different identifiers:
+
+    **Tools:**
+    - `ebay_get_ads_by_listing_id` - Find by listing ID
+    - `ebay_get_ads_by_inventory_reference` - Find by SKU (CPS only)
+  </Step>
+</Steps>
+
+### Bulk Ad Operations
+
+For large-scale ad management, use bulk operations to handle hundreds of ads at once:
+
+<Tabs>
+  <Tab title="Bulk Create">
+    ```typescript
+    // Create multiple ads using listing IDs
+    {
+      "campaignId": "12345",
+      "ads": {
+        "requests": [
+          {
+            "listingId": "123456789012",
+            "bidPercentage": "15.0"
+          },
+          {
+            "listingId": "123456789013",
+            "bidPercentage": "12.0"
+          }
+          // ... up to 500 listings
+        ]
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_bulk_create_ads_by_listing_id` - Max 500 listings (CPS/CPC)
+    - `ebay_bulk_create_ads_by_inventory_reference` - Use SKUs (CPS only)
+  </Tab>
+
+  <Tab title="Bulk Update Bids">
+    ```typescript
+    {
+      "campaignId": "12345",
+      "ads": {
+        "requests": [
+          {
+            "listingId": "123456789012",
+            "bidPercentage": "18.0"
+          },
+          {
+            "listingId": "123456789013",
+            "bidPercentage": "16.0"
+          }
+        ]
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_bulk_update_ads_bid_by_listing_id` - Update by listing ID (CPS)
+    - `ebay_bulk_update_ads_bid_by_inventory_reference` - Update by SKU (CPS)
+  </Tab>
+
+  <Tab title="Bulk Delete">
+    ```typescript
+    {
+      "campaignId": "12345",
+      "ads": {
+        "listingIds": [
+          "123456789012",
+          "123456789013"
+        ]
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_bulk_delete_ads_by_listing_id` - Delete by listing ID
+    - `ebay_bulk_delete_ads_by_inventory_reference` - Delete by SKU
+  </Tab>
+
+  <Tab title="Bulk Status Update">
+    ```typescript
+    {
+      "campaignId": "12345",
+      "ads": {
+        "requests": [
+          {
+            "adId": "ad_123",
+            "adStatus": "PAUSED"
+          },
+          {
+            "adId": "ad_456",
+            "adStatus": "ACTIVE"
+          }
+        ]
+      }
+    }
+    ```
+
+    **Tools (CPC only):**
+    - `ebay_bulk_update_ads_status` - Update by ad ID
+    - `ebay_bulk_update_ads_status_by_listing_id` - Update by listing ID
+  </Tab>
+</Tabs>
+
+## Ad Groups (CPC Campaigns)
+
+Ad groups organize ads within CPC campaigns and enable manual keyword targeting.
+
+<Info>
+**When to Use Ad Groups:** Required for CPC campaigns with manual targeting. Not used in CPS campaigns.
+</Info>
+
+### Ad Group Management
+
+<Steps>
+  <Step title="Create Ad Group">
+    ```typescript
+    {
+      "campaignId": "12345",
+      "adGroup": {
+        "name": "Electronics - Laptops",
+        "defaultBid": {
+          "amount": "0.50",
+          "currency": "USD"
+        }
+      }
+    }
+    ```
+
+    **Tool:** `ebay_create_ad_group`
+  </Step>
+
+  <Step title="Manage Ad Groups">
+    **Tools:**
+    - `ebay_get_ad_group` - Get ad group details
+    - `ebay_get_ad_groups` - List all ad groups
+    - `ebay_clone_ad_group` - Duplicate ad group
+    - `ebay_update_ad_group_bids` - Update default bids
+    - `ebay_update_ad_group_keywords` - Modify keywords
+  </Step>
+</Steps>
+
+## Keywords (CPC Manual Targeting)
+
+Keywords control when your ads appear in search results (CPC campaigns only).
+
+### Keyword Match Types
+
+<CardGroup cols={3}>
+  <Card title="Broad Match" icon="maximize">
+    Matches similar searches and variations
+  </Card>
+  <Card title="Phrase Match" icon="quotes">
+    Matches phrases containing your keyword
+  </Card>
+  <Card title="Exact Match" icon="equals">
+    Matches exact keyword only
+  </Card>
+</CardGroup>
+
+### Managing Keywords
+
+<Tabs>
+  <Tab title="Single Keyword">
+    ```typescript
+    {
+      "campaignId": "12345",
+      "keyword": {
+        "keywordText": "gaming laptop",
+        "matchType": "PHRASE",
+        "bid": {
+          "amount": "0.75",
+          "currency": "USD"
+        }
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_create_keyword` - Add keyword
+    - `ebay_get_keyword` - Get keyword details
+    - `ebay_get_keywords` - List all keywords
+    - `ebay_delete_keyword` - Remove keyword
+    - `ebay_update_keyword_bid` - Change bid
+  </Tab>
+
+  <Tab title="Bulk Keywords">
+    ```typescript
+    {
+      "campaignId": "12345",
+      "keywords": {
+        "requests": [
+          {
+            "keywordText": "gaming laptop",
+            "matchType": "PHRASE",
+            "adGroupId": "adgroup_123",
+            "bid": {
+              "amount": "0.75",
+              "currency": "USD"
+            }
+          },
+          {
+            "keywordText": "laptop computer",
+            "matchType": "BROAD",
+            "adGroupId": "adgroup_123",
+            "bid": {
+              "amount": "0.50",
+              "currency": "USD"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_bulk_create_keywords` - Create multiple keywords
+    - `ebay_bulk_delete_keywords` - Remove multiple keywords
+    - `ebay_bulk_update_keyword_bids` - Update multiple bids
+  </Tab>
+</Tabs>
+
+## Negative Keywords
+
+Negative keywords prevent your ads from showing for unwanted searches, saving budget and improving targeting.
+
+### Campaign-Level Negative Keywords
+
+Apply to entire campaign:
+
+```typescript
+{
+  "negativeKeyword": {
+    "keywordText": "cheap",
+    "matchType": "BROAD"
+  }
+}
+```
+
+**Tools:**
+- `ebay_create_campaign_negative_keyword`
+- `ebay_get_campaign_negative_keywords`
+- `ebay_delete_campaign_negative_keyword`
+- `ebay_update_campaign_negative_keyword`
+- `ebay_bulk_create_campaign_negative_keywords`
+- `ebay_bulk_update_campaign_negative_keywords`
+- `ebay_bulk_delete_campaign_negative_keywords`
+
+### Ad Group-Level Negative Keywords
+
+Apply to specific ad group:
+
+```typescript
+{
+  "campaignId": "12345",
+  "adGroupId": "adgroup_123",
+  "negativeKeyword": {
+    "keywordText": "refurbished",
+    "matchType": "EXACT"
+  }
+}
+```
+
+**Tools:**
+- `ebay_create_ad_group_negative_keyword`
+- `ebay_get_ad_group_negative_keywords`
+- `ebay_delete_ad_group_negative_keyword`
+- `ebay_update_ad_group_negative_keyword`
+- `ebay_bulk_create_ad_group_negative_keywords`
+- `ebay_bulk_update_ad_group_negative_keywords`
+- `ebay_bulk_delete_ad_group_negative_keywords`
+
+<Tip>
+**Common Negative Keywords:** Add terms like "cheap," "free," "broken," "parts," "repair" to avoid low-quality clicks.
+</Tip>
+
+## Targeting and Suggestions
+
+Optimize campaign performance with eBay's targeting and suggestion tools.
+
+### Targeting Configuration
+
+```typescript
+{
+  "campaignId": "12345",
+  "targeting": {
+    // Targeting configuration
+  }
+}
+```
+
+**Tools:**
+- `ebay_create_targeting` - Set up targeting
+- `ebay_get_targeting` - View current targeting
+- `ebay_update_targeting` - Modify targeting rules
+
+### Bid and Keyword Suggestions
+
+Get eBay's recommendations for optimal bids and keywords:
+
+```typescript
+// Get bid suggestions
+{
+  "campaignId": "12345",
+  "adGroupId": "adgroup_123"
+}
+
+// Get keyword suggestions
+{
+  "campaignId": "12345",
+  "adGroupId": "adgroup_123"
+}
+```
+
+**Tools:**
+- `ebay_suggest_bids` - Get recommended bid amounts
+- `ebay_suggest_keywords` - Get relevant keyword ideas
+
+## Campaign Reporting
+
+Track performance with comprehensive reporting tools.
+
+### Creating Reports
+
+<Steps>
+  <Step title="Request Report">
+    ```typescript
+    {
+      "reportTask": {
+        "reportType": "CAMPAIGN_PERFORMANCE_REPORT",
+        "campaignIds": ["12345", "12346"],
+        "dateFrom": "2025-01-01",
+        "dateTo": "2025-01-31",
+        "marketplaceId": "EBAY_US",
+        "dimensions": ["campaign_id", "day"],
+        "metrics": ["clicks", "impressions", "sales", "ad_fees"]
+      }
+    }
+    ```
+
+    **Report Types:**
+    - `CAMPAIGN_PERFORMANCE_REPORT` - Campaign-level metrics
+    - `LISTING_PERFORMANCE_REPORT` - Ad/listing-level data
+    - `KEYWORD_PERFORMANCE_REPORT` - Keyword performance
+    - `ACCOUNT_PERFORMANCE_REPORT` - Account summary
+
+    **Tool:** `ebay_create_report_task`
+  </Step>
+
+  <Step title="Check Report Status">
+    ```typescript
+    {
+      "reportTaskId": "task_12345"
+    }
+    ```
+
+    **Status Values:**
+    - `PENDING` - Queued for generation
+    - `IN_PROGRESS` - Currently generating
+    - `SUCCESS` - Ready to download
+    - `FAILED` - Error occurred
+
+    **Tools:**
+    - `ebay_get_report_task` - Check specific task
+    - `ebay_get_report_tasks` - List all tasks
+  </Step>
+
+  <Step title="Download Report">
+    ```typescript
+    {
+      "reportId": "report_67890"
+    }
+    ```
+
+    **Tool:** `ebay_get_ad_report`
+  </Step>
+</Steps>
+
+### Report Metadata
+
+Understand available report dimensions and metrics:
+
+**Tools:**
+- `ebay_get_ad_report_metadata` - All report type metadata
+- `ebay_get_ad_report_metadata_for_type` - Specific report type details
+
+## Item Promotions
+
+Run sales, discounts, and special offers on your listings.
+
+### Promotion Types
+
+<CardGroup cols={2}>
+  <Card title="Order Discount" icon="cart-shopping">
+    Discount based on order total or quantity
+  </Card>
+  <Card title="Markdown Sale" icon="tag">
+    Percentage or fixed amount off items
+  </Card>
+  <Card title="Volume Pricing" icon="layer-group">
+    Buy more, save more deals
+  </Card>
+  <Card title="Shipping Discount" icon="truck">
+    Free or reduced shipping
+  </Card>
+</CardGroup>
+
+### Managing Promotions
+
+<Steps>
+  <Step title="Create Promotion">
+    ```typescript
+    {
+      "promotion": {
+        "name": "Summer Clearance Sale",
+        "marketplaceId": "EBAY_US",
+        "promotionType": "MARKDOWN_SALE",
+        "promotionStatus": "SCHEDULED",
+        "startDate": "2025-06-01T00:00:00.000Z",
+        "endDate": "2025-06-30T23:59:59.999Z",
+        "discountRules": [
+          {
+            "discountType": "PERCENTAGE",
+            "discountAmount": "20"
+          }
+        ],
+        "inventoryCriterion": {
+          "inventoryItems": [
+            {
+              "listingId": "123456789012"
+            }
+          ]
+        }
+      }
+    }
+    ```
+
+    **Tool:** `ebay_create_item_promotion`
+  </Step>
+
+  <Step title="Manage Promotions">
+    **Tools:**
+    - `ebay_get_promotions` - List all promotions
+    - `ebay_get_item_promotion` - Get promotion details
+    - `ebay_update_item_promotion` - Modify promotion
+    - `ebay_delete_item_promotion` - Remove promotion
+    - `ebay_pause_item_promotion` - Temporarily stop
+    - `ebay_resume_item_promotion` - Restart paused promotion
+  </Step>
+
+  <Step title="Track Performance">
+    **Tools:**
+    - `ebay_get_promotion_report` - Detailed performance data
+    - `ebay_get_promotion_summary_report` - Summary across promotions
+  </Step>
+</Steps>
+
+<Accordion title="Promotion Status Values">
+- `DRAFT` - Created but not scheduled
+- `SCHEDULED` - Set to start in future
+- `RUNNING` - Currently active
+- `PAUSED` - Temporarily stopped
+- `ENDED` - Finished
+</Accordion>
+
+## Listing Recommendations
+
+Get eBay's suggestions to improve listing performance:
+
+```typescript
+{
+  "listingIds": [
+    "123456789012",
+    "123456789013"
+  ],
+  "limit": 50,
+  "marketplaceId": "EBAY_US"
+}
+```
+
+**Tool:** `ebay_find_listing_recommendations`
+
+**Returns recommendations for:**
+- Pricing optimization
+- Photo improvements
+- Title and description enhancements
+- Shipping options
+
+## Tool Reference
+
+### Campaign Management (11 tools)
+- `ebay_get_campaigns` - List campaigns
+- `ebay_get_campaign` - Get campaign details
+- `ebay_get_campaign_by_name` - Find by name
+- `ebay_create_campaign` - Create campaign
+- `ebay_clone_campaign` - Duplicate campaign
+- `ebay_pause_campaign` - Pause campaign
+- `ebay_resume_campaign` - Resume campaign
+- `ebay_end_campaign` - End campaign
+- `ebay_update_campaign_identification` - Update name/details
+
+### Ad Operations - Bulk (8 tools)
+- `ebay_bulk_create_ads_by_inventory_reference`
+- `ebay_bulk_create_ads_by_listing_id`
+- `ebay_bulk_delete_ads_by_inventory_reference`
+- `ebay_bulk_delete_ads_by_listing_id`
+- `ebay_bulk_update_ads_bid_by_inventory_reference`
+- `ebay_bulk_update_ads_bid_by_listing_id`
+- `ebay_bulk_update_ads_status`
+- `ebay_bulk_update_ads_status_by_listing_id`
+
+### Ad Operations - Single (9 tools)
+- `ebay_create_ad`
+- `ebay_create_ads_by_inventory_reference`
+- `ebay_get_ad`
+- `ebay_get_ads`
+- `ebay_get_ads_by_inventory_reference`
+- `ebay_get_ads_by_listing_id`
+- `ebay_delete_ad`
+- `ebay_clone_ad`
+- `ebay_update_ad_bid`
+
+### Ad Groups (6 tools)
+- `ebay_create_ad_group`
+- `ebay_get_ad_group`
+- `ebay_get_ad_groups`
+- `ebay_clone_ad_group`
+- `ebay_update_ad_group_bids`
+- `ebay_update_ad_group_keywords`
+
+### Keywords (8 tools)
+- `ebay_create_keyword`
+- `ebay_get_keyword`
+- `ebay_get_keywords`
+- `ebay_delete_keyword`
+- `ebay_update_keyword_bid`
+- `ebay_bulk_create_keywords`
+- `ebay_bulk_delete_keywords`
+- `ebay_bulk_update_keyword_bids`
+
+### Campaign Negative Keywords (8 tools)
+- `ebay_create_campaign_negative_keyword`
+- `ebay_get_campaign_negative_keyword`
+- `ebay_get_campaign_negative_keywords`
+- `ebay_delete_campaign_negative_keyword`
+- `ebay_update_campaign_negative_keyword`
+- `ebay_bulk_create_campaign_negative_keywords`
+- `ebay_bulk_update_campaign_negative_keywords`
+- `ebay_bulk_delete_campaign_negative_keywords`
+
+### Ad Group Negative Keywords (8 tools)
+- `ebay_create_ad_group_negative_keyword`
+- `ebay_get_ad_group_negative_keyword`
+- `ebay_get_ad_group_negative_keywords`
+- `ebay_delete_ad_group_negative_keyword`
+- `ebay_update_ad_group_negative_keyword`
+- `ebay_bulk_create_ad_group_negative_keywords`
+- `ebay_bulk_update_ad_group_negative_keywords`
+- `ebay_bulk_delete_ad_group_negative_keywords`
+
+### Targeting & Suggestions (5 tools)
+- `ebay_create_targeting`
+- `ebay_get_targeting`
+- `ebay_update_targeting`
+- `ebay_suggest_bids`
+- `ebay_suggest_keywords`
+
+### Reporting (6 tools)
+- `ebay_create_report_task`
+- `ebay_get_report_task`
+- `ebay_get_report_tasks`
+- `ebay_get_ad_report`
+- `ebay_get_ad_report_metadata`
+- `ebay_get_ad_report_metadata_for_type`
+
+### Promotions (9 tools)
+- `ebay_get_promotions`
+- `ebay_get_item_promotion`
+- `ebay_create_item_promotion`
+- `ebay_update_item_promotion`
+- `ebay_delete_item_promotion`
+- `ebay_pause_item_promotion`
+- `ebay_resume_item_promotion`
+- `ebay_get_promotion_report`
+- `ebay_get_promotion_summary_report`
+
+### Recommendations (1 tool)
+- `ebay_find_listing_recommendations`
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Start with CPS" icon="rocket">
+    Begin with Cost Per Sale campaigns for lower risk and easier management
+  </Card>
+  <Card title="Use Bulk Operations" icon="layer-group">
+    Leverage bulk tools when managing 10+ ads to save time
+  </Card>
+  <Card title="Monitor Negative Keywords" icon="ban">
+    Regularly review search terms and add negative keywords to improve ROI
+  </Card>
+  <Card title="Test and Optimize" icon="chart-line">
+    Run reports weekly, test different bid percentages, and optimize based on data
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Running Promotions Guide" href="/guides/running-promotions" icon="percent">
+    Learn promotion strategies
+  </Card>
+  <Card title="Analytics & Reporting" href="/features/analytics-reporting" icon="chart-bar">
+    Track performance metrics
+  </Card>
+  <Card title="Marketing API Reference" href="/api-reference/marketing/overview" icon="book">
+    Complete API documentation
+  </Card>
+  <Card title="Inventory Management" href="/features/inventory-management" icon="box">
+    Manage your product catalog
+  </Card>
+</CardGroup>
+
+## Rate Limits
+
+<Info>
+**User Tokens:** 10,000-50,000 requests/day
+
+**Recommendation:** Use bulk operations to stay within rate limits when managing large campaigns
+</Info>
+
+See [Rate Limits](/advanced/rate-limits) for detailed information.
