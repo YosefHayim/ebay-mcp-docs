@@ -1104,3 +1104,93 @@ button:focus-visible,
     animation: none;
   }
 }
+
+/* ============================================ */
+/* GLOBAL ANCHOR BUTTONS - eBay Brand Colors */
+/* ============================================ */
+
+/* Target global anchors/navigation links */
+[class*="anchor"],
+[data-anchor],
+.anchors a,
+nav[class*="global"] a,
+[class*="global-anchor"] a,
+aside a[href^="https://"],
+.topbar a[href^="https://"],
+header a[href^="https://"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* GitHub Repository - Red hover (#E53238) */
+[class*="anchor"]:nth-child(1):hover,
+.anchors a:nth-child(1):hover,
+nav[class*="global"] a:nth-child(1):hover,
+a[href*="github.com/YosefHayim/ebay-mcp-server"]:hover,
+a[aria-label*="GitHub Repository"]:hover {
+  background-color: rgba(229, 50, 56, 0.1) !important;
+  color: var(--ebay-red) !important;
+  border-left: 3px solid var(--ebay-red);
+  transform: translateX(4px);
+}
+
+/* eBay Developer Portal - Blue hover (#0064D2) */
+[class*="anchor"]:nth-child(2):hover,
+.anchors a:nth-child(2):hover,
+nav[class*="global"] a:nth-child(2):hover,
+a[href*="developer.ebay.com"]:hover,
+a[aria-label*="eBay Developer Portal"]:hover {
+  background-color: rgba(0, 100, 210, 0.1) !important;
+  color: var(--ebay-blue) !important;
+  border-left: 3px solid var(--ebay-blue);
+  transform: translateX(4px);
+}
+
+/* MCP Documentation - Yellow hover (#F5AF02) */
+[class*="anchor"]:nth-child(3):hover,
+.anchors a:nth-child(3):hover,
+nav[class*="global"] a:nth-child(3):hover,
+a[href*="modelcontextprotocol.io"]:hover,
+a[aria-label*="MCP Documentation"]:hover {
+  background-color: rgba(245, 175, 2, 0.1) !important;
+  color: var(--ebay-yellow-dark) !important;
+  border-left: 3px solid var(--ebay-yellow);
+  transform: translateX(4px);
+}
+
+/* Dark mode adjustments for global anchors */
+.dark [class*="anchor"]:nth-child(1):hover,
+.dark a[href*="github.com/YosefHayim/ebay-mcp-server"]:hover {
+  background-color: rgba(229, 50, 56, 0.2) !important;
+  color: #FF8B8F !important;
+}
+
+.dark [class*="anchor"]:nth-child(2):hover,
+.dark a[href*="developer.ebay.com"]:hover {
+  background-color: rgba(0, 100, 210, 0.2) !important;
+  color: #5BA3FF !important;
+}
+
+.dark [class*="anchor"]:nth-child(3):hover,
+.dark a[href*="modelcontextprotocol.io"]:hover {
+  background-color: rgba(245, 175, 2, 0.2) !important;
+  color: #FFCA3A !important;
+}
+
+/* Icons within anchor links */
+[class*="anchor"] svg,
+.anchors a svg,
+nav[class*="global"] a svg {
+  transition: transform 0.3s ease;
+}
+
+[class*="anchor"]:hover svg,
+.anchors a:hover svg,
+nav[class*="global"] a:hover svg {
+  transform: scale(1.1);
+}
