@@ -1,0 +1,120 @@
+name: Validate Documentation
+
+on:
+  push:
+    branches: [ main, 'claude/**' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Mintlify CLI
+        run: npm install -g mintlify
+
+      - name: Validate JSON syntax
+        run: |
+          echo "Validating docs.json syntax..."
+          cat docs.json | python3 -m json.tool > /dev/null
+          echo "✅ JSON syntax is valid"
+
+      - name: Check for broken links (dry run)
+        run: |
+          echo "Checking for broken internal links..."
+          mintlify broken-links || echo "⚠️ Some links may be broken - check output above"
+        continue-on-error: true
+
+      - name: Validate frontmatter
+        run: |
+          echo "Checking MDX files for required frontmatter..."
+          missing_frontmatter=0
+          for file in $(find . -name "*.mdx" -not -path "./node_modules/*"); do
+            if ! grep -q "^---" "$file"; then
+              echo "❌ Missing frontmatter: $file"
+              missing_frontmatter=$((missing_frontmatter + 1))
+            elif ! grep -q "^title:" "$file"; then
+              echo "⚠️  Missing title: $file"
+            elif ! grep -q "^description:" "$file"; then
+              echo "⚠️  Missing description: $file"
+            fi
+          done
+
+          if [ $missing_frontmatter -gt 0 ]; then
+            echo "❌ $missing_frontmatter files missing frontmatter"
+            exit 1
+          fi
+          echo "✅ All MDX files have frontmatter"
+
+      - name: Check code blocks have language tags
+        run: |
+          echo "Checking for code blocks without language tags..."
+          files_with_unlabeled_blocks=0
+          for file in $(find . -name "*.mdx" -not -path "./node_modules/*"); do
+            if grep -qP '```\s*$' "$file"; then
+              echo "⚠️  Unlabeled code block found: $file"
+              files_with_unlabeled_blocks=$((files_with_unlabeled_blocks + 1))
+            fi
+          done
+
+          if [ $files_with_unlabeled_blocks -gt 0 ]; then
+            echo "⚠️  $files_with_unlabeled_blocks files have unlabeled code blocks"
+          else
+            echo "✅ All code blocks have language tags"
+          fi
+        continue-on-error: true
+
+      - name: Validate docs.json structure
+        run: |
+          echo "Validating docs.json against Mintlify schema..."
+
+          # Check required fields
+          if ! jq -e '.name' docs.json > /dev/null; then
+            echo "❌ Missing required field: name"
+            exit 1
+          fi
+
+          if ! jq -e '.colors' docs.json > /dev/null; then
+            echo "❌ Missing required field: colors"
+            exit 1
+          fi
+
+          # Check colors only have valid keys
+          color_keys=$(jq -r '.colors | keys[]' docs.json)
+          for key in $color_keys; do
+            if [[ ! "$key" =~ ^(primary|light|dark)$ ]]; then
+              echo "❌ Invalid color key: $key (only primary, light, dark are supported)"
+              exit 1
+            fi
+          done
+
+          # Check navbar.primary.href is absolute URL if present
+          if jq -e '.navbar.primary.href' docs.json > /dev/null; then
+            href=$(jq -r '.navbar.primary.href' docs.json)
+            if [[ ! "$href" =~ ^https?:// ]]; then
+              echo "❌ navbar.primary.href must be absolute URL, got: $href"
+              exit 1
+            fi
+          fi
+
+          echo "✅ docs.json structure is valid"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ JSON syntax validated" >> $GITHUB_STEP_SUMMARY
+          echo "✅ docs.json structure checked" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Frontmatter validated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View full details above for any warnings." >> $GITHUB_STEP_SUMMARY

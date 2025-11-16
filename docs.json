@@ -1,20 +1,12 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "venus",
+  "theme": "mint",
   "name": "eBay MCP Server",
   "url": "https://ebaymcp.com",
   "colors": {
     "primary": "#E53238",
     "light": "#F5AF02",
-    "dark": "#0064D2",
-    "background": {
-      "light": "#FFFFFF",
-      "dark": "#0F1419"
-    },
-    "anchors": {
-      "from": "#E53238",
-      "to": "#0064D2"
-    }
+    "dark": "#0064D2"
   },
   "favicon": "/favicon.svg",
   "modeToggle": {
@@ -183,7 +175,7 @@
     "primary": {
       "type": "button",
       "label": "Get Started",
-      "href": "/quickstart"
+      "href": "https://ebaymcp.com/quickstart"
     }
   },
   "contextual": {
