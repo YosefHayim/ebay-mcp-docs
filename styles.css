@@ -237,13 +237,124 @@ footer {
   background: linear-gradient(180deg, var(--ebay-gray-900) 0%, var(--ebay-gray-800) 100%);
 }
 
-/* Sidebar Enhancements */
+/* Sidebar Enhancements with Color-Coded Navigation */
 .sidebar {
   border-right: 1px solid var(--ebay-gray-200);
 }
 
 .dark .sidebar {
   border-right-color: var(--ebay-gray-800);
+}
+
+/* Sidebar Navigation Items - Base Styles */
+.sidebar nav a,
+.sidebar nav button,
+nav[class*="sidebar"] a,
+nav[class*="sidebar"] button,
+[class*="sidebar"] nav a,
+[class*="sidebar"] nav button {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 3px solid transparent;
+  padding-left: 12px;
+  margin: 2px 0;
+}
+
+/* Hover Effects - Color Rotation by Navigation Groups */
+/* Group 1: Getting Started - Red */
+.sidebar nav a:nth-of-type(4n+1):hover,
+nav[class*="sidebar"] a:nth-of-type(4n+1):hover,
+[class*="sidebar"] nav a:nth-of-type(4n+1):hover {
+  border-left-color: var(--ebay-red);
+  background: linear-gradient(90deg, rgba(229, 50, 56, 0.08) 0%, transparent 100%);
+  padding-left: 16px;
+}
+
+/* Group 2: Core Features - Blue */
+.sidebar nav a:nth-of-type(4n+2):hover,
+nav[class*="sidebar"] a:nth-of-type(4n+2):hover,
+[class*="sidebar"] nav a:nth-of-type(4n+2):hover {
+  border-left-color: var(--ebay-blue);
+  background: linear-gradient(90deg, rgba(0, 100, 210, 0.08) 0%, transparent 100%);
+  padding-left: 16px;
+}
+
+/* Group 3: Guides & Documentation - Yellow */
+.sidebar nav a:nth-of-type(4n+3):hover,
+nav[class*="sidebar"] a:nth-of-type(4n+3):hover,
+[class*="sidebar"] nav a:nth-of-type(4n+3):hover {
+  border-left-color: var(--ebay-yellow);
+  background: linear-gradient(90deg, rgba(245, 175, 2, 0.08) 0%, transparent 100%);
+  padding-left: 16px;
+}
+
+/* Group 4: Advanced & API - Green */
+.sidebar nav a:nth-of-type(4n+4):hover,
+nav[class*="sidebar"] a:nth-of-type(4n+4):hover,
+[class*="sidebar"] nav a:nth-of-type(4n+4):hover {
+  border-left-color: var(--ebay-green);
+  background: linear-gradient(90deg, rgba(134, 184, 23, 0.08) 0%, transparent 100%);
+  padding-left: 16px;
+}
+
+/* Active State - Maintains Color Scheme */
+.sidebar nav a[aria-current="page"],
+nav[class*="sidebar"] a[aria-current="page"],
+[class*="sidebar"] nav a[aria-current="page"] {
+  font-weight: 600;
+}
+
+.sidebar nav a[aria-current="page"]:nth-of-type(4n+1),
+nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+1) {
+  border-left-color: var(--ebay-red);
+  background: linear-gradient(90deg, rgba(229, 50, 56, 0.12) 0%, transparent 100%);
+}
+
+.sidebar nav a[aria-current="page"]:nth-of-type(4n+2),
+nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+2) {
+  border-left-color: var(--ebay-blue);
+  background: linear-gradient(90deg, rgba(0, 100, 210, 0.12) 0%, transparent 100%);
+}
+
+.sidebar nav a[aria-current="page"]:nth-of-type(4n+3),
+nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+3) {
+  border-left-color: var(--ebay-yellow);
+  background: linear-gradient(90deg, rgba(245, 175, 2, 0.12) 0%, transparent 100%);
+}
+
+.sidebar nav a[aria-current="page"]:nth-of-type(4n+4),
+nav[class*="sidebar"] a[aria-current="page"]:nth-of-type(4n+4) {
+  border-left-color: var(--ebay-green);
+  background: linear-gradient(90deg, rgba(134, 184, 23, 0.12) 0%, transparent 100%);
+}
+
+/* Dark Mode Sidebar Adjustments */
+.dark .sidebar nav a:hover,
+.dark nav[class*="sidebar"] a:hover,
+.dark [class*="sidebar"] nav a:hover {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+}
+
+/* Sidebar Section Headers */
+.sidebar h3,
+.sidebar h4,
+[class*="sidebar"] h3,
+[class*="sidebar"] h4 {
+  color: var(--ebay-gray-700);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 12px;
+}
+
+.dark .sidebar h3,
+.dark .sidebar h4,
+.dark [class*="sidebar"] h3,
+.dark [class*="sidebar"] h4 {
+  color: var(--ebay-gray-400);
 }
 
 /* Tag/Chip Styling */
@@ -381,4 +492,203 @@ html {
 .dark ::selection {
   background-color: var(--ebay-yellow);
   color: var(--ebay-gray-900);
+}
+
+/* Enhanced Interactive Elements */
+/* Buttons with Sophisticated Hover Effects */
+button,
+[role="button"],
+.button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button::before,
+[role="button"]::before,
+.button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before,
+[role="button"]:hover::before,
+.button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Tabs with Color Transitions */
+[role="tablist"] button,
+.tabs button {
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+[role="tablist"] button:hover:nth-child(4n+1),
+.tabs button:hover:nth-child(4n+1) {
+  border-bottom-color: var(--ebay-red);
+  color: var(--ebay-red);
+}
+
+[role="tablist"] button:hover:nth-child(4n+2),
+.tabs button:hover:nth-child(4n+2) {
+  border-bottom-color: var(--ebay-blue);
+  color: var(--ebay-blue);
+}
+
+[role="tablist"] button:hover:nth-child(4n+3),
+.tabs button:hover:nth-child(4n+3) {
+  border-bottom-color: var(--ebay-yellow);
+  color: var(--ebay-yellow);
+}
+
+[role="tablist"] button:hover:nth-child(4n+4),
+.tabs button:hover:nth-child(4n+4) {
+  border-bottom-color: var(--ebay-green);
+  color: var(--ebay-green);
+}
+
+/* Header/Navbar with Hover Effects */
+header a,
+nav a:not([class*="sidebar"]) {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+header a::after,
+nav a:not([class*="sidebar"])::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ebay-red), var(--ebay-blue), var(--ebay-yellow), var(--ebay-green));
+  transition: width 0.3s ease;
+}
+
+header a:hover::after,
+nav a:not([class*="sidebar"]):hover::after {
+  width: 100%;
+}
+
+/* Code Blocks with Enhanced Hover */
+pre:hover {
+  box-shadow: 0 4px 12px rgba(0, 100, 210, 0.15);
+  transform: translateY(-1px);
+}
+
+.dark pre:hover {
+  box-shadow: 0 4px 12px rgba(245, 175, 2, 0.15);
+}
+
+/* Copy Button in Code Blocks */
+pre button {
+  background: linear-gradient(135deg, var(--ebay-blue), var(--ebay-blue-dark));
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+pre button:hover {
+  background: linear-gradient(135deg, var(--ebay-red), var(--ebay-red-dark));
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(229, 50, 56, 0.3);
+}
+
+/* Input Fields with Color Focus */
+input,
+textarea,
+select {
+  transition: all 0.3s ease;
+  border: 2px solid var(--ebay-gray-300);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--ebay-blue);
+  box-shadow: 0 0 0 4px rgba(0, 100, 210, 0.1);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--ebay-yellow);
+  box-shadow: 0 0 0 4px rgba(245, 175, 2, 0.1);
+}
+
+/* Tooltips */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--ebay-gray-900);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Scroll Progress Bar */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ebay-red), var(--ebay-blue), var(--ebay-yellow), var(--ebay-green));
+  transform-origin: left;
+  z-index: 9999;
+}
+
+/* Skeleton Loading States */
+.skeleton {
+  background: linear-gradient(90deg, var(--ebay-gray-200) 25%, var(--ebay-gray-100) 50%, var(--ebay-gray-200) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, var(--ebay-gray-800) 25%, var(--ebay-gray-700) 50%, var(--ebay-gray-800) 75%);
+  background-size: 200% 100%;
 }
