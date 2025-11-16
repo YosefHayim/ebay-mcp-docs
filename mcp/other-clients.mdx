@@ -1,12 +1,785 @@
 ---
-title: "Other Clients"
-description: "Documentation for Other Clients"
+title: "Other MCP Clients"
+description: "Connect eBay MCP Server to Cline, Windsurf, and other MCP-compatible clients"
+icon: "puzzle-piece"
 ---
 
-# Other Clients
+The eBay MCP Server works with any MCP-compatible client. This guide covers popular alternatives to Claude Desktop and Cursor, plus instructions for building custom integrations.
 
-Documentation for this section is coming soon.
+## Supported Clients
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+<CardGroup cols={3}>
+  <Card title="Cline (VS Code)" icon="terminal">
+    MCP support in Visual Studio Code
+  </Card>
+
+  <Card title="Windsurf IDE" icon="wind">
+    AI-powered code editor with MCP
+  </Card>
+
+  <Card title="Continue.dev" icon="c">
+    Open-source coding assistant
+  </Card>
+
+  <Card title="Custom Clients" icon="code">
+    Build your own MCP integration
+  </Card>
+
+  <Card title="Python Scripts" icon="python">
+    Programmatic access via Python
+  </Card>
+
+  <Card title="TypeScript/Node.js" icon="node-js">
+    Native JavaScript integration
+  </Card>
+</CardGroup>
+
+## Prerequisites
+
+For all clients, you need:
+
+<Check>
+  - eBay MCP Server [installed](/installation) and [configured](/configuration)
+  - eBay API credentials (Client ID and Secret)
+  - Node.js 18+ installed
+  - Basic understanding of MCP concepts
+</Check>
+
+---
+
+## Cline (VS Code Extension)
+
+Cline is a popular MCP-enabled extension for Visual Studio Code.
+
+### Installation
+
+<Steps>
+  <Step title="Install VS Code">
+    Download and install Visual Studio Code from [code.visualstudio.com](https://code.visualstudio.com)
+  </Step>
+
+  <Step title="Install Cline Extension">
+    1. Open VS Code
+    2. Go to Extensions (Cmd/Ctrl + Shift + X)
+    3. Search for "Cline"
+    4. Click **Install**
+
+    Or install via command line:
+    ```bash
+    code --install-extension cline.cline
+    ```
+  </Step>
+
+  <Step title="Configure MCP Servers">
+    Cline uses a configuration file for MCP servers.
+
+    **Location:**
+    - macOS/Linux: `~/.cline/mcp_settings.json`
+    - Windows: `%USERPROFILE%\.cline\mcp_settings.json`
+
+    Create or edit the file:
+
+    ```json
+    {
+      "mcpServers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "YourAppId-12345",
+            "EBAY_CLIENT_SECRET": "YourCertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox"
+          }
+        }
+      }
+    }
+    ```
+
+    <Warning>
+      Replace `/absolute/path/to/ebay-mcp-server` with your actual installation path
+    </Warning>
+  </Step>
+
+  <Step title="Reload VS Code">
+    1. Open Command Palette (Cmd/Ctrl + Shift + P)
+    2. Type "Developer: Reload Window"
+    3. Press Enter
+
+    Cline will now connect to the eBay MCP Server.
+  </Step>
+
+  <Step title="Test the Connection">
+    1. Open Cline panel in VS Code
+    2. Type: "List my eBay fulfillment policies"
+    3. Cline should use the eBay MCP tools to fetch your policies
+  </Step>
+</Steps>
+
+<Tip>
+  Check Cline's documentation for the latest configuration format, as it may vary by version
+</Tip>
+
+---
+
+## Windsurf IDE
+
+Windsurf is an AI-first IDE with native MCP support.
+
+### Installation
+
+<Steps>
+  <Step title="Install Windsurf">
+    Download from [windsurf.ai](https://windsurf.ai) (or check current official site)
+
+    Available for macOS, Windows, and Linux.
+  </Step>
+
+  <Step title="Locate Configuration File">
+    Windsurf configuration location (may vary by version):
+
+    - macOS: `~/Library/Application Support/Windsurf/mcp.json`
+    - Windows: `%APPDATA%\Windsurf\mcp.json`
+    - Linux: `~/.config/Windsurf/mcp.json`
+
+    <Info>
+      Check Windsurf's documentation for the exact location in your version
+    </Info>
+  </Step>
+
+  <Step title="Add eBay MCP Server">
+    Edit the MCP configuration file:
+
+    ```json
+    {
+      "mcpServers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "YourAppId-12345",
+            "EBAY_CLIENT_SECRET": "YourCertId-67890",
+            "EBAY_ENVIRONMENT": "sandbox",
+            "EBAY_USER_ACCESS_TOKEN": "v^1.1#i^1#...",
+            "EBAY_USER_REFRESH_TOKEN": "v^1.1#i^1#..."
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Restart Windsurf">
+    Fully quit and restart Windsurf for changes to take effect.
+  </Step>
+</Steps>
+
+---
+
+## Continue.dev
+
+Continue is an open-source AI coding assistant with MCP support.
+
+### Installation
+
+<Steps>
+  <Step title="Install Continue Extension">
+    **For VS Code:**
+    1. Open Extensions
+    2. Search for "Continue"
+    3. Install the extension
+
+    **For JetBrains IDEs:**
+    Download from [continue.dev/docs](https://continue.dev/docs)
+  </Step>
+
+  <Step title="Configure MCP Server">
+    Continue uses `~/.continue/config.json` for configuration.
+
+    Edit the file to add MCP server:
+
+    ```json
+    {
+      "models": [...],
+      "mcpServers": {
+        "ebay": {
+          "command": "node",
+          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
+          "env": {
+            "EBAY_CLIENT_ID": "YourAppId",
+            "EBAY_CLIENT_SECRET": "YourCertId",
+            "EBAY_ENVIRONMENT": "sandbox"
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Reload Continue">
+    Reload your IDE or restart Continue extension.
+  </Step>
+</Steps>
+
+---
+
+## Generic MCP Client Setup
+
+For any MCP-compatible client, follow this general pattern:
+
+### Standard Configuration Format
+
+Most MCP clients use this configuration structure:
+
+```json
+{
+  "mcpServers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/path/to/ebay-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "your_client_id",
+        "EBAY_CLIENT_SECRET": "your_client_secret",
+        "EBAY_ENVIRONMENT": "sandbox"
+      }
+    }
+  }
+}
+```
+
+### Environment Variables
+
+You can reference environment variables instead of hardcoding credentials:
+
+```json
+{
+  "mcpServers": {
+    "ebay": {
+      "command": "node",
+      "args": ["/path/to/ebay-mcp-server/build/index.js"],
+      "env": {
+        "EBAY_CLIENT_ID": "${EBAY_CLIENT_ID}",
+        "EBAY_CLIENT_SECRET": "${EBAY_CLIENT_SECRET}",
+        "EBAY_ENVIRONMENT": "${EBAY_ENVIRONMENT:-sandbox}"
+      }
+    }
+  }
+}
+```
+
+Then set environment variables in your shell:
+
+```bash
+export EBAY_CLIENT_ID="YourAppId-12345"
+export EBAY_CLIENT_SECRET="YourCertId-67890"
+export EBAY_ENVIRONMENT="sandbox"
+```
+
+---
+
+## Programmatic Integration
+
+Build custom integrations with Python or TypeScript.
+
+### Python Integration
+
+Use the MCP Python SDK to connect to eBay MCP Server:
+
+<Steps>
+  <Step title="Install MCP SDK">
+    ```bash
+    pip install mcp
+    ```
+  </Step>
+
+  <Step title="Create Python Client">
+    ```python
+    import asyncio
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+
+    async def main():
+        # Configure eBay MCP Server
+        server_params = StdioServerParameters(
+            command="node",
+            args=["/path/to/ebay-mcp-server/build/index.js"],
+            env={
+                "EBAY_CLIENT_ID": "YourAppId",
+                "EBAY_CLIENT_SECRET": "YourCertId",
+                "EBAY_ENVIRONMENT": "sandbox"
+            }
+        )
+
+        # Connect to server
+        async with stdio_client(server_params) as (read, write):
+            async with ClientSession(read, write) as session:
+                # Initialize connection
+                await session.initialize()
+
+                # List available tools
+                tools = await session.list_tools()
+                print(f"Available tools: {len(tools.tools)}")
+
+                # Call a tool
+                result = await session.call_tool(
+                    "getFulfillmentPolicies",
+                    arguments={"marketplace_id": "EBAY_US"}
+                )
+
+                print("Fulfillment Policies:", result)
+
+    # Run the client
+    asyncio.run(main())
+    ```
+  </Step>
+
+  <Step title="Run Your Script">
+    ```bash
+    python ebay_mcp_client.py
+    ```
+  </Step>
+</Steps>
+
+### TypeScript/Node.js Integration
+
+Use the MCP TypeScript SDK:
+
+<Steps>
+  <Step title="Install Dependencies">
+    ```bash
+    npm install @modelcontextprotocol/sdk
+    ```
+  </Step>
+
+  <Step title="Create TypeScript Client">
+    ```typescript
+    import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+    import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+
+    async function main() {
+      // Configure eBay MCP Server transport
+      const transport = new StdioClientTransport({
+        command: 'node',
+        args: ['/path/to/ebay-mcp-server/build/index.js'],
+        env: {
+          EBAY_CLIENT_ID: process.env.EBAY_CLIENT_ID!,
+          EBAY_CLIENT_SECRET: process.env.EBAY_CLIENT_SECRET!,
+          EBAY_ENVIRONMENT: 'sandbox'
+        }
+      });
+
+      // Create MCP client
+      const client = new Client({
+        name: 'ebay-client',
+        version: '1.0.0'
+      }, {
+        capabilities: {}
+      });
+
+      // Connect to server
+      await client.connect(transport);
+
+      // List tools
+      const { tools } = await client.listTools();
+      console.log(`Available tools: ${tools.length}`);
+
+      // Call a tool
+      const result = await client.callTool({
+        name: 'getInventoryItems',
+        arguments: {
+          limit: 10
+        }
+      });
+
+      console.log('Inventory Items:', result);
+
+      // Clean up
+      await client.close();
+    }
+
+    main().catch(console.error);
+    ```
+  </Step>
+
+  <Step title="Compile and Run">
+    ```bash
+    npx tsx ebay-mcp-client.ts
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Web-Based Clients
+
+Integrate eBay MCP Server into web applications.
+
+### Using HTTP/SSE Transport
+
+The eBay MCP Server can run in SSE (Server-Sent Events) mode for web clients:
+
+<Steps>
+  <Step title="Start Server in SSE Mode">
+    Modify server configuration to use HTTP transport:
+
+    ```bash
+    # Set transport mode
+    export MCP_TRANSPORT=sse
+    export MCP_PORT=3000
+
+    # Start server
+    cd /path/to/ebay-mcp-server
+    npm start
+    ```
+  </Step>
+
+  <Step title="Connect from Web Client">
+    ```javascript
+    // Example using fetch API
+    async function callEbayTool(toolName, args) {
+      const response = await fetch('http://localhost:3000/mcp/tools/call', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: toolName,
+          arguments: args
+        })
+      });
+
+      return await response.json();
+    }
+
+    // Use the tool
+    const policies = await callEbayTool('getFulfillmentPolicies', {
+      marketplace_id: 'EBAY_US'
+    });
+
+    console.log(policies);
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  SSE mode is currently experimental. Check the eBay MCP Server documentation for current support status.
+</Warning>
+
+---
+
+## Configuration Best Practices
+
+### Security
+
+<AccordionGroup>
+  <Accordion title="Never commit credentials" icon="shield">
+    **Don't:**
+    ```json
+    {
+      "env": {
+        "EBAY_CLIENT_ID": "YourActualClientId",  // ❌ Bad!
+        "EBAY_CLIENT_SECRET": "YourActualSecret"
+      }
+    }
+    ```
+
+    **Do:**
+    ```json
+    {
+      "env": {
+        "EBAY_CLIENT_ID": "${EBAY_CLIENT_ID}",  // ✅ Good!
+        "EBAY_CLIENT_SECRET": "${EBAY_CLIENT_SECRET}"
+      }
+    }
+    ```
+
+    Use environment variables or secret management tools.
+  </Accordion>
+
+  <Accordion title="Use separate configs per environment" icon="layer-group">
+    Maintain different configuration files:
+
+    - `mcp_config.sandbox.json` - For testing
+    - `mcp_config.production.json` - For live operations
+    - Add both to `.gitignore`
+  </Accordion>
+
+  <Accordion title="Set proper file permissions" icon="lock">
+    ```bash
+    # Restrict access to config files
+    chmod 600 ~/.client/mcp_settings.json
+
+    # Make sure .env is not readable by others
+    chmod 600 /path/to/ebay-mcp-server/.env
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Performance
+
+<Accordion title="Enable connection pooling">
+  For high-volume applications, reuse MCP client connections:
+
+  ```python
+  # Python example
+  class EbayMCPPool:
+      def __init__(self):
+          self._session = None
+
+      async def get_session(self):
+          if not self._session:
+              # Create connection
+              self._session = await create_mcp_session()
+          return self._session
+  ```
+</Accordion>
+
+<Accordion title="Implement caching">
+  Cache frequently accessed data to reduce API calls:
+
+  ```typescript
+  import { LRUCache } from 'lru-cache';
+
+  const cache = new LRUCache({
+    max: 500,
+    ttl: 1000 * 60 * 5  // 5 minutes
+  });
+
+  async function getInventoryItems() {
+    const cached = cache.get('inventory');
+    if (cached) return cached;
+
+    const result = await client.callTool({
+      name: 'getInventoryItems'
+    });
+
+    cache.set('inventory', result);
+    return result;
+  }
+  ```
+</Accordion>
+
+### Error Handling
+
+<Accordion title="Implement retry logic">
+  ```typescript
+  async function callToolWithRetry(
+    toolName: string,
+    args: any,
+    maxRetries = 3
+  ) {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        return await client.callTool({ name: toolName, arguments: args });
+      } catch (error) {
+        if (i === maxRetries - 1) throw error;
+
+        // Exponential backoff
+        await new Promise(resolve =>
+          setTimeout(resolve, Math.pow(2, i) * 1000)
+        );
+      }
+    }
+  }
+  ```
+</Accordion>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Client can't find MCP server">
+    **Possible causes:**
+    - Wrong path to server
+    - Server not built
+    - Node.js not in PATH
+
+    **Solutions:**
+    1. Verify server path:
+       ```bash
+       ls /path/to/ebay-mcp-server/build/index.js
+       ```
+    2. Build server:
+       ```bash
+       cd /path/to/ebay-mcp-server && npm run build
+       ```
+    3. Check Node.js:
+       ```bash
+       which node
+       node --version
+       ```
+  </Accordion>
+
+  <Accordion title="Connection timeout">
+    **Cause:** Server takes too long to start or authenticate.
+
+    **Solutions:**
+    1. Increase timeout in client configuration
+    2. Check network connectivity
+    3. Verify credentials are correct
+    4. Test server independently:
+       ```bash
+       cd /path/to/ebay-mcp-server
+       npm start
+       ```
+  </Accordion>
+
+  <Accordion title="Tools not appearing in client">
+    **Cause:** MCP protocol version mismatch or server initialization failure.
+
+    **Solutions:**
+    1. Update MCP SDK to latest version
+    2. Check server logs for errors
+    3. Verify environment variables are set
+    4. Test with simple MCP server first
+  </Accordion>
+
+  <Accordion title="Authentication failures">
+    **Cause:** Invalid or expired credentials.
+
+    **Solutions:**
+    1. Verify credentials in [eBay Developer Portal](https://developer.ebay.com)
+    2. Regenerate user tokens:
+       ```bash
+       cd /path/to/ebay-mcp-server
+       npm run setup
+       ```
+    3. Check environment matches credentials (Sandbox vs Production)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Building Custom Integrations
+
+### Creating a Custom MCP Client
+
+<Steps>
+  <Step title="Choose Your Framework">
+    Select based on your needs:
+    - **Python:** Best for data science, automation scripts
+    - **TypeScript/Node.js:** Best for web apps, serverless functions
+    - **Go:** Best for high-performance services
+    - **Rust:** Best for system-level integrations
+  </Step>
+
+  <Step title="Install MCP SDK">
+    <Tabs>
+      <Tab title="Python">
+        ```bash
+        pip install mcp
+        ```
+      </Tab>
+
+      <Tab title="TypeScript">
+        ```bash
+        npm install @modelcontextprotocol/sdk
+        ```
+      </Tab>
+
+      <Tab title="Other Languages">
+        Check [MCP specification](https://modelcontextprotocol.io) for implementation guides
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Implement Client Logic">
+    Follow MCP client protocol:
+    1. Establish transport (stdio, HTTP, etc.)
+    2. Send initialization message
+    3. List available tools
+    4. Call tools with proper parameters
+    5. Handle responses and errors
+    6. Close connection gracefully
+  </Step>
+
+  <Step title="Add eBay-Specific Features">
+    - Rate limit handling
+    - Token refresh logic
+    - Error recovery
+    - Result caching
+    - Batch operations
+  </Step>
+</Steps>
+
+### Example: Slack Bot Integration
+
+```python
+from slack_bolt import App
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+app = App(token=os.environ["SLACK_BOT_TOKEN"])
+
+@app.command("/ebay-orders")
+async def check_orders(ack, command, say):
+    await ack()
+
+    # Connect to eBay MCP Server
+    server_params = StdioServerParameters(
+        command="node",
+        args=["/path/to/ebay-mcp-server/build/index.js"],
+        env={
+            "EBAY_CLIENT_ID": os.environ["EBAY_CLIENT_ID"],
+            "EBAY_CLIENT_SECRET": os.environ["EBAY_CLIENT_SECRET"],
+            "EBAY_ENVIRONMENT": "production"
+        }
+    )
+
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            # Get recent orders
+            result = await session.call_tool(
+                "getOrders",
+                arguments={"limit": 5}
+            )
+
+            # Format and send to Slack
+            await say(f"Recent orders: {result}")
+
+app.start(3000)
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Explore all 230+ available eBay tools
+  </Card>
+
+  <Card title="Build Automation" icon="robot" href="/guides/bulk-operations">
+    Create bulk operations and automation scripts
+  </Card>
+
+  <Card title="Best Practices" icon="lightbulb" href="/guides/best-practices">
+    Learn optimization tips and patterns
+  </Card>
+
+  <Card title="Architecture Guide" icon="diagram-project" href="/advanced/architecture">
+    Understand MCP server internals
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+<CardGroup cols={2}>
+  <Card title="MCP Specification" icon="book" href="https://modelcontextprotocol.io">
+    Official Model Context Protocol documentation
+  </Card>
+
+  <Card title="Troubleshooting" icon="life-ring" href="/support/troubleshooting">
+    Comprehensive solutions for common issues
+  </Card>
+
+  <Card title="Community" icon="users" href="https://github.com/YosefHayim/ebay-mcp-server/discussions">
+    Join discussions and get help
+  </Card>
+
+  <Card title="GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server">
+    View source code and contribute
+  </Card>
+</CardGroup>
