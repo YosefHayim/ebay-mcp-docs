@@ -1,657 +1,331 @@
+# eBay MCP Server Documentation
+
+## Working Relationship
+- You can push back on ideas - this can lead to better documentation. Cite sources and explain your reasoning when you do so
+- ALWAYS ask for clarification rather than making assumptions
+- NEVER lie, guess, or make up information
+- When uncertain about eBay API behavior or MCP specifications, acknowledge it and suggest verification
+
+## Project Context
+
+### What This Is
+Documentation for the eBay MCP Server - a comprehensive Model Context Protocol implementation that provides AI assistants with full access to eBay's Sell APIs through 230+ tools.
+
+### Project Characteristics
+- **Technology:** TypeScript, Node.js 18+, MCP SDK 1.21.1
+- **API Coverage:** 99.1% (110/111 eBay Sell API endpoints)
+- **Testing:** 870+ tests with 99%+ function coverage
+- **License:** Apache 2.0
+- **Repository:** https://github.com/YosefHayim/ebay-mcp-server
+
+### Documentation Format
+- **Format:** MDX files with YAML frontmatter
+- **Build System:** Mintlify documentation platform
+- **Config:** docs.json for navigation, theme, and settings
+- **Components:** Mintlify React components (Card, Steps, Accordion, etc.)
+- **Theme:** Venus theme with eBay brand colors (primary: #E53238, light: #F5A623, dark: #0064D2)
+
+## Audience
+
+### Primary Audiences
+1. **New developers:** Need step-by-step guides, clear explanations, minimal jargon
+2. **Experienced developers:** Want API references, architecture details, advanced topics
+3. **AI assistant users:** Need practical guides for using MCP tools with Claude, Cursor, etc.
+4. **Contributors:** Need development setup, testing, and contribution guidelines
+
+### Assumed Knowledge
+- Basic understanding of APIs and REST concepts
+- Familiarity with Node.js and npm
+- General command-line proficiency
+- For advanced docs: TypeScript, OAuth 2.0, testing frameworks
+
+## Content Strategy
+
+### Guiding Principles
+- Document just enough for user success - not too much, not too little
+- Prioritize accuracy and usability of information
+- Make content evergreen when possible (avoid version-specific details unless necessary)
+- Search for existing information before adding new content
+- Avoid duplication unless done for a strategic reason (e.g., different audience levels)
+- Check existing patterns for consistency
+- Start by making the smallest reasonable changes
+
+### Content Organization
+1. **Getting Started:** Quick wins, immediate value (quickstart, installation, configuration)
+2. **Core Concepts:** Authentication, MCP integration, API overview
+3. **Features:** Detailed guides for each API category (inventory, orders, marketing, analytics)
+4. **Practical Guides:** Real-world scenarios and workflows
+5. **API Reference:** Complete tool documentation
+6. **Advanced:** Architecture, testing, contributing
+7. **Support:** Troubleshooting, FAQ, changelog
+
+### Technical Accuracy
+- All eBay API endpoint counts, coverage percentages, and capabilities must match the actual implementation
+- Rate limits (10,000-50,000 for user tokens, 1,000 for client credentials) are accurate
+- Code examples must be tested and working
+- Tool names and parameters must match the actual MCP server implementation
+- Environment variables must match the server's `.env` schema
+
+## Frontmatter Requirements
+
+Every MDX page MUST include:
+```yaml
 ---
-title: "Using eBay MCP with Claude"
-description: "Complete guide to integrating eBay MCP Server with Claude AI"
-icon: "message"
+title: "Clear, descriptive page title"
+description: "Concise summary for SEO/navigation (50-160 characters ideal)"
 ---
+```
 
-# Using eBay MCP Server with Claude
+Optional frontmatter:
+```yaml
+icon: "icon-name"  # For navigation
+sidebarTitle: "Shorter title for sidebar"
+mode: "wide"  # For pages needing more width
+```
 
-This guide shows you how to connect the eBay MCP Server to Claude for AI-powered eBay automation with Anthropic's most capable AI assistant.
+## Writing Standards
 
-<Note>
-  **Prerequisites:**
-  - eBay MCP Server [installed](/installation) and [configured](/configuration)
-  - Claude subscription (Pro, Max, or API access)
-  - Claude Desktop app OR API access
-</Note>
+### Voice and Tone
+- **Second-person voice:** "you" not "we" or "users"
+- **Active voice:** "Configure your credentials" not "Credentials should be configured"
+- **Conversational but professional:** Helpful guide, not academic paper
+- **Encouraging:** "You can do this" attitude, especially for new developers
 
-## Overview
+### Structure
+- **Prerequisites at start** of procedural content (use `<Note>` or `<Info>` callouts)
+- **Progressive disclosure:** Simple first, complexity later
+- **Clear headings:** Descriptive, action-oriented when appropriate
+- **Short paragraphs:** 2-4 sentences max
+- **Lists for scanability:** Bullet points and numbered steps
 
-Claude has **native MCP support**, making it the easiest AI assistant to connect with the eBay MCP Server:
+### Code and Examples
+- **Test all code examples** before publishing
+- **Match style** of existing examples in the project
+- **Include both basic and advanced** use cases where relevant
+- **Language tags on ALL code blocks:** ```bash, ```typescript, ```json, etc.
+- **Comment complex code:** Explain non-obvious parts
+- **Show realistic examples:** Use plausible values, not "foo" and "bar"
 
-- **230+ eBay Tools** - Full access to eBay's Sell APIs
-- **Native Integration** - Built-in MCP protocol support
-- **200K Context Window** - Handle large product catalogs and complex operations
-- **Advanced Reasoning** - Claude's exceptional analysis for business decisions
-- **Tool Use** - Industry-leading function calling accuracy
+### Visual Content
+- **Alt text on ALL images:** Descriptive, not "image" or "screenshot"
+- **Relative paths for internal links:** `/quickstart` not `https://docs.example.com/quickstart`
+- **External links:** Use full URLs with descriptive text
+- **Screenshots:** Keep up-to-date, use consistent window sizing
 
-## Quick Start
+### Mintlify Components
 
-### Method 1: Claude Desktop (Recommended)
+#### Use Frequently
+- `<Card>` and `<CardGroup>`: For navigation and feature showcases
+- `<Steps>` and `<Step>`: For sequential procedures
+- `<Accordion>` and `<AccordionGroup>`: For optional/supplementary content
+- `<Tabs>` and `<Tab>`: For alternative approaches or platforms
+- `<Note>`, `<Tip>`, `<Warning>`, `<Info>`, `<Check>`: For callouts
 
-The easiest way to use eBay MCP with Claude.
+#### Use Appropriately
+- `<CodeGroup>`: For showing same operation in multiple languages
+- `<Frame>`: For image borders and styling
+- `<Columns>`: For side-by-side content
 
+#### Example Usage
+```mdx
 <Steps>
-  <Step title="Install Claude Desktop">
-    Download Claude Desktop from [claude.ai/download](https://claude.ai/download)
-
-    Available for:
-    - macOS
-    - Windows
-    - Linux
-  </Step>
-
-  <Step title="Locate Configuration File">
-    Find your Claude Desktop config file:
-
-    **macOS:**
-    ```
-    ~/Library/Application Support/Claude/claude_desktop_config.json
-    ```
-
-    **Windows:**
-    ```
-    %APPDATA%\Claude\claude_desktop_config.json
-    ```
-
-    **Linux:**
-    ```
-    ~/.config/Claude/claude_desktop_config.json
+  <Step title="Install Dependencies">
+    Run the installation command:
+    ```bash
+    npm install
     ```
   </Step>
 
-  <Step title="Add eBay MCP Server">
-    Edit `claude_desktop_config.json`:
-
-    ```json
-    {
-      "mcpServers": {
-        "ebay": {
-          "command": "node",
-          "args": ["/absolute/path/to/ebay-mcp-server/build/index.js"],
-          "env": {
-            "EBAY_CLIENT_ID": "your_client_id_here",
-            "EBAY_CLIENT_SECRET": "your_client_secret_here",
-            "EBAY_ENVIRONMENT": "sandbox",
-            "EBAY_REDIRECT_URI": "http://localhost:3000/callback"
-          }
-        }
-      }
-    }
-    ```
-
-    <Warning>
-      Replace `/absolute/path/to/ebay-mcp-server` with the actual path where you cloned the repository.
-      Use an **absolute path**, not a relative path.
-    </Warning>
-  </Step>
-
-  <Step title="Restart Claude Desktop">
-    1. Quit Claude Desktop completely
-    2. Reopen Claude Desktop
-    3. Look for the 🔨 tools icon in the interface
-    4. You should see eBay tools available!
-  </Step>
-
-  <Step title="Test the Connection">
-    In Claude Desktop, try:
-
-    > "Can you list my eBay fulfillment policies?"
-
-    Claude will use the `getFulfillmentPolicies` tool and show your configured policies.
-
-    <Check>
-      **Success!** You now have 230+ eBay tools available in Claude Desktop.
-    </Check>
+  <Step title="Configure Environment">
+    Create your `.env` file with credentials.
   </Step>
 </Steps>
 
-### Method 2: Claude API
-
-For programmatic access or custom integrations.
-
-<Tabs>
-  <Tab title="Python">
-    ```python
-    import anthropic
-    from mcp import Client, StdioTransport
-    import os
-
-    # Initialize Claude
-    client = anthropic.Anthropic(
-        api_key=os.environ.get("ANTHROPIC_API_KEY")
-    )
-
-    # Connect to eBay MCP Server
-    mcp_transport = StdioTransport(
-        command='node',
-        args=['/path/to/ebay-mcp-server/build/index.js'],
-        env={
-            'EBAY_CLIENT_ID': os.environ['EBAY_CLIENT_ID'],
-            'EBAY_CLIENT_SECRET': os.environ['EBAY_CLIENT_SECRET'],
-            'EBAY_ENVIRONMENT': 'sandbox'
-        }
-    )
-
-    mcp_client = Client('claude-ebay', '1.0.0')
-    await mcp_client.connect(mcp_transport)
-
-    # List available tools
-    tools = await mcp_client.list_tools()
-    print(f"Connected! {len(tools)} eBay tools available")
-
-    # Use Claude with eBay tools
-    message = client.messages.create(
-        model="claude-sonnet-4",
-        max_tokens=4096,
-        tools=[{
-            "name": tool.name,
-            "description": tool.description,
-            "input_schema": tool.inputSchema
-        } for tool in tools],
-        messages=[{
-            "role": "user",
-            "content": "List my eBay inventory items"
-        }]
-    )
-
-    print(message.content)
-    ```
-  </Tab>
-
-  <Tab title="TypeScript">
-    ```typescript
-    import Anthropic from '@anthropic-ai/sdk';
-    import { MCPClient } from '@modelcontextprotocol/sdk/client/index.js';
-    import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-
-    // Initialize Claude
-    const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY
-    });
-
-    // Connect to eBay MCP Server
-    const transport = new StdioClientTransport({
-      command: 'node',
-      args: ['/path/to/ebay-mcp-server/build/index.js'],
-      env: {
-        EBAY_CLIENT_ID: process.env.EBAY_CLIENT_ID,
-        EBAY_CLIENT_SECRET: process.env.EBAY_CLIENT_SECRET,
-        EBAY_ENVIRONMENT: 'sandbox'
-      }
-    });
-
-    const client = new MCPClient({
-      name: 'claude-ebay-client',
-      version: '1.0.0'
-    }, {
-      capabilities: {}
-    });
-
-    await client.connect(transport);
-
-    // List available tools
-    const { tools } = await client.listTools();
-    console.log(`Connected! ${tools.length} eBay tools available`);
-
-    // Use Claude with eBay tools
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4',
-      max_tokens: 4096,
-      tools: tools.map(tool => ({
-        name: tool.name,
-        description: tool.description,
-        input_schema: tool.inputSchema
-      })),
-      messages: [{
-        role: 'user',
-        content: 'Show me my recent eBay orders'
-      }]
-    });
-
-    console.log(message.content);
-    ```
-  </Tab>
-</Tabs>
-
-## Common Use Cases
-
-### 1. Natural Language Inventory Management
-
-Claude excels at understanding complex inventory operations:
-
-```
-"I need to create a new listing for a vintage Canon AE-1 camera.
-It's in excellent condition, include all relevant specs, price it
-competitively based on similar listings, and use the appropriate eBay category."
+<Warning>
+  Never commit your `.env` file to version control
+</Warning>
 ```
 
-Claude will:
-1. Extract structured data from your description
-2. Research competitive pricing patterns
-3. Select the correct eBay category
-4. Create the inventory item with all proper fields
-5. Confirm the listing details
+## Git Workflow
 
-### 2. Intelligent Order Processing
+### Commit Guidelines
+- **NEVER use --no-verify** when committing
+- **Ask how to handle uncommitted changes** before starting work
+- **Create a new branch** when no clear branch exists for changes
+- **Commit frequently** throughout development with clear messages
+- **NEVER skip or disable pre-commit hooks**
 
-Claude can handle complex order workflows:
-
+### Commit Message Format
 ```
-"Process all orders from the last 3 days that are awaiting shipment.
-For each order, generate a shipping label and send the buyer a friendly
-message with the tracking number and expected delivery date."
-```
+<type>: <subject>
 
-Claude executes:
-- Queries orders with proper date filters
-- Generates shipping labels via `createShippingFulfillment`
-- Composes personalized buyer messages
-- Provides summary of all actions taken
+<body>
 
-### 3. Strategic Marketing Campaigns
-
-Claude's reasoning helps optimize promotions:
-
-```
-"Analyze my slow-moving inventory and create a marketing campaign.
-Suggest which items to promote, what discount percentage to offer,
-and the optimal campaign duration based on historical sales data."
+<footer>
 ```
 
-Claude performs:
-- Analyzes inventory turnover rates
-- Identifies underperforming items
-- Recommends data-driven discount strategies
-- Creates targeted promotions
-- Explains the reasoning behind recommendations
-
-### 4. Business Analytics and Insights
-
-Claude excels at analyzing business data:
-
-```
-"Review my seller performance metrics for the last quarter.
-Identify areas where I'm underperforming, explain why, and suggest
-specific actions to improve my seller rating."
-```
-
-Claude provides:
-- Comprehensive metric analysis
-- Root cause identification
-- Actionable improvement strategies
-- Timeline for implementation
-- Expected impact projections
-
-## Advanced Features
-
-### Multi-Step Reasoning
-
-Claude can plan and execute complex workflows:
-
-```
-User: "I'm going on vacation for 2 weeks. Prepare my account."
-
-Claude: "I'll help you prepare your eBay account for your vacation. Here's my plan:
-
-1. Pause all active listings temporarily
-2. Set up an out-of-office auto-responder for messages
-3. Review pending orders and ensure all shipments are scheduled
-4. Create a summary report of your account status
-
-Should I proceed with these actions?"
-
-User: "Yes, do it."
-
-Claude: [Executes all steps and provides detailed confirmation]
-```
-
-### Context-Aware Assistance
-
-With a 200K token context window, Claude remembers entire conversations:
-
-```
-User: "What were my best-selling items last month?"
-Claude: [Provides analysis]
-
-User: "Create a promotion for those items"
-Claude: [Creates promotion using items from previous query]
-
-User: "Make it 15% instead of 20%"
-Claude: [Adjusts the promotion, remembering the context]
-```
-
-### Error Recovery and Validation
-
-Claude validates operations before execution:
-
-```
-User: "Delete all my inventory items"
-
-Claude: "I notice you're asking to delete ALL inventory items.
-This is a destructive action that will:
-- Remove 147 active listings
-- Potentially affect 23 pending orders
-- Cannot be undone
-
-This seems unusual. Could you clarify:
-1. Did you mean to delete specific items?
-2. Or should I help you pause listings instead?
-3. If you do want to delete everything, could you confirm by typing 'DELETE ALL ITEMS'?"
-```
-
-## Why Claude for eBay MCP?
-
-### Advantages over Other AI Assistants
-
-<CardGroup cols={2}>
-  <Card title="Native MCP Support" icon="plug">
-    Built-in protocol support - no bridges or workarounds needed
-  </Card>
-
-  <Card title="Exceptional Reasoning" icon="brain">
-    Industry-leading analysis and decision-making capabilities
-  </Card>
-
-  <Card title="200K Context Window" icon="window">
-    Handle massive product catalogs and long conversation histories
-  </Card>
-
-  <Card title="Honest & Safe" icon="shield-check">
-    Admits uncertainty, asks clarifying questions, validates actions
-  </Card>
-
-  <Card title="Tool Use Accuracy" icon="bullseye">
-    Best-in-class function calling with minimal errors
-  </Card>
-
-  <Card title="Clear Communication" icon="comments">
-    Explains reasoning and decisions in accessible language
-  </Card>
-</CardGroup>
-
-### Comparison Table
-
-| Feature | Claude | Gemini | ChatGPT |
-|---------|--------|--------|---------|
-| **MCP Support** | Native | Via SDK | Via SDK |
-| **Context Window** | 200K tokens | 32K tokens | 128K tokens |
-| **Reasoning Quality** | Exceptional | Good | Good |
-| **Tool Accuracy** | Industry-leading | Good | Good |
-| **Safety Features** | Strong validation | Standard | Standard |
-| **Desktop App** | ✅ Built-in MCP | ❌ | ❌ |
-| **Best For** | Complex workflows | High-volume tasks | General purpose |
-
-## Configuration Options
-
-### Basic Configuration
-
-Minimal setup for Claude Desktop:
-
-```json
-{
-  "mcpServers": {
-    "ebay": {
-      "command": "node",
-      "args": ["/path/to/ebay-mcp-server/build/index.js"],
-      "env": {
-        "EBAY_CLIENT_ID": "your_client_id",
-        "EBAY_CLIENT_SECRET": "your_client_secret",
-        "EBAY_ENVIRONMENT": "sandbox"
-      }
-    }
-  }
-}
-```
-
-### Advanced Configuration
-
-With user tokens for full API access:
-
-```json
-{
-  "mcpServers": {
-    "ebay": {
-      "command": "node",
-      "args": ["/path/to/ebay-mcp-server/build/index.js"],
-      "env": {
-        "EBAY_CLIENT_ID": "your_client_id",
-        "EBAY_CLIENT_SECRET": "your_client_secret",
-        "EBAY_ENVIRONMENT": "production",
-        "EBAY_USER_ACCESS_TOKEN": "your_access_token",
-        "EBAY_USER_REFRESH_TOKEN": "your_refresh_token",
-        "EBAY_USER_TOKEN_EXPIRY": "2024-12-31T23:59:59.000Z",
-        "LOG_LEVEL": "info"
-      }
-    }
-  }
-}
-```
-
-### Multiple Environments
-
-Configure both Sandbox and Production:
-
-```json
-{
-  "mcpServers": {
-    "ebay-sandbox": {
-      "command": "node",
-      "args": ["/path/to/ebay-mcp-server/build/index.js"],
-      "env": {
-        "EBAY_ENVIRONMENT": "sandbox",
-        "EBAY_CLIENT_ID": "sandbox_client_id",
-        "EBAY_CLIENT_SECRET": "sandbox_client_secret"
-      }
-    },
-    "ebay-production": {
-      "command": "node",
-      "args": ["/path/to/ebay-mcp-server/build/index.js"],
-      "env": {
-        "EBAY_ENVIRONMENT": "production",
-        "EBAY_CLIENT_ID": "production_client_id",
-        "EBAY_CLIENT_SECRET": "production_client_secret",
-        "EBAY_USER_ACCESS_TOKEN": "production_token",
-        "EBAY_USER_REFRESH_TOKEN": "production_refresh"
-      }
-    }
-  }
-}
-```
-
-## Best Practices
-
-### 1. Be Specific and Clear
-
-Claude performs best with detailed instructions:
-
-❌ **Vague:** "Update my listings"
-✅ **Clear:** "Update all electronics listings to include free shipping and a 30-day return policy"
-
-### 2. Use Claude's Reasoning
-
-Ask Claude to explain its approach:
-
-```
-"Before creating this promotion, explain your strategy and why you think
-these are the right items to promote. Then proceed if it makes sense."
-```
-
-### 3. Leverage Context Memory
-
-Build on previous conversations:
-
-```
-Session 1: "Analyze my top 10 selling items"
-Session 2: "Create similar listings for new inventory"
-Claude remembers the top items from Session 1
-```
-
-### 4. Validate Important Actions
-
-For critical operations:
-
-```
-"I want to change all my prices. First, show me a preview of the changes,
-then ask for my confirmation before making any updates."
-```
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Tools Not Appearing in Claude Desktop">
-    **Problem:** The 🔨 tools icon doesn't show eBay tools
-
-    **Solutions:**
-    1. **Check config file location** - Must be exact path for your OS
-    2. **Verify JSON syntax** - Use a JSON validator
-    3. **Use absolute paths** - Not relative paths in config
-    4. **Restart Claude Desktop** - Fully quit and reopen
-    5. **Check server path** - Ensure the path exists:
-       ```bash
-       ls /path/to/ebay-mcp-server/build/index.js
-       ```
-    6. **Test server directly**:
-       ```bash
-       node /path/to/ebay-mcp-server/build/index.js
-       ```
-  </Accordion>
-
-  <Accordion title="Authentication Errors">
-    **Problem:** eBay API authentication fails
-
-    **Solutions:**
-    1. **Verify credentials** in eBay Developer Portal
-    2. **Check environment** - Sandbox vs Production mismatch
-    3. **Regenerate tokens** if expired:
-       ```bash
-       cd /path/to/ebay-mcp-server
-       npm run setup
-       ```
-    4. **Update config** with new tokens
-    5. **Restart Claude Desktop**
-  </Accordion>
-
-  <Accordion title="Claude Can't Execute Tools">
-    **Problem:** Claude sees tools but can't use them
-
-    **Solutions:**
-    1. **Check server is running** - Should start automatically
-    2. **Review error messages** in Claude's response
-    3. **Verify eBay credentials** are valid
-    4. **Test with simple command**: "List my eBay user account details"
-    5. **Check logs** in the MCP server output
-  </Accordion>
-
-  <Accordion title="Slow Performance">
-    **Problem:** Tool calls take a long time
-
-    **Possible causes:**
-    - Network latency to eBay APIs
-    - Large data sets being retrieved
-    - Rate limiting delays
-
-    **Solutions:**
-    1. **Use user tokens** for higher rate limits
-    2. **Filter queries** to reduce data transfer
-    3. **Batch operations** when possible
-    4. **Check internet connection**
-  </Accordion>
-</AccordionGroup>
-
-## Example Workflows
-
-### Complete Listing Creation
-
-```
-User: "I have a vintage Nikon F3 camera in mint condition with original box and manual. Create a compelling listing."
-
-Claude: "I'll create a comprehensive listing for your Nikon F3. Let me:
-
-1. Research similar listings to set competitive pricing
-2. Write a detailed description highlighting the mint condition and accessories
-3. Select the correct eBay category for vintage cameras
-4. Add all relevant item specifics
-5. Set appropriate shipping options
-
-Proceeding with creation..."
-
-[Claude creates the listing and provides confirmation with listing ID and preview URL]
-```
-
-### Inventory Audit
-
-```
-User: "Audit my inventory and identify any issues"
-
-Claude: "I'll perform a complete inventory audit. Checking:
-
-✓ 147 active listings analyzed
-! Found 3 items with quantity = 0 (should be paused)
-! Found 12 items missing images
-! Found 5 items with pricing below cost
-✓ All items have proper categories
-✓ Shipping policies correctly assigned
-
-Would you like me to:
-1. Pause the out-of-stock items?
-2. Generate a report of items needing images?
-3. Review the underpriced items together?"
-```
-
-### Automated Reporting
-
-```
-User: "Generate my weekly sales report"
-
-Claude: "Here's your sales summary for the week:
-
-📊 Overview:
-- Total Sales: $1,247.83 (↑ 15% vs last week)
-- Orders: 23 (↑ 3 vs last week)
-- Avg Order Value: $54.25
-
-🏆 Top Performers:
-1. Vintage Camera Accessories - $312.45 (6 sales)
-2. Electronics Bundle - $189.99 (3 sales)
-3. Collectible Items - $156.78 (4 sales)
-
-⚠️ Action Items:
-- 2 orders need shipping labels
-- 1 buyer message awaiting response
-- 3 items low on inventory
-
-Would you like me to handle any of these action items?"
-```
+Types: `docs`, `fix`, `feat`, `chore`, `style`, `refactor`
+
+Examples:
+- `docs: add OAuth setup guide`
+- `fix: correct rate limit values in quickstart`
+- `docs: improve troubleshooting section clarity`
+
+## Do Not
+
+- Skip frontmatter on any MDX file
+- Use absolute URLs for internal links
+- Include untested code examples
+- Make assumptions - always ask for clarification
+- Add content without checking for duplication
+- Use first-person plural ("we") when second person ("you") is more direct
+- Over-promise features that don't exist
+- Copy-paste from other docs without verifying accuracy for this project
+- Use emojis except in code comments or when explicitly requested
+
+## Common Patterns
+
+### Installation Instructions
+Always include:
+1. System requirements
+2. Step-by-step installation
+3. Verification step
+4. Common troubleshooting
+5. Next steps
+
+### API Documentation
+Structure:
+1. Overview and purpose
+2. Prerequisites
+3. Available operations (tools)
+4. Code examples
+5. Common use cases
+6. Error handling
+7. Related topics
+
+### Troubleshooting Sections
+Format:
+- **Problem:** Clear description
+- **Cause:** Why it happens
+- **Solution:** Step-by-step fix
+- Use `<Accordion>` for multiple issues
+
+### Cross-References
+- Link to related content generously
+- Use descriptive link text: "See the [OAuth setup guide](/authentication/oauth-setup)" not "click here"
+- Provide context: why should they visit that link?
+
+## Style Reference
+
+### eBay-Specific Terms
+- **eBay Sell APIs** (not "eBay API" or "Sell API")
+- **eBay Developer Portal** (capitalize properly)
+- **Sandbox** and **Production** (capitalize when referring to environments)
+- **Client ID** and **Client Secret** (not "client id" or "client_id" in prose)
+- **OAuth 2.0** (not "OAuth" or "OAuth2")
+- **MCP server** (lowercase "server" unless at start of sentence)
+- **Model Context Protocol (MCP)** (full name on first use, MCP thereafter)
+
+### Technical Terms
+- **user tokens** (lowercase in general text)
+- **client credentials** (lowercase in general text)
+- **rate limits** (not "rate limiting" when referring to the limits themselves)
+- **tools** (lowercase when referring to MCP tools)
+
+### Code Elements in Prose
+- Use backticks for: `npm install`, `EBAY_CLIENT_ID`, `getFulfillmentPolicies`
+- Use **bold** for: UI elements, button names, emphasis
+- Use _italics_ for: introducing new terms (first use only)
+
+## Mintlify-Specific Features
+
+### AI Optimization (2025)
+- **llms.txt file:** Defines priority pages and key concepts for AI ingestion
+- **Model Context Protocol support:** Auto-generated MCP servers for API docs
+- **Contextual options:** Copy, view, ChatGPT, Claude, Perplexity, MCP, Cursor, VSCode
+
+### Modern Features to Use
+- **Update component:** For changelog with filterable tags
+- **Search customization:** `"prompt": "Search eBay MCP documentation..."`
+- **Feedback options:** Thumbs rating, suggest edits, raise issues
+- **Code block features:** Focus mode, expandable blocks, theme-aware
+
+### Accessibility
+- ARIA attributes handled by Mintlify components
+- Ensure all interactive elements are keyboard-accessible
+- Provide text alternatives for visual content
+- Use semantic HTML through MDX
+
+## Quality Checklist
+
+Before finalizing any documentation page:
+
+- [ ] Frontmatter complete (title, description)
+- [ ] No broken links (internal or external)
+- [ ] All code examples tested and working
+- [ ] Code blocks have language tags
+- [ ] Images have descriptive alt text
+- [ ] Callouts used appropriately (Note, Warning, Tip, etc.)
+- [ ] Content matches existing style and tone
+- [ ] No assumptions made - everything verified
+- [ ] Cross-references to related topics included
+- [ ] Next steps or related resources provided
+- [ ] Mintlify components used correctly
+- [ ] No typos or grammatical errors
+- [ ] Technical accuracy verified against source code
+- [ ] Appropriate for target audience (new vs. experienced)
+
+## Common Questions
+
+### When should I create a new page vs. expand an existing one?
+- New page: Distinct topic, different audience level, or would make existing page too long (>1000 lines)
+- Expand existing: Closely related topic, same audience, adds valuable context
+
+### How much detail in code examples?
+- Enough to be useful and correct
+- Not so much it becomes overwhelming
+- Provide "basic" and "advanced" examples when there's a clear distinction
+
+### How to handle version-specific information?
+- Make it evergreen when possible
+- If version-specific, clearly state which version
+- Use versioning features (coming to Mintlify) when available
+- Prefer: "As of version X.Y" over "Currently"
+
+### What if information conflicts with the source repository?
+- Trust the source code over documentation
+- Update docs to match reality
+- If uncertain, verify with repository owner
+- Never guess or make assumptions
+
+## Project-Specific Notes
+
+### Rate Limits Are Critical
+Users frequently hit rate limits. Documentation must:
+- Clearly distinguish user token limits (10K-50K/day) from client credentials (1K/day)
+- Emphasize importance of user tokens for production
+- Provide troubleshooting for rate limit errors
+
+### OAuth Setup Is a Common Pain Point
+- Step-by-step instructions must be crystal clear
+- Screenshots or detailed descriptions of eBay Developer Portal
+- Common errors (redirect URI mismatch, wrong environment)
+- Both automated and manual setup methods
+
+### Multiple MCP Clients
+- Don't assume Claude Desktop
+- Provide config for Claude, Cursor, and generic MCP clients
+- Path configurations vary by OS (macOS, Windows, Linux)
+
+### Sandbox vs. Production
+- Always recommend starting with Sandbox
+- Clear warnings about Production affecting real transactions
+- Switching process must be documented
 
 ## Resources
 
-- **Claude Desktop:** https://claude.ai/download
-- **Claude API Docs:** https://docs.anthropic.com
-- **MCP Documentation:** https://modelcontextprotocol.io
-- **eBay MCP Server:** https://github.com/YosefHayim/ebay-mcp-server
-- **Claude in the IDE:** Use Cursor or other MCP-compatible editors
-
-## Next Steps
-
-<CardGroup cols={2}>
-  <Card title="Explore All Tools" icon="tools" href="/api-reference/introduction">
-    Browse all 230+ eBay tools available
-  </Card>
-
-  <Card title="Best Practices Guide" icon="lightbulb" href="/guides/best-practices">
-    Optimize your Claude + eBay workflow
-  </Card>
-
-  <Card title="Advanced Workflows" icon="diagram-project" href="/guides/bulk-operations">
-    Master complex automation tasks
-  </Card>
-
-  <Card title="Compare AI Assistants" icon="scale-balanced" href="/gemini">
-    See how Gemini integration compares
-  </Card>
-</CardGroup>
-
----
-
-**Need Help?** Visit our [support page](/support/troubleshooting) or ask in [GitHub Discussions](https://github.com/YosefHayim/ebay-mcp-server/discussions).
+- **Mintlify Docs:** https://mintlify.com/docs
+- **eBay Developer Portal:** https://developer.ebay.com
+- **MCP Specification:** https://modelcontextprotocol.io
+- **Source Repository:** https://github.com/YosefHayim/ebay-mcp-server
+- **MDX Documentation:** https://mdxjs.com/
