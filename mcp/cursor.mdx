@@ -33,7 +33,7 @@ Before connecting Cursor, ensure you have:
 <Check>
   - eBay MCP Server [installed](/installation) and [configured](/configuration)
   - Cursor IDE installed ([Download here](https://cursor.sh))
-  - eBay API credentials (Client ID and Secret)
+  - eBay Developer credentials (Client ID and Secret)
   - Node.js 18+ installed
 </Check>
 
@@ -149,7 +149,7 @@ Before connecting Cursor, ensure you have:
       **Important:**
       - Replace `/absolute/path/to/ebay-mcp-server` with your actual installation path
       - Use **absolute paths**, not relative paths
-      - Replace the example credentials with your actual eBay API credentials
+      - Replace the example credentials with your actual eBay Developer credentials
     </Warning>
 
     **Example paths:**
@@ -308,7 +308,7 @@ Here are practical ways to use eBay MCP with Cursor:
   3. Include proper error handling and types
 </Accordion>
 
-<Accordion title="Debug eBay API integration">
+<Accordion title="Debug eBay Sell APIs integration">
   **Scenario:** Your code for fetching orders isn't working
 
   **Prompt:**
@@ -635,11 +635,11 @@ Check Cursor and server logs for debugging:
   ```markdown
   # eBay Integration Rules
 
-  When working with eBay APIs:
+  When working with eBay Sell APIs:
   - Always use the eBay MCP tools instead of direct API calls
   - Prefer Sandbox environment for testing
   - Include proper error handling for rate limits
-  - Use TypeScript for type safety with eBay API responses
+  - Use TypeScript for type safety with eBay Sell APIs responses
 
   Available eBay MCP tools include:
   - Inventory: createOrReplaceInventoryItem, getInventoryItems, updateOffer

@@ -257,7 +257,7 @@ Problems during installation or building the server.
 
 ## Authentication Issues
 
-Problems with eBay API credentials and OAuth.
+Problems with eBay Developer credentials and OAuth.
 
 <AccordionGroup>
   <Accordion title="Error: Invalid Client Credentials" icon="key">
@@ -736,7 +736,7 @@ Problems that occur while the server is running.
   <Accordion title="Slow API responses" icon="hourglass">
     **Problem:** API calls take a long time to complete
 
-    **Cause:** Network latency, eBay API performance, or inefficient queries.
+    **Cause:** Network latency, eBay Sell APIs performance, or inefficient queries.
 
     **Solutions:**
 
@@ -755,21 +755,21 @@ Problems that occur while the server is running.
        - Use filters to reduce response size
        - Cache frequently accessed data
 
-    4. **Check eBay API status:**
+    4. **Check eBay Sell APIs status:**
        - Visit [eBay Developer Status](https://developer.ebay.com/support/api-status)
        - May be platform-wide performance issues
 
     5. **Consider geographic location:**
-       - eBay APIs may be slower from certain regions
+       - eBay Sell APIs may be slower from certain regions
        - Consider using a proxy or VPN to different region
 
     <Note>
-      Some eBay API endpoints are inherently slower than others, especially bulk operations and complex queries.
+      Some eBay Sell APIs endpoints are inherently slower than others, especially bulk operations and complex queries.
     </Note>
   </Accordion>
 
   <Accordion title="Unexpected API errors" icon="bug">
-    **Problem:** Getting errors from eBay API that aren't related to authentication or rate limits
+    **Problem:** Getting errors from eBay Sell APIs that aren't related to authentication or rate limits
 
     **Cause:** Invalid requests, API changes, or data validation issues.
 
@@ -854,7 +854,7 @@ Problems that occur while the server is running.
   <Accordion title="Token refresh failures" icon="arrows-rotate">
     **Problem:** Server can't automatically refresh expired access tokens
 
-    **Cause:** Invalid refresh token, network issues, or eBay API problems.
+    **Cause:** Invalid refresh token, network issues, or eBay Sell APIs issues.
 
     **Solution:**
 
@@ -999,7 +999,7 @@ If your problem isn't listed here:
   </Card>
 
   <Card title="eBay Developer Support" icon="life-ring" href="https://developer.ebay.com/support">
-    Official eBay API support resources
+    Official eBay Sell APIs support resources
   </Card>
 
   <Card title="MCP Documentation" icon="book" href="https://modelcontextprotocol.io">

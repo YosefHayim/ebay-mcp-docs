@@ -81,8 +81,8 @@ This documentation covers:
 
 ## 🎯 Project Stats
 
-- **API Coverage:** 99.1% (110/111 eBay Sell API endpoints)
-- **Tools Available:** 230+ eBay API tools
+- **API Coverage:** 99.1% (110/111 eBay Sell APIs endpoints)
+- **Tools Available:** 230+ eBay Sell APIs tools
 - **Test Coverage:** 870+ tests with 99%+ function coverage
 - **Rate Limits:** 10,000-50,000 requests/day with user tokens
 - **License:** Apache 2.0
