@@ -1,12 +1,1046 @@
 ---
-title: "Faq"
-description: "Documentation for Faq"
+title: "Frequently Asked Questions"
+description: "Answers to common questions about the eBay MCP Server"
+icon: "circle-question"
 ---
 
-# Faq
+Find quick answers to the most frequently asked questions about installing, configuring, and using the eBay MCP Server.
 
-Documentation for this section is coming soon.
+<Tip>
+  Don't see your question? Check the [Troubleshooting Guide](/support/troubleshooting) or ask on [GitHub Discussions](https://github.com/YosefHayim/ebay-mcp-server/discussions).
+</Tip>
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+---
+
+## Getting Started
+
+<AccordionGroup>
+  <Accordion title="What is the eBay MCP Server?" icon="info-circle">
+    The eBay MCP Server is a **Model Context Protocol (MCP)** implementation that provides AI assistants with comprehensive access to eBay's Sell APIs.
+
+    **Key features:**
+    - **230+ tools** covering eBay selling operations
+    - **99.1% API coverage** (110/111 eBay Sell API endpoints)
+    - **Full authentication support** with OAuth 2.0
+    - **Compatible** with Claude Desktop, Cursor, and other MCP clients
+    - **Well-tested** with 870+ tests and 99%+ function coverage
+
+    It allows AI assistants like Claude to help you manage your eBay business through natural language conversations.
+
+    <Card title="Learn More" icon="book" href="/introduction">
+      Read the full introduction
+    </Card>
+  </Accordion>
+
+  <Accordion title="Do I need programming experience to use this?" icon="code">
+    **No, programming experience is not required for basic usage.**
+
+    **For basic setup and use:**
+    - Follow the [Quickstart Guide](/quickstart) step-by-step
+    - Use the interactive setup wizard: `npm run setup`
+    - Interact through your MCP client (Claude Desktop, Cursor, etc.)
+    - No coding needed - just configure and use through AI conversations
+
+    **Programming is helpful for:**
+    - Advanced customization
+    - Contributing to the project
+    - Debugging complex issues
+    - Integrating with custom workflows
+
+    <Tip>
+      The setup wizard handles most technical details automatically.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Do I need an active eBay seller account?" icon="store">
+    **It depends on your environment:**
+
+    **For Sandbox (testing):**
+    - ❌ **No seller account required**
+    - Only need an eBay Developer account (free)
+    - Perfect for learning and development
+    - Create test listings without real transactions
+
+    **For Production (live operations):**
+    - ✅ **Yes, active seller account required**
+    - Must be registered as an eBay seller
+    - Account must be in good standing
+    - Used for real listings and transactions
+
+    <Info>
+      We recommend starting with Sandbox to learn the system before using Production.
+    </Info>
+  </Accordion>
+
+  <Accordion title="How much does this cost?" icon="dollar-sign">
+    **The eBay MCP Server itself is completely free:**
+    - ✅ **Open source** under Apache 2.0 license
+    - ✅ **No subscription fees**
+    - ✅ **No usage limits** from the MCP server
+    - ✅ **Free to use** for personal and commercial projects
+
+    **However, you may incur costs from:**
+
+    1. **eBay fees** (when using Production):
+       - Standard eBay selling fees apply
+       - Final value fees on sold items
+       - Optional listing upgrades
+
+    2. **MCP client costs** (varies by client):
+       - Claude Desktop Pro: $20/month (optional)
+       - Cursor: Free or $20/month for Pro features
+       - Other clients: Check individual pricing
+
+    3. **eBay API limits:**
+       - Sandbox: Unlimited requests (free)
+       - Production with client credentials: 1,000 requests/day (free)
+       - Production with user tokens: 10,000-50,000 requests/day (free with eBay account)
+
+    <Check>
+      The server itself will never charge you anything. It's completely free and open source.
+    </Check>
+  </Accordion>
+
+  <Accordion title="Can I use this for eBay buying (not selling)?" icon="shopping-cart">
+    **No, this server focuses exclusively on eBay's Sell APIs.**
+
+    **What the server DOES:**
+    - ✅ Create and manage listings
+    - ✅ Fulfill orders
+    - ✅ Run marketing campaigns
+    - ✅ Analyze business metrics
+    - ✅ Manage seller account settings
+
+    **What the server does NOT do:**
+    - ❌ Browse eBay as a buyer
+    - ❌ Make purchases
+    - ❌ Search for products to buy
+    - ❌ Manage buyer accounts
+
+    **Why?**
+    - Built specifically for sellers and businesses
+    - Uses eBay's Sell API family (not Buy APIs)
+    - Designed for seller operations and automation
+
+    <Note>
+      For buying operations, you would need a different integration using eBay's Buy APIs.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Which AI assistants work with this server?" icon="robot">
+    The eBay MCP Server works with **any MCP-compatible client:**
+
+    **Fully Tested:**
+    - ✅ **Claude Desktop** - Official Anthropic app with native MCP support
+    - ✅ **Cursor** - AI-first code editor
+    - ✅ **Cline** (formerly Claude Dev) - VS Code extension
+
+    **Also Compatible:**
+    - Continue (VS Code extension)
+    - Zed editor (experimental MCP support)
+    - Any custom MCP client following the specification
+
+    **Not Currently Supported:**
+    - ChatGPT (doesn't support MCP)
+    - Google Gemini web interface (doesn't support MCP)
+    - Copilot (uses different protocol)
+
+    <Card title="Integration Guides" icon="plug" href="/mcp/claude-desktop">
+      See setup guides for each client
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Installation & Setup
+
+<AccordionGroup>
+  <Accordion title="What are the system requirements?" icon="laptop">
+    **Minimum requirements:**
+
+    **Software:**
+    - **Node.js:** Version 18.0.0 or higher
+    - **npm:** Version 8.0.0 or higher (comes with Node.js)
+    - **Git:** Latest version recommended
+    - **Operating System:** macOS, Linux, or Windows
+
+    **Hardware:**
+    - **Disk Space:** ~500 MB for installation
+    - **RAM:** 512 MB minimum, 1 GB recommended
+    - **CPU:** Any modern processor
+
+    **Network:**
+    - Internet connection for eBay API access
+    - Ability to reach `api.ebay.com`
+
+    **Verify your system:**
+    ```bash
+    node --version  # Should show v18.x.x or higher
+    npm --version   # Should show v8.x.x or higher
+    git --version   # Should show git version 2.x.x
+    ```
+
+    <Tip>
+      Install the Node.js LTS (Long Term Support) version from [nodejs.org](https://nodejs.org)
+    </Tip>
+  </Accordion>
+
+  <Accordion title="How long does installation take?" icon="clock">
+    **Typical installation timeline:**
+
+    1. **Get eBay credentials:** 5-10 minutes
+       - Create developer account
+       - Set up application
+       - Note Client ID and Secret
+
+    2. **Install server:** 2-3 minutes
+       - Clone repository: ~30 seconds
+       - Install dependencies: ~1-2 minutes
+       - Build project: ~30 seconds
+
+    3. **Configure credentials:** 2-5 minutes
+       - Run setup wizard: ~2-3 minutes
+       - Complete OAuth flow: ~1-2 minutes
+
+    4. **Connect MCP client:** 1-2 minutes
+       - Edit config file
+       - Restart client
+
+    **Total time: 10-20 minutes** for complete setup
+
+    <Check>
+      Following the [Quickstart Guide](/quickstart) ensures the fastest setup experience.
+    </Check>
+  </Accordion>
+
+  <Accordion title="Where do I get eBay API credentials?" icon="key">
+    **Step-by-step process:**
+
+    1. **Create eBay Developer account:**
+       - Visit [developer.ebay.com](https://developer.ebay.com)
+       - Click "Register" in top right
+       - Complete registration (free)
+
+    2. **Create an Application:**
+       - Sign in to Developer Portal
+       - Go to **My Account → Application Keys**
+       - Click **Create an Application Key**
+       - Choose **Sandbox** (for testing) or **Production**
+
+    3. **Get your credentials:**
+       - **Client ID** (also called App ID)
+       - **Client Secret** (also called Cert ID)
+       - Copy these - you'll need them for setup
+
+    4. **Configure OAuth:**
+       - Add redirect URI: `http://localhost:3000/callback`
+       - Save your application
+
+    **Credentials are free** and generated instantly.
+
+    <Card title="Detailed Guide" icon="book" href="/quickstart#step-1-get-ebay-developer-credentials">
+      See full credential setup guide
+    </Card>
+  </Accordion>
+
+  <Accordion title="Should I use Sandbox or Production?" icon="flask">
+    **Use Sandbox first, then Production later.**
+
+    **Sandbox (Recommended for starting):**
+    - ✅ Safe testing environment
+    - ✅ No real transactions
+    - ✅ Free to use
+    - ✅ No seller account needed
+    - ✅ Perfect for learning
+    - ❌ Fake data only
+    - ❌ Doesn't affect real eBay
+
+    **Production (For live operations):**
+    - ✅ Real eBay marketplace
+    - ✅ Actual listings and sales
+    - ✅ Real customer orders
+    - ⚠️ Real transactions and fees
+    - ⚠️ Requires active seller account
+    - ⚠️ Mistakes affect real business
+
+    **Recommended workflow:**
+    1. Start with Sandbox
+    2. Learn the tools and workflows
+    3. Test your processes thoroughly
+    4. Switch to Production when confident
+
+    <Warning>
+      **Always test new operations in Sandbox first** before using them in Production.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="How do I switch from Sandbox to Production?" icon="repeat">
+    **Complete process:**
+
+    <Steps>
+      <Step title="Create Production Application">
+        1. Visit [eBay Developer Portal](https://developer.ebay.com)
+        2. Create a new application key
+        3. Select **Production** environment
+        4. Copy your Production Client ID and Secret
+      </Step>
+
+      <Step title="Update Environment Variables">
+        Edit your `.env` file:
+        ```bash
+        EBAY_ENVIRONMENT=production
+        EBAY_CLIENT_ID=YourProdClientId
+        EBAY_CLIENT_SECRET=YourProdClientSecret
+        ```
+
+        **Important:** Remove any Sandbox tokens:
+        - Delete `EBAY_USER_ACCESS_TOKEN`
+        - Delete `EBAY_USER_REFRESH_TOKEN`
+        - Delete `EBAY_USER_TOKEN_EXPIRY`
+      </Step>
+
+      <Step title="Generate Production Tokens">
+        ```bash
+        npm run setup
+        ```
+        Complete the OAuth flow with your Production credentials.
+      </Step>
+
+      <Step title="Verify Configuration">
+        ```bash
+        npm run validate-config
+        ```
+        Ensure Production credentials are working.
+      </Step>
+
+      <Step title="Restart MCP Server">
+        Restart your MCP client to load the new credentials.
+      </Step>
+    </Steps>
+
+    <Warning>
+      **Sandbox and Production credentials are completely separate.** You can't mix them.
+    </Warning>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Authentication & Security
+
+<AccordionGroup>
+  <Accordion title="What's the difference between User Tokens and Client Credentials?" icon="shield">
+    **Two authentication modes with different capabilities:**
+
+    **User Tokens (OAuth 2.0) - Recommended:**
+    - ✅ **Full API access** - all 230+ tools available
+    - ✅ **High rate limits** - 10,000-50,000 requests/day
+    - ✅ **User-specific operations** - manage your listings, orders, etc.
+    - ✅ **Automatic refresh** - tokens renew automatically
+    - ⚠️ Requires OAuth flow (one-time setup)
+
+    **Client Credentials - Fallback:**
+    - ✅ **Simple setup** - just Client ID and Secret
+    - ✅ **No OAuth needed** - automatic authentication
+    - ❌ **Limited rate limits** - only 1,000 requests/day
+    - ❌ **Restricted access** - can't access user-specific data
+    - ❌ **Fewer tools available**
+
+    **Comparison:**
+
+    | Feature | User Tokens | Client Credentials |
+    |---------|------------|-------------------|
+    | Rate Limit | 10K-50K/day | 1,000/day |
+    | Setup Complexity | OAuth flow | Simple |
+    | API Access | Full (230+ tools) | Limited |
+    | Best For | Production use | Testing only |
+
+    <Tip>
+      The setup wizard (`npm run setup`) configures user tokens automatically.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="How do I know if my tokens are working?" icon="check-circle">
+    **Several ways to verify:**
+
+    **1. Run configuration validator:**
+    ```bash
+    npm run validate-config
+    ```
+    This checks:
+    - Credentials are valid
+    - Tokens are not expired
+    - API connectivity works
+
+    **2. Check server startup logs:**
+    ```bash
+    npm start
+    ```
+    Look for:
+    - ✅ "Client credentials validated"
+    - ✅ "User tokens loaded" (if using OAuth)
+    - ✅ "230+ tools registered"
+
+    **3. Test in MCP client:**
+    - Connect your MCP client
+    - Look for 🔨 tools icon
+    - Try a simple operation like "List my fulfillment policies"
+
+    **4. Check token expiry:**
+    Look in your `.env` file:
+    ```bash
+    EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
+    ```
+    - Access tokens: Expire in 2 hours (auto-refresh)
+    - Refresh tokens: Expire in 18 months
+
+    <Info>
+      The server automatically refreshes expired access tokens using the refresh token.
+    </Info>
+  </Accordion>
+
+  <Accordion title="How often do I need to re-authenticate?" icon="calendar">
+    **It depends on your authentication method:**
+
+    **With User Tokens (OAuth):**
+    - **Access tokens:** Expire every 2 hours
+      - ✅ Automatically refreshed by the server
+      - You don't need to do anything
+
+    - **Refresh tokens:** Expire after 18 months
+      - ⚠️ Need to re-run OAuth flow when they expire
+      - You'll get an error when this happens
+      - Solution: Run `npm run setup` again
+
+    **With Client Credentials:**
+    - **Never expire**
+    - Automatically renewed by the server
+    - No manual intervention needed
+
+    **In practice:**
+    - **Daily use:** No action needed (tokens auto-refresh)
+    - **Every 18 months:** Re-run `npm run setup` for new OAuth tokens
+    - **After credential changes:** Run `npm run setup` again
+
+    <Tip>
+      Set a calendar reminder for 17 months after setup to regenerate tokens before they expire.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Is my API data secure?" icon="lock">
+    **Security measures in place:**
+
+    **Credential Storage:**
+    - ✅ Stored in `.env` file (local only)
+    - ✅ `.gitignore` prevents Git commits
+    - ✅ Never transmitted except to eBay APIs
+    - ✅ Environment variables not logged
+
+    **Network Security:**
+    - ✅ All API calls use HTTPS encryption
+    - ✅ Direct connection to eBay (no intermediaries)
+    - ✅ OAuth 2.0 industry standard
+    - ✅ Tokens are encrypted in transit
+
+    **Best Practices:**
+
+    1. **Never commit `.env` to version control:**
+       ```bash
+       # Check .gitignore includes .env
+       cat .gitignore | grep .env
+       ```
+
+    2. **Set proper file permissions:**
+       ```bash
+       chmod 600 .env
+       ```
+
+    3. **Rotate credentials regularly:**
+       - Regenerate every 90 days minimum
+       - Immediately if compromised
+
+    4. **Use separate credentials per environment:**
+       - Different keys for Sandbox vs Production
+       - Never use production keys for testing
+
+    <Warning>
+      Never share your Client Secret or tokens publicly, in screenshots, or in bug reports.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="What happens if my tokens are stolen?" icon="skull-crossbones">
+    **If you suspect credential compromise:**
+
+    **Immediate actions:**
+
+    1. **Revoke tokens immediately:**
+       - Visit [eBay Developer Portal](https://developer.ebay.com)
+       - Delete or regenerate your application credentials
+       - This invalidates all tokens instantly
+
+    2. **Generate new credentials:**
+       - Create new Client ID and Secret
+       - Update your `.env` file
+       - Run `npm run setup` with new credentials
+
+    3. **Check for unauthorized activity:**
+       - Review your eBay account for unusual changes
+       - Check recent API activity in Developer Portal
+       - Look for unexpected listings or orders
+
+    4. **Secure your system:**
+       - Scan for malware
+       - Change passwords
+       - Review who has access to your system
+
+    **Prevention:**
+    - Never commit `.env` to public repositories
+    - Don't share credentials in screenshots
+    - Use file permissions: `chmod 600 .env`
+    - Enable 2FA on your eBay account
+
+    <Card title="Security Policy" icon="shield" href="https://github.com/YosefHayim/ebay-mcp-server/security">
+      Report security issues responsibly
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Using the Server
+
+<AccordionGroup>
+  <Accordion title="How many API calls can I make per day?" icon="chart-line">
+    **Rate limits vary by authentication method and account type:**
+
+    **With Client Credentials:**
+    - **1,000 requests per day**
+    - Very limited
+    - Only for testing/development
+
+    **With User Tokens:**
+
+    | eBay Account Type | Daily Limit |
+    |------------------|-------------|
+    | Basic Seller | 10,000 requests |
+    | Business Seller | 25,000 requests |
+    | Enterprise Seller | 50,000 requests |
+
+    **Per-second limits:**
+    - Varies by endpoint
+    - Typically 10-50 requests/second
+    - Server handles throttling automatically
+
+    **What happens if I exceed limits:**
+    - Get "429 Too Many Requests" error
+    - Limits reset after 24 hours
+    - No permanent impact
+
+    **How to increase limits:**
+    1. Upgrade from client credentials to user tokens
+    2. Upgrade your eBay seller account tier
+    3. Optimize your API usage (caching, batching)
+
+    <Tip>
+      Monitor your usage and upgrade to user tokens for production use.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Can I use this server for multiple eBay accounts?" icon="users">
+    **Yes, but with some configuration:**
+
+    **Option 1: Multiple Instances**
+    - Clone the server multiple times
+    - Configure each with different credentials
+    - Run as separate MCP servers
+
+    ```bash
+    # Structure
+    ~/ebay-mcp-server-account1/
+    ~/ebay-mcp-server-account2/
+    ~/ebay-mcp-server-account3/
+    ```
+
+    **Option 2: Switch Credentials**
+    - Use different `.env` files
+    - Switch between them as needed
+
+    ```bash
+    # Maintain separate .env files
+    .env.account1
+    .env.account2
+
+    # Copy the one you need
+    cp .env.account1 .env
+    ```
+
+    **Option 3: Dynamic Configuration** (Advanced)
+    - Modify server to accept account parameter
+    - Requires code changes
+    - Not officially supported yet
+
+    **MCP Client Configuration:**
+    ```json
+    {
+      "mcpServers": {
+        "ebay-account1": {
+          "command": "node",
+          "args": ["/path/to/server1/build/index.js"]
+        },
+        "ebay-account2": {
+          "command": "node",
+          "args": ["/path/to/server2/build/index.js"]
+        }
+      }
+    }
+    ```
+
+    <Note>
+      Each server instance requires separate eBay API credentials and rate limits apply per account.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Does this work internationally?" icon="globe">
+    **Yes, the server works with eBay's global marketplaces:**
+
+    **Supported Marketplaces:**
+    - 🇺🇸 United States (eBay.com)
+    - 🇬🇧 United Kingdom (eBay.co.uk)
+    - 🇩🇪 Germany (eBay.de)
+    - 🇦🇺 Australia (eBay.com.au)
+    - 🇨🇦 Canada (eBay.ca)
+    - 🇫🇷 France (eBay.fr)
+    - 🇮🇹 Italy (eBay.it)
+    - 🇪🇸 Spain (eBay.es)
+    - And all other eBay marketplaces
+
+    **How it works:**
+    - Use marketplace-specific parameters in API calls
+    - Tools accept `marketplace_id` parameters
+    - Same credentials work across marketplaces
+    - Must be authorized to sell in that marketplace
+
+    **Example:**
+    ```typescript
+    // List item on eBay UK
+    marketplace_id: "EBAY_GB"
+
+    // List item on eBay Germany
+    marketplace_id: "EBAY_DE"
+    ```
+
+    **Requirements:**
+    - eBay seller account authorized for that marketplace
+    - Appropriate marketplace settings in your account
+    - Compliance with local regulations
+
+    <Tip>
+      Your eBay seller account determines which marketplaces you can access.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Can I automate recurring tasks?" icon="calendar-days">
+    **Yes, but with important considerations:**
+
+    **What you CAN automate:**
+    - ✅ Inventory updates (bulk price changes, quantity updates)
+    - ✅ Order processing (marking shipped, adding tracking)
+    - ✅ Policy management (updating return/payment policies)
+    - ✅ Analytics reporting (daily/weekly reports)
+    - ✅ Listing refreshes (relisting ended items)
+
+    **How to automate:**
+
+    **Option 1: Through MCP Client**
+    - Use AI assistant to perform tasks on schedule
+    - Set up reminders or recurring requests
+    - Limited by client capabilities
+
+    **Option 2: Custom Scripts** (Advanced)
+    - Write Node.js scripts using the MCP server
+    - Schedule with cron (Linux/Mac) or Task Scheduler (Windows)
+    - Requires programming knowledge
+
+    **Option 3: Third-party Integration** (Advanced)
+    - Zapier, Make.com, or similar
+    - Webhook integrations
+    - May require custom development
+
+    **Important limitations:**
+    - ⚠️ **Rate limits still apply** - don't exceed daily limits
+    - ⚠️ **Monitor automation** - check for errors regularly
+    - ⚠️ **eBay policies** - must comply with seller rules
+    - ⚠️ **No official scheduling** - server doesn't include scheduler
+
+    <Warning>
+      Be careful with automation in Production - test thoroughly in Sandbox first.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="What can't this server do?" icon="ban">
+    **Current limitations:**
+
+    **eBay Functionality:**
+    - ❌ **Buyer operations** - can't browse or purchase items
+    - ❌ **Messaging buyers** - eBay Messaging API not included
+    - ❌ **Returns management** - limited return handling
+    - ❌ **Disputes** - can't manage cases/disputes
+    - ❌ **eBay Partner Network** - no affiliate tracking
+
+    **Technical Limitations:**
+    - ❌ **Real-time notifications** - no webhook support yet
+    - ❌ **File uploads** - can't upload images directly (use URLs)
+    - ❌ **Bulk CSV import** - no built-in CSV processing
+    - ❌ **Historical data beyond API limits** - eBay API constraints apply
+    - ❌ **Multi-account management** - designed for single account
+
+    **MCP Protocol Limitations:**
+    - ❌ **Persistent state** - server is stateless
+    - ❌ **Background jobs** - no built-in job scheduling
+    - ❌ **Real-time sync** - changes aren't pushed to client
+
+    **Why these limitations exist:**
+    - Some features not available in eBay Sell APIs
+    - MCP protocol design constraints
+    - Project scope focused on core selling operations
+
+    <Note>
+      Many limitations are planned for future versions. Check the [Changelog](/support/changelog) for updates.
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting & Support
+
+<AccordionGroup>
+  <Accordion title="My server isn't connecting to my MCP client" icon="plug-circle-xmark">
+    **Common causes and solutions:**
+
+    **1. Check the path in your config:**
+    ```json
+    {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/ebay-mcp-server/build/index.js"
+      ]
+    }
+    ```
+    - Must be **absolute path**, not relative
+    - Check the file exists: `ls /path/to/build/index.js`
+    - No tilde (`~`) - use full path
+
+    **2. Ensure server is built:**
+    ```bash
+    cd ebay-mcp-server
+    npm run build
+    ls build/index.js  # Should exist
+    ```
+
+    **3. Restart MCP client:**
+    - Fully quit (Cmd+Q on Mac)
+    - Reopen application
+    - Check for 🔨 tools icon
+
+    **4. Check environment variables:**
+    - Pass credentials in config's `env` section
+    - Or ensure `.env` file exists in server directory
+
+    <Card title="Full Guide" icon="wrench" href="/support/troubleshooting#mcp-client-connection-issues">
+      See detailed troubleshooting steps
+    </Card>
+  </Accordion>
+
+  <Accordion title="I'm getting rate limit errors" icon="gauge-high">
+    **You've exceeded your daily API request limit.**
+
+    **Quick solutions:**
+
+    1. **Upgrade to user tokens** (if using client credentials):
+       ```bash
+       npm run setup
+       ```
+       This increases from 1,000 to 10,000+ requests/day
+
+    2. **Wait for reset:**
+       - Rate limits reset every 24 hours
+       - Check when your limit resets in eBay Developer Portal
+
+    3. **Optimize API usage:**
+       - Cache responses when possible
+       - Use bulk operations instead of individual calls
+       - Avoid unnecessary polling
+
+    4. **Upgrade eBay account:**
+       - Business sellers get 25,000 requests/day
+       - Enterprise sellers get 50,000 requests/day
+
+    <Card title="Rate Limit Guide" icon="gauge" href="/support/troubleshooting#rate-limit-errors">
+      Learn more about managing rate limits
+    </Card>
+  </Accordion>
+
+  <Accordion title="Where can I get help?" icon="life-ring">
+    **Multiple support channels:**
+
+    **Documentation:**
+    - 📚 [Full Documentation](/) - Start here
+    - 🔧 [Troubleshooting Guide](/support/troubleshooting) - Common issues
+    - ❓ [This FAQ](/support/faq) - Quick answers
+
+    **Community Support:**
+    - 💬 [GitHub Discussions](https://github.com/YosefHayim/ebay-mcp-server/discussions) - Ask questions
+    - 🐛 [GitHub Issues](https://github.com/YosefHayim/ebay-mcp-server/issues) - Report bugs
+    - 📖 [eBay Developer Forums](https://community.ebay.com/t5/Developer-Community/ct-p/developer-community) - eBay API help
+
+    **eBay Resources:**
+    - 🌐 [eBay Developer Portal](https://developer.ebay.com) - API documentation
+    - 📞 [eBay Developer Support](https://developer.ebay.com/support) - Official support
+    - 📊 [eBay API Status](https://developer.ebay.com/support/api-status) - System status
+
+    **When asking for help, include:**
+    - Error messages (complete, not truncated)
+    - Steps to reproduce the issue
+    - Your environment (OS, Node version, MCP client)
+    - Configuration (without secrets!)
+
+    <Warning>
+      Never share your Client Secret, access tokens, or refresh tokens when asking for help.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="How do I report bugs or request features?" icon="bug">
+    **Use GitHub Issues for all bug reports and feature requests:**
+
+    **For Bugs:**
+    1. Visit [GitHub Issues](https://github.com/YosefHayim/ebay-mcp-server/issues)
+    2. Search existing issues first
+    3. Click "New Issue" → "Bug Report"
+    4. Fill in the template:
+       - Description of the bug
+       - Steps to reproduce
+       - Expected vs actual behavior
+       - Environment info
+       - Logs and error messages
+
+    **For Feature Requests:**
+    1. Visit [GitHub Issues](https://github.com/YosefHayim/ebay-mcp-server/issues)
+    2. Search if already requested
+    3. Click "New Issue" → "Feature Request"
+    4. Describe:
+       - What feature you want
+       - Why it would be useful
+       - How it should work
+       - Alternatives considered
+
+    **For Security Issues:**
+    - **Don't** create public issues
+    - Follow the [Security Policy](https://github.com/YosefHayim/ebay-mcp-server/security)
+    - Report privately to maintainers
+
+    <Tip>
+      Good bug reports with reproduction steps get fixed faster!
+    </Tip>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Advanced Topics
+
+<AccordionGroup>
+  <Accordion title="Can I contribute to the project?" icon="code-pull-request">
+    **Yes! Contributions are welcome and appreciated.**
+
+    **Ways to contribute:**
+
+    **1. Code Contributions:**
+    - Fix bugs
+    - Add new features
+    - Improve performance
+    - Add tests
+
+    **2. Documentation:**
+    - Fix typos
+    - Improve clarity
+    - Add examples
+    - Translate to other languages
+
+    **3. Testing:**
+    - Report bugs
+    - Test new features
+    - Verify fixes
+
+    **4. Community:**
+    - Answer questions in Discussions
+    - Help other users
+    - Share your use cases
+
+    **Getting started:**
+
+    1. **Fork the repository**
+    2. **Read the contributing guide:**
+       - [CONTRIBUTING.md](https://github.com/YosefHayim/ebay-mcp-server/blob/main/CONTRIBUTING.md)
+    3. **Set up development environment**
+    4. **Make your changes**
+    5. **Submit a pull request**
+
+    **Requirements:**
+    - Follow code style guidelines
+    - Add tests for new features
+    - Update documentation
+    - Sign commits (DCO)
+
+    <Card title="Contributing Guide" icon="heart" href="/advanced/contributing">
+      Read the full contributing guide
+    </Card>
+  </Accordion>
+
+  <Accordion title="How is this different from other eBay integrations?" icon="code-compare">
+    **Key differentiators:**
+
+    **1. Model Context Protocol (MCP):**
+    - Modern AI-first architecture
+    - Natural language interface
+    - Works with multiple AI assistants
+    - Standardized protocol
+
+    **2. Comprehensive Coverage:**
+    - 230+ tools (most complete eBay integration)
+    - 99.1% API coverage
+    - All major seller operations
+    - Regularly updated
+
+    **3. Developer Experience:**
+    - Simple setup (10 minutes)
+    - Interactive configuration wizard
+    - Excellent documentation
+    - Well-tested (870+ tests)
+
+    **4. Open Source:**
+    - Apache 2.0 license
+    - Free forever
+    - Community-driven
+    - Transparent development
+
+    **Compared to:**
+
+    **Traditional APIs:**
+    - More coding required
+    - Manual API calls
+    - No AI integration
+
+    **eBay Official Tools:**
+    - Different use cases
+    - Web-based interfaces
+    - Not API-focused
+
+    **Other Integrations:**
+    - Often limited scope
+    - May lack OAuth support
+    - Varying quality/maintenance
+
+    <Check>
+      This is the most comprehensive MCP server for eBay's Sell APIs.
+    </Check>
+  </Accordion>
+
+  <Accordion title="Is this project actively maintained?" icon="code-branch">
+    **Yes, the project is actively maintained and developed.**
+
+    **Indicators of active maintenance:**
+
+    **Regular Updates:**
+    - Frequent commits and releases
+    - Bug fixes addressed promptly
+    - New features added regularly
+    - Dependencies kept up-to-date
+
+    **Community Engagement:**
+    - Issues responded to within 24-48 hours
+    - Pull requests reviewed and merged
+    - Active GitHub Discussions
+    - Regular documentation updates
+
+    **Quality Standards:**
+    - 870+ tests maintained
+    - 99%+ function coverage
+    - Continuous integration (CI)
+    - Regular security audits
+
+    **Roadmap:**
+    - Planned features documented
+    - Clear versioning (semantic versioning)
+    - Changelog maintained
+    - Transparent development
+
+    **How to check:**
+    - Visit [GitHub repository](https://github.com/YosefHayim/ebay-mcp-server)
+    - Check commit frequency
+    - Review closed/open issues
+    - See [Changelog](/support/changelog)
+
+    <Info>
+      The project follows an open development model. You can see all activity on GitHub.
+    </Info>
+  </Accordion>
+
+  <Accordion title="What's on the roadmap?" icon="map">
+    **Planned features and improvements:**
+
+    **Near-term (Next 3 months):**
+    - 🔔 Webhook support for real-time notifications
+    - 📦 Docker images for easier deployment
+    - 🌐 Additional marketplace support
+    - 📊 Enhanced analytics and reporting
+    - 🎨 Image upload support
+
+    **Mid-term (3-6 months):**
+    - 💬 eBay Messaging API integration
+    - 🔄 Automated backup and restore
+    - 📈 Performance optimizations
+    - 🧪 Additional testing tools
+    - 📚 More code examples
+
+    **Long-term (6-12 months):**
+    - 🤖 AI-powered listing optimization
+    - 📊 Business intelligence features
+    - 🔌 Additional MCP client support
+    - 🌍 Multi-language documentation
+    - 🎯 Advanced automation features
+
+    **How to influence roadmap:**
+    - 👍 Upvote feature requests on GitHub
+    - 💡 Suggest new features in Discussions
+    - 🤝 Contribute pull requests
+    - 💬 Share your use cases
+
+    <Card title="Changelog" icon="timeline" href="/support/changelog">
+      See what's been released
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Still Have Questions?
+
+<CardGroup cols={2}>
+  <Card title="Troubleshooting" icon="wrench" href="/support/troubleshooting">
+    Detailed solutions to common problems
+  </Card>
+
+  <Card title="GitHub Discussions" icon="comments" href="https://github.com/YosefHayim/ebay-mcp-server/discussions">
+    Ask the community
+  </Card>
+
+  <Card title="Full Documentation" icon="book" href="/">
+    Explore all documentation
+  </Card>
+
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Complete tool documentation
+  </Card>
+</CardGroup>

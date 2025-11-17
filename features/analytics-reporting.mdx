@@ -1,12 +1,473 @@
 ---
-title: "Analytics Reporting"
-description: "Documentation for Analytics Reporting"
+title: "Analytics & Reporting"
+description: "Track listing performance, seller metrics, and customer service standards with 4 powerful analytics tools"
 ---
 
-# Analytics Reporting
+The eBay MCP Server provides analytics and reporting capabilities through the **Analytics API**, offering 4 specialized tools to monitor listing traffic, seller performance standards, and customer service metrics.
 
-Documentation for this section is coming soon.
+## Overview
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+eBay's Analytics API helps you understand how your listings perform, track your seller standards compliance, and monitor customer service quality. These insights enable data-driven decisions to improve sales and maintain good seller standing.
+
+<Info>
+**Analytics Coverage:**
+1. **Traffic Reports**: Listing views, clicks, conversion rates
+2. **Seller Standards**: Performance evaluation and compliance
+3. **Customer Service Metrics**: Response times and satisfaction
+</Info>
+
+## Core Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Traffic Reports" icon="chart-line">
+    Track listing impressions, clicks, and sales
+  </Card>
+  <Card title="Seller Standards" icon="star">
+    Monitor performance evaluation scores
+  </Card>
+  <Card title="Customer Service" icon="headset">
+    Measure response times and quality
+  </Card>
+  <Card title="Historical Data" icon="clock-rotate-left">
+    Access performance trends over time
+  </Card>
+</CardGroup>
+
+## Traffic Reports
+
+Monitor how buyers discover and interact with your listings across eBay.
+
+### Understanding Traffic Metrics
+
+<Tabs>
+  <Tab title="Key Metrics">
+    - **IMPRESSION**: Number of times listing appeared in search
+    - **CLICK_THROUGH_RATE**: Percentage of impressions that resulted in clicks
+    - **LISTING_VIEWS**: Number of times listing page was viewed
+    - **SALES_CONVERSION_RATE**: Percentage of views that resulted in sales
+    - **TRANSACTION**: Number of completed sales
+  </Tab>
+
+  <Tab title="Dimensions">
+    - **LISTING**: View data by individual listing
+    - **DAY**: Daily breakdown of traffic
+    - **WEEK**: Weekly aggregated data
+    - **MONTH**: Monthly summary
+  </Tab>
+</Tabs>
+
+### Generating Traffic Reports
+
+<Steps>
+  <Step title="Request Traffic Report">
+    ```typescript
+    {
+      "dimension": "LISTING",
+      "filter": "listingIds:{123456789012|123456789013}",
+      "metric": "CLICK_THROUGH_RATE,IMPRESSION,LISTING_VIEWS,SALES_CONVERSION_RATE",
+      "sort": "-LISTING_VIEWS"
+    }
+    ```
+
+    **Parameters:**
+    - `dimension` - How to group data (LISTING, DAY, etc.)
+    - `filter` - Which listings/dates to include
+    - `metric` - Which metrics to retrieve
+    - `sort` - Sort order (prefix with `-` for descending)
+
+    **Tool:** `ebay_get_traffic_report`
+  </Step>
+
+  <Step title="Analyze Report Data">
+    **Typical Response:**
+
+    ```json
+    {
+      "records": [
+        {
+          "dimension": {
+            "dimensionKey": "LISTING",
+            "dimensionValues": [
+              {
+                "name": "listingId",
+                "value": "123456789012"
+              }
+            ]
+          },
+          "metrics": [
+            {
+              "name": "IMPRESSION",
+              "value": "1250"
+            },
+            {
+              "name": "CLICK_THROUGH_RATE",
+              "value": "3.2"
+            },
+            {
+              "name": "LISTING_VIEWS",
+              "value": "40"
+            },
+            {
+              "name": "SALES_CONVERSION_RATE",
+              "value": "12.5"
+            },
+            {
+              "name": "TRANSACTION",
+              "value": "5"
+            }
+          ]
+        }
+      ]
+    }
+    ```
+  </Step>
+</Steps>
+
+### Common Traffic Report Scenarios
+
+<AccordionGroup>
+  <Accordion title="Top Performing Listings">
+    Identify your best sellers:
+
+    ```typescript
+    {
+      "dimension": "LISTING",
+      "filter": "lastAccessDate:[2025-01-01T00:00:00.000Z..2025-01-31T23:59:59.999Z]",
+      "metric": "TRANSACTION,SALES_CONVERSION_RATE,LISTING_VIEWS",
+      "sort": "-TRANSACTION"
+    }
+    ```
+
+    **Analysis:** Look for listings with high transaction counts and conversion rates to identify successful products.
+  </Accordion>
+
+  <Accordion title="Traffic Trends Over Time">
+    Track daily performance:
+
+    ```typescript
+    {
+      "dimension": "DAY",
+      "filter": "listingIds:{123456789012}",
+      "metric": "IMPRESSION,LISTING_VIEWS,TRANSACTION",
+      "sort": "DAY"
+    }
+    ```
+
+    **Analysis:** Identify traffic patterns, seasonal trends, and campaign impact.
+  </Accordion>
+
+  <Accordion title="Low Conversion Listings">
+    Find underperforming listings:
+
+    ```typescript
+    {
+      "dimension": "LISTING",
+      "filter": "lastAccessDate:[2025-01-01T00:00:00.000Z..2025-01-31T23:59:59.999Z]",
+      "metric": "LISTING_VIEWS,SALES_CONVERSION_RATE",
+      "sort": "SALES_CONVERSION_RATE"
+    }
+    ```
+
+    **Analysis:** Listings with many views but low conversion may need better photos, descriptions, or pricing.
+  </Accordion>
+
+  <Accordion title="Click-Through Rate Analysis">
+    Optimize search visibility:
+
+    ```typescript
+    {
+      "dimension": "LISTING",
+      "filter": "lastAccessDate:[2025-01-01T00:00:00.000Z..2025-01-31T23:59:59.999Z]",
+      "metric": "IMPRESSION,CLICK_THROUGH_RATE",
+      "sort": "CLICK_THROUGH_RATE"
+    }
+    ```
+
+    **Analysis:** Low CTR despite high impressions suggests title or thumbnail optimization needed.
+  </Accordion>
+</AccordionGroup>
+
+## Seller Standards Profiles
+
+Monitor your seller performance evaluation and compliance with eBay's seller standards.
+
+### Understanding Seller Standards
+
+eBay evaluates sellers based on:
+- **Defect Rate**: Late shipments, canceled orders, returns
+- **Customer Satisfaction**: Positive feedback, detailed ratings
+- **Shipping Performance**: On-time delivery rates
+- **Case Closure Rate**: How disputes are resolved
+
+<Warning>
+**Important:** Maintaining good seller standards is critical. Below Standard status can result in search placement降低, increased fees, or account suspension.
+</Warning>
+
+### Checking Seller Standards
+
+<Steps>
+  <Step title="Get All Standards Profiles">
+    ```typescript
+    {}  // No parameters required
+    ```
+
+    **Tool:** `ebay_find_seller_standards_profiles`
+
+    **Returns:** All evaluation cycles and programs
+  </Step>
+
+  <Step title="Get Specific Profile">
+    ```typescript
+    {
+      "program": "CUSTOMER_SERVICE",
+      "cycle": "CURRENT"
+    }
+    ```
+
+    **Programs:**
+    - `CUSTOMER_SERVICE` - Overall seller performance
+    - `SELLER_LEVEL_PLUS` - Top-rated seller program
+
+    **Cycles:**
+    - `CURRENT` - Current evaluation period
+    - `PREVIOUS` - Last completed evaluation
+    - `PROJECTED` - Forecasted next evaluation
+
+    **Tool:** `ebay_get_seller_standards_profile`
+  </Step>
+</Steps>
+
+### Interpreting Standards Data
+
+<Accordion title="Standard Performance Levels">
+**Above Standard:**
+- Exceeds performance requirements
+- Eligible for search benefits and lower fees
+- May qualify for Top Rated Seller status
+
+**Standard:**
+- Meets performance requirements
+- Good standing with no penalties
+
+**Below Standard:**
+- Does not meet requirements
+- May face search placement降低
+- Higher fees may apply
+- Risk of account restrictions
+
+**Action Required:**
+- Immediate intervention needed
+- Significant performance issues
+- Account at risk of suspension
+</Accordion>
+
+<Accordion title="Example Response">
+```json
+{
+  "program": "CUSTOMER_SERVICE",
+  "cycle": "CURRENT",
+  "status": "ABOVE_STANDARD",
+  "evaluationDate": "2025-02-01T00:00:00.000Z",
+  "metrics": [
+    {
+      "name": "DEFECT_RATE",
+      "value": "0.8",
+      "benchmark": "2.0"
+    },
+    {
+      "name": "LATE_SHIPMENT_RATE",
+      "value": "1.2",
+      "benchmark": "3.0"
+    },
+    {
+      "name": "CASES_NOT_RESOLVED",
+      "value": "5",
+      "benchmark": "10"
+    }
+  ]
+}
+```
+</Accordion>
+
+## Customer Service Metrics
+
+Track your customer service quality and response performance.
+
+### Available Metrics
+
+<CardGroup cols={2}>
+  <Card title="Response Time" icon="clock">
+    Average time to respond to buyer messages
+  </Card>
+  <Card title="Resolution Rate" icon="check-circle">
+    Percentage of inquiries resolved satisfactorily
+  </Card>
+  <Card title="Message Volume" icon="messages">
+    Number of customer service contacts
+  </Card>
+  <Card title="Satisfaction Score" icon="face-smile">
+    Buyer ratings of support quality
+  </Card>
+</CardGroup>
+
+### Retrieving Customer Service Metrics
+
+```typescript
+{
+  "customerServiceMetricType": "RESPONSE_TIME",
+  "evaluationType": "CURRENT",
+  "evaluationMarketplaceId": "EBAY_US"
+}
+```
+
+**Metric Types:**
+- `RESPONSE_TIME` - How quickly you respond
+- `RESOLUTION_RATE` - How effectively you resolve issues
+- `INQUIRY_VOLUME` - Number of customer contacts
+- `SATISFACTION_SCORE` - Overall customer satisfaction
+
+**Evaluation Types:**
+- `CURRENT` - Current period
+- `PREVIOUS` - Last completed period
+- `PROJECTED` - Forecasted score
+
+**Tool:** `ebay_get_customer_service_metric`
+
+<Tip>
+**Best Practice:** Aim to respond to all buyer messages within 24 hours. Fast response times improve customer satisfaction and seller standards scores.
+</Tip>
+
+## Analytics Best Practices
+
+<Steps>
+  <Step title="Monitor Regularly">
+    - Check traffic reports weekly
+    - Review seller standards monthly
+    - Track customer service metrics daily
+  </Step>
+
+  <Step title="Act on Insights">
+    **Low CTR?** Improve titles and thumbnails
+
+    **High views, low sales?** Review pricing and descriptions
+
+    **Below standard?** Focus on shipping speed and communication
+  </Step>
+
+  <Step title="Compare Periods">
+    Track performance over time:
+    - Week over week growth
+    - Month over month trends
+    - Year over year comparison
+  </Step>
+
+  <Step title="Set Performance Goals">
+    - Target conversion rate improvements
+    - Aim for Above Standard status
+    - Reduce response time targets
+  </Step>
+</Steps>
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Weekly Performance Review">
+    **Recommended workflow:**
+
+    1. Get traffic report for past 7 days
+    2. Identify top and bottom performers
+    3. Check seller standards status
+    4. Review customer service metrics
+    5. Make data-driven adjustments
+  </Accordion>
+
+  <Accordion title="New Listing Analysis">
+    **First 30 days after listing:**
+
+    1. Track daily impressions and views
+    2. Monitor conversion rates
+    3. Compare to similar listings
+    4. Optimize based on performance
+  </Accordion>
+
+  <Accordion title="Campaign Performance Tracking">
+    **During promotional campaigns:**
+
+    1. Get baseline traffic before campaign
+    2. Monitor daily during campaign
+    3. Calculate ROI post-campaign
+    4. Identify most effective promotions
+  </Accordion>
+
+  <Accordion title="Seller Standards Improvement">
+    **If below standard:**
+
+    1. Check current standards profile
+    2. Identify problem areas
+    3. Review customer service metrics
+    4. Implement corrective actions
+    5. Monitor projected status
+  </Accordion>
+</AccordionGroup>
+
+## Tool Reference
+
+### Traffic Reports (1 tool)
+- `ebay_get_traffic_report` - Retrieve listing traffic and performance data
+
+### Seller Standards (2 tools)
+- `ebay_find_seller_standards_profiles` - List all standards profiles
+- `ebay_get_seller_standards_profile` - Get specific profile details
+
+### Customer Service (1 tool)
+- `ebay_get_customer_service_metric` - Retrieve customer service metrics
+
+## Understanding the Data
+
+<Accordion title="When Data Updates">
+- **Traffic Reports**: Updated daily (previous day's data available by 8am PT)
+- **Seller Standards**: Evaluated monthly, typically on the 20th
+- **Customer Service**: Updated daily with rolling averages
+</Accordion>
+
+<Accordion title="Data Retention">
+- **Traffic Reports**: 2 years of historical data
+- **Seller Standards**: Current and 12 previous evaluation cycles
+- **Customer Service**: 90 days of detailed metrics
+</Accordion>
+
+<Accordion title="Marketplace Differences">
+Different marketplaces may have:
+- Different seller standard thresholds
+- Different metric availability
+- Different update schedules
+
+Always specify the correct `marketplaceId` in your requests.
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Marketing Campaigns" href="/features/marketing-campaigns" icon="megaphone">
+    Use insights to optimize campaigns
+  </Card>
+  <Card title="Best Practices Guide" href="/guides/best-practices" icon="lightbulb">
+    Learn optimization strategies
+  </Card>
+  <Card title="Analytics API Reference" href="/api-reference/analytics/overview" icon="book">
+    Complete API documentation
+  </Card>
+  <Card title="Account Management" href="/features/account-management" icon="user">
+    Manage seller account settings
+  </Card>
+</CardGroup>
+
+## Rate Limits
+
+<Info>
+**User Tokens:** 10,000-50,000 requests/day
+
+**Recommendation:** Analytics data updates daily, so once-daily retrieval is typically sufficient
+</Info>
+
+See [Rate Limits](/advanced/rate-limits) for detailed information.

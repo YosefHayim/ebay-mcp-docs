@@ -1,12 +1,698 @@
 ---
 title: "Bulk Operations"
-description: "Documentation for Bulk Operations"
+description: "Scale your eBay business with bulk inventory, marketing, and account management operations"
+icon: "layer-group"
 ---
 
 # Bulk Operations
 
-Documentation for this section is coming soon.
+Learn how to efficiently manage large-scale eBay operations using bulk tools for inventory, marketing, and account management. Maximize productivity and stay within API rate limits.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+<Note>
+  **Prerequisites**
+  - eBay MCP Server configured with user OAuth token
+  - Appropriate scopes: `sell.inventory`, `sell.marketing`, `sell.account`
+  - CSV files or structured data for batch operations
+  - Understanding of individual operations before scaling to bulk
+</Note>
+
+## Why Use Bulk Operations?
+
+<CardGroup cols={2}>
+  <Card title="Rate Limit Efficiency" icon="gauge-high">
+    Bulk operations count as single API calls, maximizing your daily limit of 10,000-50,000 requests
+  </Card>
+
+  <Card title="Time Savings" icon="clock">
+    Process hundreds or thousands of items in minutes instead of hours
+  </Card>
+
+  <Card title="Data Consistency" icon="check-double">
+    Apply uniform changes across your entire catalog simultaneously
+  </Card>
+
+  <Card title="Reduced Errors" icon="shield-check">
+    Validate data once and apply to many items, minimizing individual mistakes
+  </Card>
+</CardGroup>
+
+## Inventory Bulk Operations
+
+### Bulk Create or Replace Inventory Items
+
+Upload large product catalogs efficiently:
+
+<Accordion title="Ask your AI assistant">
+```
+I have a CSV file with 500 products. Create inventory items for all of them:
+- Each row has: SKU, Title, Description, Brand, Condition, Price, Quantity
+- All items are NEW condition
+- Default package weight: 1 lb
+- Default package dimensions: 10x8x3 inches
+```
+</Accordion>
+
+The server uses `ebay_bulk_create_or_replace_inventory_item` to:
+- Process up to 25 items per request
+- Create new items or update existing ones (idempotent)
+- Return detailed results for each item (success or error)
+- Handle validation errors per-item without failing entire batch
+
+<Info>
+**Best Practice:** Split large datasets into batches of 25 items. The eBay MCP Server automatically handles batch splitting and progress tracking.
+</Info>
+
+### Bulk Retrieve Inventory Items
+
+Fetch details for multiple SKUs:
+
+<Accordion title="Ask your AI assistant">
+```
+Retrieve inventory details for these 100 SKUs:
+LAPTOP-001 through LAPTOP-100
+
+Show me:
+- Current availability and quantity
+- Product condition
+- Package dimensions and weight
+```
+</Accordion>
+
+The server uses `ebay_bulk_get_inventory_item` to retrieve multiple items efficiently.
+
+### Bulk Update Price and Quantity
+
+Seasonal pricing updates made easy:
+
+<Tabs>
+  <Tab title="Holiday Sale">
+    ```
+    Update pricing for my entire electronics catalog (200+ items):
+    - Reduce all prices by 15%
+    - Keep quantities unchanged
+    ```
+
+    Perfect for seasonal sales and promotions
+  </Tab>
+
+  <Tab title="Inventory Sync">
+    ```
+    Sync quantities from my warehouse system:
+    - Update 500 SKUs with new quantity values
+    - Don't change prices
+    ```
+
+    Ideal for daily inventory synchronization
+  </Tab>
+
+  <Tab title="Price Increase">
+    ```
+    Increase prices for all items in category "Electronics":
+    - Add 10% to current price
+    - Update effective immediately
+    ```
+
+    Handle supplier cost increases efficiently
+  </Tab>
+</Tabs>
+
+The server uses `ebay_bulk_update_price_quantity` to modify pricing and stock levels across your catalog.
+
+<Warning>
+Price changes take effect immediately. Always verify your pricing data before bulk updates, especially percentage-based changes.
+</Warning>
+
+### Bulk Create Offers
+
+Convert inventory items to active listings at scale:
+
+<Accordion title="Ask your AI assistant">
+```
+Create offers for 100 inventory items:
+- SKUs: ELECTRONICS-001 through ELECTRONICS-100
+- Marketplace: EBAY_US
+- Format: FIXED_PRICE
+- Use my default fulfillment policy
+- Use my default payment policy
+- Use my default return policy
+- Quantity: Match inventory availability
+```
+</Accordion>
+
+The server uses `ebay_bulk_create_offer` to generate multiple offers simultaneously.
+
+### Bulk Publish Offers
+
+Launch multiple listings at once:
+
+<Accordion title="Ask your AI assistant">
+```
+Publish all unpublished offers for my summer collection:
+- 50 offers across various categories
+- All using SKU-based inventory references
+- Publish to EBAY_US marketplace
+```
+</Accordion>
+
+The server uses `ebay_bulk_publish_offer` to activate multiple listings in one operation.
+
+<Tip>
+**Launch Strategy:** Create offers in advance, preview fees for each, then bulk publish all at once during peak shopping hours for maximum visibility.
+</Tip>
+
+### Bulk Migrate Legacy Listings
+
+Modernize old listings to the Inventory API:
+
+<Accordion title="Ask your AI assistant">
+```
+Migrate my 200 legacy fixed-price listings to the Inventory API:
+- Preserve all listing data (title, description, photos)
+- Maintain current pricing
+- Assign new SKUs based on listing IDs
+- Keep listings active during migration
+```
+</Accordion>
+
+The server uses `ebay_bulk_migrate_listing` to convert old-format listings to modern Inventory API structure.
+
+<Note>
+Migration is a one-way operation. Once migrated, listings must be managed through Inventory API tools. Test with a small batch first.
+</Note>
+
+## Marketing Bulk Operations
+
+### Bulk Create Ads
+
+Promote your entire catalog:
+
+<Accordion title="Ask your AI assistant">
+```
+Add all my electronics listings (300+ SKUs) to my "Q4 Holiday Campaign":
+- Ad Group: "Electronics - All Products"
+- Ad rate: 7% for all items
+- Use SKU-based inventory references
+```
+</Accordion>
+
+The server uses `ebay_bulk_create_ad_by_inventory_reference` for efficient ad creation.
+
+### Bulk Delete Ads
+
+Remove underperforming ads quickly:
+
+<Accordion title="Ask your AI assistant">
+```
+Remove all ads from my "Summer Sale" campaign that have:
+- ROAS < 2:1
+- Less than 5 sales in the past 30 days
+```
+</Accordion>
+
+After identifying low performers, the server uses `ebay_bulk_delete_ad` to remove them from your campaign.
+
+### Bulk Update Ad Bids
+
+Optimize ad spend across your catalog:
+
+<Tabs>
+  <Tab title="Increase Winners">
+    ```
+    For all ads with ROAS > 8:1, increase bid by 2%
+    (Currently 50 high-performing ads)
+    ```
+
+    Scale successful ads to capture more sales
+  </Tab>
+
+  <Tab title="Reduce Losers">
+    ```
+    For all ads with ROAS < 3:1, decrease bid by 1%
+    (Currently 75 underperforming ads)
+    ```
+
+    Improve profitability of struggling ads
+  </Tab>
+
+  <Tab title="Seasonal Adjustment">
+    ```
+    During Black Friday week:
+    - Increase all ad bids by 3%
+    - Applies to 500+ active ads
+    ```
+
+    Compete aggressively during peak shopping events
+  </Tab>
+</Tabs>
+
+The server uses `ebay_bulk_update_ad_bid` to modify bidding strategy at scale.
+
+### Bulk Keyword Operations
+
+Manage keywords across campaigns:
+
+<AccordionGroup>
+  <Accordion title="Bulk Create Keywords">
+    ```
+    Add these 50 keywords to all my laptop ad groups (10 ad groups):
+    - Common laptop search terms
+    - All with Broad match type
+    - Default bid: 8%
+
+    Total: 500 keyword additions
+    ```
+
+    The server uses `ebay_bulk_create_keyword` to add keywords efficiently
+  </Accordion>
+
+  <Accordion title="Bulk Delete Keywords">
+    ```
+    Remove all keywords with:
+    - CTR < 0.2%
+    - Zero sales after 30 days
+
+    Affects approximately 100 keywords across campaigns
+    ```
+
+    The server uses `ebay_bulk_delete_keyword` to clean up underperformers
+  </Accordion>
+
+  <Accordion title="Bulk Update Keyword Bids">
+    ```
+    Adjust bids for high-performing keywords:
+    - Find keywords with conversion rate > 10%
+    - Increase bids by 2% each
+
+    Updates ~40 keywords across campaigns
+    ```
+
+    The server uses `ebay_bulk_update_keyword_bid` for optimization
+  </Accordion>
+</AccordionGroup>
+
+### Bulk Negative Keywords
+
+Filter unprofitable searches at scale:
+
+<Tabs>
+  <Tab title="Campaign-Level">
+    ```
+    Add these 30 negative keywords to all my campaigns (5 campaigns):
+    - Common terms that attract browsers but not buyers
+    - Terms: "free", "cheap", "broken", "parts", etc.
+
+    Total: 150 negative keyword additions
+    ```
+
+    The server uses `ebay_bulk_create_campaign_negative_keyword`
+  </Tab>
+
+  <Tab title="Ad Group-Level">
+    ```
+    For each premium ad group, add negative keywords:
+    - "budget", "discount", "under $X"
+    - Apply to 15 premium ad groups
+
+    Total: 45 negative keyword additions
+    ```
+
+    The server uses `ebay_bulk_create_adgroup_negative_keyword`
+  </Tab>
+</Tabs>
+
+## Account Management Bulk Operations
+
+### Bulk Sales Tax Table
+
+Configure sales tax for all jurisdictions:
+
+<Accordion title="Ask your AI assistant">
+```
+Set up sales tax for all US states:
+- CA: 7.25%, Tax shipping: Yes
+- NY: 4%, Tax shipping: No
+- TX: 6.25%, Tax shipping: Yes
+- [Continue for all 50 states]
+```
+</Accordion>
+
+The server uses `ebay_create_or_replace_sales_tax_table` to configure tax rates for multiple jurisdictions simultaneously.
+
+<Info>
+Sales tax rates vary by state and can change. Consult a tax professional or use eBay's automated sales tax calculation service for accuracy.
+</Info>
+
+## Bulk Operation Best Practices
+
+### Data Preparation
+
+<Steps>
+  <Step title="Validate Data First">
+    Test with 5-10 items before processing hundreds. Verify formats, required fields, and business rules
+  </Step>
+
+  <Step title="Use Consistent Formats">
+    Standardize SKU naming, price formats (decimal places), and text encoding (UTF-8)
+  </Step>
+
+  <Step title="Backup Before Changes">
+    Export current data before bulk updates. Enables rollback if needed
+  </Step>
+
+  <Step title="Handle Errors Gracefully">
+    Bulk operations return per-item status. Review failed items and retry after fixing data
+  </Step>
+</Steps>
+
+### Batch Size Guidelines
+
+<Tabs>
+  <Tab title="Inventory Operations">
+    **Optimal batch size:** 25 items per request
+
+    - Inventory item creation: 25 items
+    - Offer creation: 25 offers
+    - Price/quantity updates: 25 SKUs
+
+    eBay's API enforces this limit
+  </Tab>
+
+  <Tab title="Marketing Operations">
+    **Optimal batch size:** 50-100 items per request
+
+    - Ad creation: 100 ads
+    - Keyword operations: 100 keywords
+    - Bid updates: 100 modifications
+
+    Higher limits but monitor response times
+  </Tab>
+
+  <Tab title="Account Operations">
+    **Optimal batch size:** All jurisdictions at once
+
+    - Sales tax table: All states/provinces in single request
+    - Policy creation: Process all policies together
+
+    These operations are designed for complete datasets
+  </Tab>
+</Tabs>
+
+### Error Handling Strategies
+
+<AccordionGroup>
+  <Accordion title="Partial Failures">
+    **Scenario:** Bulk operation completes but 15 out of 100 items failed
+
+    **Response:**
+    1. Extract failed items from response
+    2. Review error messages for each failure
+    3. Fix data issues (invalid SKU, missing field, etc.)
+    4. Retry only the failed items
+    5. Don't resubmit successful items (wastes API calls)
+
+    The eBay MCP Server provides detailed per-item results for this workflow
+  </Accordion>
+
+  <Accordion title="Complete Failures">
+    **Scenario:** Entire bulk request rejected (authentication, invalid request structure)
+
+    **Response:**
+    1. Check error message for root cause
+    2. Verify OAuth token is valid and has correct scopes
+    3. Validate request format (JSON structure, required fields)
+    4. Test with single item first to isolate issue
+    5. Retry full batch after fixing root cause
+  </Accordion>
+
+  <Accordion title="Rate Limit Errors">
+    **Scenario:** Hit daily API call limit during bulk operations
+
+    **Response:**
+    1. Switch to user token if using client credentials (1K → 10K+ daily limit)
+    2. Spread operations across multiple days
+    3. Prioritize critical updates (inventory sync over cosmetic changes)
+    4. Use bulk endpoints to maximize efficiency
+    5. Wait 24 hours for limit reset (resets midnight Pacific Time)
+  </Accordion>
+</AccordionGroup>
+
+### Scheduling Bulk Operations
+
+Optimize timing for different operation types:
+
+<Tabs>
+  <Tab title="Off-Peak Hours">
+    **Best for:** Large inventory uploads, catalog migrations
+
+    **Timing:** 2 AM - 6 AM Pacific Time
+    - Lower eBay API load
+    - Faster response times
+    - Minimal buyer impact during updates
+  </Tab>
+
+  <Tab title="Business Hours">
+    **Best for:** Price updates, new listings
+
+    **Timing:** 9 AM - 5 PM Pacific Time
+    - Immediate buyer visibility
+    - Monitor for issues in real-time
+    - Customer support available if needed
+  </Tab>
+
+  <Tab title="Pre-Peak Shopping">
+    **Best for:** Promotion launches, ad campaigns
+
+    **Timing:** 6 PM - 9 PM local time (all time zones)
+    - Peak shopping hours for most buyers
+    - Maximum visibility for new listings
+    - Optimal time for marketing activation
+  </Tab>
+
+  <Tab title="Daily Automation">
+    **Best for:** Inventory synchronization, bid optimization
+
+    **Timing:** Same time daily (e.g., 8 AM Pacific)
+    - Consistent data freshness
+    - Predictable API usage patterns
+    - Easy to monitor and debug issues
+  </Tab>
+</Tabs>
+
+## Real-World Bulk Workflows
+
+### New Product Launch
+
+<Accordion title="Complete workflow for launching 100-item collection">
+```
+Step 1: Bulk create inventory items (100 items)
+- Upload product catalog with SKUs, titles, descriptions, images
+- Set condition, brand, MPN for all items
+- Configure package dimensions and weight
+
+Step 2: Bulk create offers (100 offers)
+- Set pricing for each SKU
+- Apply business policies (fulfillment, payment, return)
+- Configure marketplace (EBAY_US)
+
+Step 3: Preview fees (sample 10 items)
+- Check listing fees for representative items
+- Verify cost is acceptable
+
+Step 4: Bulk publish offers (100 listings)
+- Activate all listings simultaneously
+- Launch at peak shopping time (evening)
+
+Step 5: Bulk create ads (100 ads)
+- Add all new listings to marketing campaign
+- Set initial bid rate (7%)
+- Target relevant keywords
+
+Total time: ~30 minutes (vs. 8+ hours individually)
+Total API calls: ~15 (vs. 500+ individually)
+```
+</Accordion>
+
+### Seasonal Price Update
+
+<Accordion title="Holiday sale pricing workflow">
+```
+Step 1: Export current pricing
+- Retrieve all inventory items (500 SKUs)
+- Save current prices for rollback
+
+Step 2: Calculate sale prices
+- Apply 20% discount to all items
+- Round to .99 endings ($49.99, not $50.00)
+- Set minimum price floor ($10 minimum)
+
+Step 3: Bulk update prices (500 items)
+- Apply new pricing across catalog
+- Maintain current quantities
+
+Step 4: Create promotion
+- Add "20% OFF SALE" banner
+- Set promotion duration (7 days)
+
+Step 5: Update ad bids
+- Increase ad rates by 2% during sale
+- Bulk update all active ads (300 ads)
+
+Step 6: Post-sale rollback
+- Bulk update prices back to original
+- Restore normal ad bid rates
+
+Total time: ~1 hour (vs. 10+ hours manually)
+```
+</Accordion>
+
+### Inventory Synchronization
+
+<Accordion title="Daily warehouse sync workflow">
+```
+Daily at 8 AM:
+
+Step 1: Export warehouse inventory (1000 SKUs)
+- Get current quantities from warehouse system
+- Identify SKUs with quantity changes
+
+Step 2: Bulk update quantities (~200 changed SKUs daily)
+- Update only items with quantity differences
+- Don't modify pricing
+- Mark out-of-stock items as quantity 0
+
+Step 3: Pause ads for out-of-stock items
+- Identify inventory with 0 quantity
+- Bulk pause ads for those SKUs (prevent wasted ad spend)
+
+Step 4: Resume ads for restocked items
+- Identify inventory that came back in stock
+- Bulk resume ads for those SKUs
+
+Step 5: Generate sync report
+- Items updated
+- Out-of-stock alerts
+- Restock notifications
+
+Automation friendly: Can run via cron job or scheduled AI assistant task
+```
+</Accordion>
+
+## Monitoring and Reporting
+
+### Track Bulk Operation Success
+
+<CardGroup cols={2}>
+  <Card title="Success Rate" icon="chart-pie">
+    Monitor percentage of successful items per bulk operation
+
+    **Target:** >95% success rate
+
+    **If lower:** Review data validation process
+  </Card>
+
+  <Card title="Processing Time" icon="stopwatch">
+    Track how long bulk operations take
+
+    **Benchmark:** ~5 seconds per 25 items
+
+    **If slower:** Check API health, network connection
+  </Card>
+
+  <Card title="API Usage" icon="chart-line">
+    Monitor daily API call consumption
+
+    **Limit:** 10,000-50,000 per day (user tokens)
+
+    **Optimize:** Use bulk operations to stay under limit
+  </Card>
+
+  <Card title="Error Patterns" icon="triangle-exclamation">
+    Identify recurring errors across operations
+
+    **Common:** Invalid SKU format, missing policies
+
+    **Fix:** Update data validation rules
+  </Card>
+</CardGroup>
+
+### Generate Bulk Operation Reports
+
+<Accordion title="Ask your AI assistant">
+```
+Generate a report of all my bulk operations from the past week:
+- Total items processed
+- Success vs. failure rates
+- Most common errors
+- API calls used
+- Time saved vs. individual operations
+```
+</Accordion>
+
+## Common Issues and Solutions
+
+<AccordionGroup>
+  <Accordion title="Error: Batch size exceeded">
+    **Problem:** Attempting to process more than 25 items in inventory bulk operation
+
+    **Solution:**
+    - Split data into batches of 25 items or fewer
+    - Process batches sequentially
+    - eBay MCP Server can handle automatic batch splitting—ask your AI assistant to "process all 500 items in appropriate batches"
+  </Accordion>
+
+  <Accordion title="Error: Duplicate SKUs in batch">
+    **Problem:** Same SKU appears multiple times in single bulk request
+
+    **Solution:**
+    - Deduplicate data before submission
+    - Keep only the most recent/correct version
+    - Use data validation tools to catch duplicates
+  </Accordion>
+
+  <Accordion title="Warning: Some items failed">
+    **Problem:** Partial success (70 succeeded, 5 failed out of 75)
+
+    **Solution:**
+    - Extract failed items from response
+    - Review error messages for each
+    - Common causes: missing required fields, invalid values, SKU not found
+    - Fix data and retry only the failed items
+  </Accordion>
+
+  <Accordion title="Error: Rate limit exceeded mid-operation">
+    **Problem:** Hit daily API limit while processing large bulk operation
+
+    **Solution:**
+    - Note which batch failed (e.g., batch 8 of 20)
+    - Wait for rate limit reset (midnight Pacific Time)
+    - Resume from failed batch (don't restart from beginning)
+    - Consider spreading operations across multiple days
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="First Listing" icon="list" href="/guides/first-listing">
+    Master individual operations before scaling to bulk
+  </Card>
+
+  <Card title="Best Practices" icon="star" href="/guides/best-practices">
+    Optimize your bulk operation strategy
+  </Card>
+
+  <Card title="Rate Limits" icon="gauge-high" href="/advanced/rate-limits">
+    Understand API limits and optimization
+  </Card>
+
+  <Card title="Error Handling" icon="shield-halved" href="/advanced/error-handling">
+    Advanced error handling strategies
+  </Card>
+</CardGroup>
+
+## Related Topics
+
+- [Inventory Management](/features/inventory-management) - Individual inventory operations
+- [Marketing Campaigns](/features/marketing-campaigns) - Individual marketing operations
+- [Account Management](/features/account-management) - Policy and tax management
+- [OAuth Setup](/authentication/oauth-setup) - Ensure sufficient scopes for bulk operations

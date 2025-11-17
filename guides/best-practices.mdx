@@ -1,12 +1,921 @@
 ---
 title: "Best Practices"
-description: "Documentation for Best Practices"
+description: "Essential guidelines for secure, efficient, and reliable eBay operations using the MCP Server"
+icon: "star"
 ---
 
 # Best Practices
 
-Documentation for this section is coming soon.
+Follow these proven strategies to ensure secure, efficient, and reliable eBay operations with the eBay MCP Server. Learn from common pitfalls and optimize your selling workflow.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Authentication & Security
+
+### OAuth Token Management
+
+<CardGroup cols={2}>
+  <Card title="Use User Tokens" icon="user-check">
+    **Why:** 10,000-50,000 requests/day vs. 1,000 for client credentials
+
+    **How:** Complete OAuth flow to obtain user tokens with full API access
+  </Card>
+
+  <Card title="Secure Token Storage" icon="lock">
+    **Why:** Prevent unauthorized access to your eBay account
+
+    **How:** Store tokens in `.env` file with `600` permissions (owner read/write only)
+  </Card>
+
+  <Card title="Rotate Tokens Regularly" icon="rotate">
+    **Why:** Refresh tokens expire after 6-12 months
+
+    **How:** Set calendar reminder to regenerate tokens before expiration
+  </Card>
+
+  <Card title="Never Commit Secrets" icon="code-branch">
+    **Why:** Exposed tokens allow anyone to control your eBay account
+
+    **How:** Verify `.env` is in `.gitignore` before every commit
+  </Card>
+</CardGroup>
+
+### Environment Separation
+
+<Tabs>
+  <Tab title="Development">
+    **Use:** Sandbox environment exclusively
+
+    **Credentials:** Separate sandbox app credentials
+
+    **Testing:** All new features, integrations, and bulk operations
+
+    **Data:** Fake listings, test orders, mock inventory
+
+    **Risk:** Zero - no real money or listings affected
+  </Tab>
+
+  <Tab title="Production">
+    **Use:** Production environment only for live operations
+
+    **Credentials:** Production app credentials (different from sandbox)
+
+    **Operations:** Tested and verified features only
+
+    **Data:** Real listings, actual orders, live inventory
+
+    **Risk:** High - affects actual transactions and seller metrics
+  </Tab>
+</Tabs>
+
+<Warning>
+**Never test in production.** A single bulk operation error could update prices on hundreds of live listings or cancel real orders.
+</Warning>
+
+### Required OAuth Scopes
+
+Configure appropriate scopes for your operations:
+
+```bash
+# Comprehensive access (recommended for full functionality)
+https://api.ebay.com/oauth/api_scope/sell.inventory
+https://api.ebay.com/oauth/api_scope/sell.marketing
+https://api.ebay.com/oauth/api_scope/sell.account
+https://api.ebay.com/oauth/api_scope/sell.fulfillment
+https://api.ebay.com/oauth/api_scope/sell.analytics.readonly
+https://api.ebay.com/oauth/api_scope/sell.finances
+https://api.ebay.com/oauth/api_scope/sell.payment.dispute
+https://api.ebay.com/oauth/api_scope/sell.item.draft
+https://api.ebay.com/oauth/api_scope/sell.item
+```
+
+<Info>
+Grant only the scopes you need. For read-only operations, use `readonly` variants (e.g., `sell.inventory.readonly`) to minimize security risk.
+</Info>
+
+### Security Checklist
+
+<Steps>
+  <Step title="File Permissions">
+    Set `.env` to `600` (owner read/write only):
+    ```bash
+    chmod 600 .env
+    ```
+  </Step>
+
+  <Step title="Git Configuration">
+    Verify `.env` is gitignored:
+    ```bash
+    git check-ignore .env
+    # Should output: .env
+    ```
+  </Step>
+
+  <Step title="Token Validation">
+    Check token status regularly:
+    ```
+    Ask your AI: "Check my eBay OAuth token status"
+    ```
+  </Step>
+
+  <Step title="Access Monitoring">
+    Review eBay Developer Portal > Applications > Usage for suspicious activity
+  </Step>
+</Steps>
+
+## Rate Limit Optimization
+
+### Understanding Rate Limits
+
+<Tabs>
+  <Tab title="User Tokens">
+    **Daily Limits:**
+    - Basic tier: 10,000 requests/day
+    - Standard tier: 25,000 requests/day
+    - Advanced tier: 50,000 requests/day
+
+    **Per-Minute:** 5,000 requests/minute (all tiers)
+
+    **Automatic:** Token refresh every ~2 hours
+  </Tab>
+
+  <Tab title="Client Credentials">
+    **Daily Limit:** 1,000 requests/day (all tiers)
+
+    **Per-Minute:** 5,000 requests/minute
+
+    **Use Case:** Fallback for read-only operations
+
+    **Limitation:** No write operations (create, update, delete)
+  </Tab>
+</Tabs>
+
+### Rate Limit Strategy
+
+<Steps>
+  <Step title="Prioritize User Tokens">
+    Always use user tokens for production. Save 90% of API calls with higher limits
+  </Step>
+
+  <Step title="Use Bulk Operations">
+    Process 25 items in one API call instead of 25 separate calls. Multiply efficiency by 25x
+  </Step>
+
+  <Step title="Cache Data">
+    Store frequently accessed data (policies, locations) locally. Don't fetch repeatedly
+  </Step>
+
+  <Step title="Implement Backoff">
+    The MCP server automatically retries on 429 errors with exponential backoff. Don't fight rate limits—respect them
+  </Step>
+
+  <Step title="Monitor Usage">
+    Track daily API consumption. Set alerts at 80% of daily limit to prevent cutoffs
+  </Step>
+</Steps>
+
+### Efficient API Usage Patterns
+
+<AccordionGroup>
+  <Accordion title="Good: Bulk update 100 prices">
+    ```
+    API Calls: 4 (4 batches of 25 items)
+    Time: ~20 seconds
+    Rate limit impact: 0.04% of daily limit (10K tier)
+
+    Update prices for 100 SKUs using bulk_update_price_quantity
+    ```
+
+    **Efficiency:** 25 items per API call
+  </Accordion>
+
+  <Accordion title="Bad: Update 100 prices individually">
+    ```
+    API Calls: 100 (1 per item)
+    Time: ~5 minutes
+    Rate limit impact: 1% of daily limit (10K tier)
+
+    Loop through 100 SKUs calling update_price_quantity individually
+    ```
+
+    **Inefficiency:** 25x more API calls than necessary
+  </Accordion>
+
+  <Accordion title="Good: Daily inventory sync">
+    ```
+    Daily at 8 AM:
+    1. Bulk fetch all inventory (1 API call for metadata)
+    2. Compare with warehouse data (0 API calls - local processing)
+    3. Bulk update only changed items (200/25 = 8 API calls)
+
+    Total: 9 API calls for 1000-item catalog
+    ```
+
+    **Efficiency:** Sync entire catalog with <0.1% of daily limit
+  </Accordion>
+
+  <Accordion title="Bad: Real-time per-item checks">
+    ```
+    For each sale:
+    1. Get inventory item (1 API call)
+    2. Update quantity (1 API call)
+    3. Get updated item (1 API call)
+
+    At 50 sales/day: 150 API calls
+    ```
+
+    **Inefficiency:** 1.5% of daily limit on simple quantity updates
+  </Accordion>
+</AccordionGroup>
+
+## Error Handling
+
+### Common Errors and Solutions
+
+<Tabs>
+  <Tab title="Authentication Errors">
+    **401 Unauthorized / 403 Forbidden**
+
+    **Causes:**
+    - Expired access token
+    - Invalid OAuth scopes
+    - Revoked app credentials
+
+    **Solutions:**
+    ```
+    Ask your AI: "Check my eBay token status"
+
+    If expired:
+    Ask your AI: "Generate new OAuth authorization URL"
+
+    Complete OAuth flow and update .env file
+    Restart MCP client
+    ```
+  </Tab>
+
+  <Tab title="Rate Limit Errors">
+    **429 Too Many Requests**
+
+    **Causes:**
+    - Exceeded daily limit (10K-50K)
+    - Exceeded per-minute limit (5K)
+
+    **Solutions:**
+    - Server automatically retries with backoff
+    - Switch to user token if using client credentials
+    - Spread operations across multiple days
+    - Wait for limit reset (midnight Pacific Time)
+  </Tab>
+
+  <Tab title="Validation Errors">
+    **400 Bad Request**
+
+    **Causes:**
+    - Missing required fields
+    - Invalid field values
+    - SKU format errors
+    - Policy ID not found
+
+    **Solutions:**
+    - Read error message carefully (specifies exact issue)
+    - Verify all required fields present
+    - Check field formats (dates, prices, enums)
+    - Test with single item before bulk operations
+  </Tab>
+
+  <Tab title="Resource Errors">
+    **404 Not Found**
+
+    **Causes:**
+    - SKU doesn't exist
+    - Offer ID invalid
+    - Campaign ID wrong
+    - Wrong marketplace
+
+    **Solutions:**
+    - Verify resource IDs are correct
+    - Check if resource was deleted
+    - Confirm you're using correct marketplace
+    - List existing resources to find correct IDs
+  </Tab>
+</Tabs>
+
+### Error Handling Workflow
+
+<Steps>
+  <Step title="Capture Error Details">
+    The MCP server provides detailed error messages. Read them carefully—they contain the solution
+  </Step>
+
+  <Step title="Identify Error Category">
+    Authentication? Validation? Rate limit? Resource not found? Each has different solutions
+  </Step>
+
+  <Step title="Apply Appropriate Fix">
+    Use error-specific solution from documentation or ask AI assistant for help
+  </Step>
+
+  <Step title="Retry with Fixed Data">
+    For bulk operations, retry only failed items after fixing issues
+  </Step>
+
+  <Step title="Log and Monitor">
+    Track recurring errors. Patterns indicate systematic issues requiring process changes
+  </Step>
+</Steps>
+
+## Testing Strategy
+
+### Development Testing
+
+<Accordion title="Sandbox testing workflow">
+```
+Before ANY production deployment:
+
+1. Configure sandbox environment
+   - Sandbox app credentials in .env
+   - EBAY_ENVIRONMENT=SANDBOX
+   - Test user tokens
+
+2. Create test data
+   - 10-20 sample listings
+   - Test orders (use eBay sandbox buyer accounts)
+   - Sample marketing campaigns
+
+3. Test all operations
+   - Create inventory items
+   - Publish offers
+   - Fulfill test orders
+   - Run marketing campaigns
+   - Execute bulk operations
+
+4. Verify results
+   - Check listings in sandbox Seller Hub
+   - Confirm orders processed correctly
+   - Review campaign metrics
+   - Validate bulk operation success rates
+
+5. Test error scenarios
+   - Invalid SKUs
+   - Expired tokens
+   - Missing policies
+   - Duplicate data
+
+6. Switch to production ONLY after perfect sandbox performance
+```
+</Accordion>
+
+### Automated Testing
+
+The eBay MCP Server includes comprehensive test suite:
+
+```bash
+# Run all tests (870+ tests)
+npm run test
+
+# Run with coverage reporting
+npm run test:coverage
+# Target: 99%+ function coverage, 85%+ line coverage
+
+# Test specific endpoint categories
+npm run test:endpoints
+
+# Use MCP Inspector for interactive testing
+npx @modelcontextprotocol/inspector node build/index.js
+```
+
+<Tip>
+Run tests before every deployment and after any configuration changes. Tests catch issues before they affect your eBay account.
+</Tip>
+
+## Performance Optimization
+
+### Listing Optimization
+
+<CardGroup cols={2}>
+  <Card title="Photos" icon="image">
+    **Minimum:** 4 high-quality photos
+
+    **Recommended:** 8-12 photos showing all angles
+
+    **Impact:** 2-3x higher conversion rate
+  </Card>
+
+  <Card title="Title Keywords" icon="heading">
+    **Use:** 60-80 character descriptive titles
+
+    **Include:** Brand, model, key features, condition
+
+    **Impact:** 40-60% higher search visibility
+  </Card>
+
+  <Card title="Item Specifics" icon="list-check">
+    **Fill:** All category-specific attributes
+
+    **Required:** Brand, MPN, UPC (when applicable)
+
+    **Impact:** Better search ranking and buyer trust
+  </Card>
+
+  <Card title="Pricing" icon="tag">
+    **Research:** Competitor pricing
+
+    **Strategy:** Competitive or value-added pricing
+
+    **Impact:** Direct effect on conversion rate
+  </Card>
+</CardGroup>
+
+### Seller Performance Metrics
+
+Monitor and maintain these eBay seller standards:
+
+<Tabs>
+  <Tab title="Order Defect Rate">
+    **Definition:** Percentage of orders with defects
+
+    **Target:** < 2%
+
+    **Includes:**
+    - Item not as described cases
+    - Item not received cases
+    - Low detailed seller ratings
+
+    **Impact:** Poor performance = search suppression
+  </Tab>
+
+  <Tab title="Late Shipment Rate">
+    **Definition:** Orders shipped after handling time
+
+    **Target:** < 4%
+
+    **Tracking:** From order payment to tracking upload
+
+    **Impact:** Late shipments hurt search ranking
+  </Tab>
+
+  <Tab title="Cancellation Rate">
+    **Definition:** Seller-initiated cancellations
+
+    **Target:** < 2.5%
+
+    **Causes:** Out of stock, pricing errors, policy violations
+
+    **Impact:** High rate = below standard status
+  </Tab>
+
+  <Tab title="Return Rate">
+    **Definition:** Items returned by buyers
+
+    **Target:** Varies by category (typically < 5-10%)
+
+    **Causes:** INAD, remorse, defects
+
+    **Impact:** High returns suggest quality issues
+  </Tab>
+</Tabs>
+
+<Warning>
+Falling below eBay seller standards can result in search suppression, seller fee increases, or account suspension. Monitor metrics weekly.
+</Warning>
+
+## Data Management
+
+### SKU Naming Conventions
+
+<Tabs>
+  <Tab title="Recommended Format">
+    ```
+    Format: CATEGORY-BRAND-MODEL-VARIANT
+
+    Examples:
+    LAPTOP-DELL-XPS15-16GB-512GB
+    PHONE-APPLE-14PRO-256GB-BLUE
+    SHIRT-NIKE-DRYFIT-L-BLACK
+
+    Benefits:
+    - Easy to identify products
+    - Sortable and searchable
+    - Supports variant tracking
+    - Scalable for large catalogs
+    ```
+  </Tab>
+
+  <Tab title="Avoid These">
+    ```
+    ❌ Sequential numbers only: SKU001, SKU002
+    Reason: No product information
+
+    ❌ Special characters: LAPTOP@001, SKU#123
+    Reason: API compatibility issues
+
+    ❌ Spaces: LAPTOP 001, DELL XPS 15
+    Reason: URL encoding problems
+
+    ❌ Too long: DELL-XPS-15-9520-INTEL-CORE-I7-12700H-16GB-DDR5
+    Reason: 50 character limit, hard to work with
+
+    ❌ Random strings: FJ83KD92, XLKJ329F
+    Reason: Impossible to identify products
+    ```
+  </Tab>
+</Tabs>
+
+### Inventory Management
+
+<Steps>
+  <Step title="Single Source of Truth">
+    Maintain one authoritative inventory database. Sync to eBay, don't use eBay as your inventory system
+  </Step>
+
+  <Step title="Regular Synchronization">
+    Sync inventory quantities daily (minimum). Real-time syncing for high-volume sellers
+  </Step>
+
+  <Step title="Buffer Stock">
+    Set eBay quantities 10-20% lower than actual stock. Prevents overselling from multi-channel listings
+  </Step>
+
+  <Step title="Automated Alerts">
+    Set low-stock alerts at your reorder point. Prevent out-of-stock situations
+  </Step>
+
+  <Step title="Audit Trail">
+    Log all inventory changes with timestamp and reason. Essential for troubleshooting discrepancies
+  </Step>
+</Steps>
+
+### Policy Management
+
+<AccordionGroup>
+  <Accordion title="Fulfillment Policies">
+    **Create:** 2-3 policies for different handling times
+    - Standard: 3-5 business days
+    - Expedited: 1-2 business days
+    - Dropship: 5-7 business days
+
+    **Update:** Quarterly or when shipping methods change
+
+    **Best Practice:** Be conservative with handling times. Better to ship early than late
+  </Accordion>
+
+  <Accordion title="Payment Policies">
+    **Create:** 1-2 policies
+    - Immediate payment required (recommended)
+    - Payment within 2 days (for established buyers)
+
+    **Update:** Rarely (eBay handles payment processing)
+
+    **Best Practice:** Require immediate payment to avoid unpaid item cases
+  </Accordion>
+
+  <Accordion title="Return Policies">
+    **Create:** 2-3 policies based on category
+    - 30-day returns (standard)
+    - 60-day returns (competitive advantage)
+    - No returns (limited items, verify category allows)
+
+    **Update:** Annually or based on competition
+
+    **Best Practice:** Free returns improve conversion but increase costs. Test and measure impact
+  </Accordion>
+</AccordionGroup>
+
+## Operational Workflows
+
+### Daily Checklist
+
+<Accordion title="Daily seller operations">
+```
+Morning (8-9 AM):
+☐ Check for new orders (unfulfilled)
+☐ Review inventory levels for popular items
+☐ Sync inventory quantities from warehouse
+☐ Check for buyer messages (respond within 24 hours)
+☐ Review any open payment disputes
+
+Midday (12-1 PM):
+☐ Process and ship morning orders
+☐ Upload tracking numbers
+☐ Update any delayed shipments with buyer communication
+
+Afternoon (3-4 PM):
+☐ Monitor promoted listings performance
+☐ Adjust underperforming ad bids
+☐ Check for low-stock alerts
+☐ Review seller metrics dashboard
+
+Evening (6-7 PM):
+☐ Final order check and shipments
+☐ Respond to remaining buyer messages
+☐ Plan next day's tasks
+
+Weekly (Friday afternoon):
+☐ Generate performance reports (sales, ads, metrics)
+☐ Review and respond to feedback
+☐ Analyze best-selling products
+☐ Plan inventory reorders
+☐ Update promotional campaigns
+```
+</Accordion>
+
+### Marketing Optimization Routine
+
+<Accordion title="Weekly marketing review workflow">
+```
+Every Monday at 10 AM:
+
+1. Generate campaign performance report (past 7 days)
+   - All active campaigns
+   - Metrics: Impressions, clicks, sales, ROAS, ad fees
+
+2. Identify winners and losers
+   Winners: ROAS > 7:1
+   Maintain: ROAS 4-7:1
+   Optimize: ROAS 2-4:1
+   Pause: ROAS < 2:1
+
+3. Adjust ad bids
+   - Increase winners by 1-2%
+   - Decrease losers by 1-2%
+   - Pause ads with zero sales after 14 days
+
+4. Keyword optimization
+   - Add 5-10 high-performing keywords from suggestions
+   - Remove keywords with zero impressions after 14 days
+   - Add negative keywords from search term reports
+
+5. Budget allocation
+   - Shift budget from underperformers to winners
+   - Test new campaigns with 10% of total budget
+
+6. Document changes
+   - Track bid adjustments
+   - Note campaign modifications
+   - Set goals for next week
+```
+</Accordion>
+
+## Compliance and Policies
+
+### eBay Policy Adherence
+
+<Warning>
+Violating eBay policies can result in listing removals, account restrictions, or permanent suspension. Stay informed of policy updates.
+</Warning>
+
+<Tabs>
+  <Tab title="Prohibited Items">
+    **Never list:**
+    - Counterfeit items
+    - Recalled products
+    - Stolen goods
+    - Items violating intellectual property
+    - Restricted items without proper licensing
+
+    **Check:** eBay's prohibited items list before listing new categories
+  </Tab>
+
+  <Tab title="Listing Policies">
+    **Requirements:**
+    - Accurate item descriptions
+    - Clear photos of actual item
+    - Honest condition assessment
+    - Transparent shipping costs
+    - Valid return policy
+
+    **Avoid:** Keyword stuffing, misleading titles, hidden fees
+  </Tab>
+
+  <Tab title="Selling Practices">
+    **Required:**
+    - Ship within stated handling time
+    - Provide valid tracking numbers
+    - Respond to buyer messages within 24 hours
+    - Honor listed prices and policies
+
+    **Prohibited:** Price gouging, feedback manipulation, shill bidding
+  </Tab>
+</Tabs>
+
+### Data Privacy
+
+<Steps>
+  <Step title="Buyer Information">
+    Use buyer data only for transaction fulfillment. Never share, sell, or use for unauthorized marketing
+  </Step>
+
+  <Step title="Data Retention">
+    Retain transaction records per tax law requirements (typically 7 years). Delete unnecessary PII
+  </Step>
+
+  <Step title="Secure Storage">
+    Encrypt stored buyer information. Use secure databases with access controls
+  </Step>
+
+  <Step title="Data Requests">
+    Honor buyer requests for data access or deletion per GDPR/CCPA requirements
+  </Step>
+</Steps>
+
+## Monitoring and Maintenance
+
+### Health Checks
+
+<CardGroup cols={2}>
+  <Card title="Daily" icon="calendar-day">
+    - OAuth token status
+    - Order processing queue
+    - Inventory synchronization
+    - Buyer message response time
+  </Card>
+
+  <Card title="Weekly" icon="calendar-week">
+    - Seller performance metrics
+    - Marketing campaign ROAS
+    - Listing quality scores
+    - Customer service metrics
+  </Card>
+
+  <Card title="Monthly" icon="calendar">
+    - Token rotation status
+    - Policy updates and compliance
+    - Fee structure optimization
+    - Competitor analysis
+  </Card>
+
+  <Card title="Quarterly" icon="calendar-days">
+    - Business policy review
+    - Shipping method optimization
+    - Category performance analysis
+    - Strategic planning
+  </Card>
+</CardGroup>
+
+### Logging and Debugging
+
+<Accordion title="Enable debug logging when troubleshooting">
+```bash
+# In .env file
+EBAY_DEBUG=true
+
+# Provides detailed logs:
+- API request/response details
+- Authentication token refreshes
+- Error stack traces
+- Performance metrics
+
+⚠️ DISABLE in production (contains sensitive data)
+```
+</Accordion>
+
+<Warning>
+Debug mode logs contain OAuth tokens and buyer information. Never commit debug logs to version control or share publicly.
+</Warning>
+
+## Disaster Recovery
+
+### Backup Strategy
+
+<Steps>
+  <Step title="Configuration Backup">
+    Backup `.env` file securely (encrypted storage). Enables quick recovery if file corrupted
+  </Step>
+
+  <Step title="Data Export">
+    Export inventory, orders, and policies monthly. Store in secure, off-site location
+  </Step>
+
+  <Step title="Policy Documentation">
+    Document all business policies, procedures, and configurations. Enables recovery without data loss
+  </Step>
+
+  <Step title="Access Recovery">
+    Maintain backup authentication methods for eBay account. 2FA recovery codes, backup email
+  </Step>
+</Steps>
+
+### Incident Response
+
+<AccordionGroup>
+  <Accordion title="Compromised credentials">
+    **Immediate Actions:**
+    1. Change eBay password
+    2. Revoke OAuth tokens in Developer Portal
+    3. Generate new app credentials
+    4. Update `.env` with new credentials
+    5. Review recent account activity for unauthorized changes
+    6. Contact eBay seller support if unauthorized activity detected
+  </Accordion>
+
+  <Accordion title="Bulk operation error">
+    **Recovery Steps:**
+    1. STOP all ongoing operations immediately
+    2. Identify affected items from operation logs
+    3. Export current state of affected listings
+    4. Determine correct values from backup data
+    5. Create rollback plan (reverse operations)
+    6. Execute rollback in sandbox first
+    7. Apply rollback to production after verification
+    8. Document incident and preventive measures
+  </Accordion>
+
+  <Accordion title="Account suspension">
+    **Response Protocol:**
+    1. Review suspension notification for specific violations
+    2. Gather evidence to contest (if suspension erroneous)
+    3. Contact eBay seller support immediately
+    4. Submit appeal with documentation
+    5. While suspended: pause all automations, marketing
+    6. After reinstatement: review all policies and procedures
+    7. Implement preventive measures to avoid repeat
+  </Accordion>
+</AccordionGroup>
+
+## Continuous Improvement
+
+### Metrics to Track
+
+<Tabs>
+  <Tab title="Sales Performance">
+    - Total sales volume
+    - Average order value
+    - Conversion rate
+    - Sales per listing
+    - Best-selling categories
+  </Tab>
+
+  <Tab title="Operational Efficiency">
+    - Orders processed per hour
+    - Average fulfillment time
+    - API calls per operation
+    - Error rate percentage
+    - Automation success rate
+  </Tab>
+
+  <Tab title="Marketing ROI">
+    - Return on ad spend (ROAS)
+    - Cost per acquisition (CPA)
+    - Click-through rate (CTR)
+    - Conversion rate
+    - Revenue per campaign
+  </Tab>
+
+  <Tab title="Customer Satisfaction">
+    - Feedback score
+    - Detailed seller ratings
+    - Return rate
+    - Message response time
+    - Case resolution time
+  </Tab>
+</Tabs>
+
+### Optimization Process
+
+<Steps>
+  <Step title="Measure Current State">
+    Establish baseline metrics for all key performance indicators
+  </Step>
+
+  <Step title="Identify Bottlenecks">
+    Find areas with lowest performance or highest manual effort
+  </Step>
+
+  <Step title="Implement Improvement">
+    Make one change at a time. Test in sandbox, measure impact
+  </Step>
+
+  <Step title="Validate Results">
+    Compare new metrics to baseline. Keep improvements, revert failures
+  </Step>
+
+  <Step title="Document and Repeat">
+    Record successful optimizations. Apply process to next bottleneck
+  </Step>
+</Steps>
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="Documentation" icon="book" href="/support/troubleshooting">
+    Search docs for error messages and common issues
+  </Card>
+
+  <Card title="GitHub Issues" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/issues">
+    Report bugs and request features
+  </Card>
+
+  <Card title="eBay Developer Portal" icon="globe" href="https://developer.ebay.com">
+    Official eBay API documentation and support
+  </Card>
+
+  <Card title="MCP Documentation" icon="book-open" href="https://modelcontextprotocol.io">
+    Model Context Protocol specifications
+  </Card>
+</CardGroup>
+
+## Related Topics
+
+- [OAuth Setup](/authentication/oauth-setup) - Secure authentication configuration
+- [Rate Limits](/advanced/rate-limits) - API usage optimization
+- [Error Handling](/advanced/error-handling) - Advanced error management
+- [Testing](/advanced/testing) - Comprehensive testing strategies
+- [Troubleshooting](/support/troubleshooting) - Common issues and solutions

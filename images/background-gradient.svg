@@ -1,0 +1,72 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- eBay MCP Background Gradient - Optimized for Dark Theme -->
+
+  <defs>
+    <!-- Main Gradient Background -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Accent Gradients -->
+    <radialGradient id="redAccent" cx="20%" cy="30%">
+      <stop offset="0%" style="stop-color:#E53238;stop-opacity:0.08" />
+      <stop offset="100%" style="stop-color:#E53238;stop-opacity:0" />
+    </radialGradient>
+
+    <radialGradient id="blueAccent" cx="80%" cy="20%">
+      <stop offset="0%" style="stop-color:#0064D2;stop-opacity:0.08" />
+      <stop offset="100%" style="stop-color:#0064D2;stop-opacity:0" />
+    </radialGradient>
+
+    <radialGradient id="yellowAccent" cx="70%" cy="80%">
+      <stop offset="0%" style="stop-color:#F5AF02;stop-opacity:0.06" />
+      <stop offset="100%" style="stop-color:#F5AF02;stop-opacity:0" />
+    </radialGradient>
+
+    <radialGradient id="greenAccent" cx="15%" cy="85%">
+      <stop offset="0%" style="stop-color:#86B817;stop-opacity:0.06" />
+      <stop offset="100%" style="stop-color:#86B817;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Base Background -->
+  <rect width="1920" height="1080" fill="url(#bgGradient)"/>
+
+  <!-- Color Accents -->
+  <ellipse cx="384" cy="324" rx="400" ry="400" fill="url(#redAccent)"/>
+  <ellipse cx="1536" cy="216" rx="450" ry="450" fill="url(#blueAccent)"/>
+  <ellipse cx="1344" cy="864" rx="380" ry="380" fill="url(#yellowAccent)"/>
+  <ellipse cx="288" cy="918" rx="350" ry="350" fill="url(#greenAccent)"/>
+
+  <!-- Subtle Grid Pattern -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+
+  <!-- Connection Lines (Subtle Tech Pattern) -->
+  <g opacity="0.03" stroke="#4DA8FF" stroke-width="1">
+    <line x1="200" y1="200" x2="400" y2="350"/>
+    <line x1="400" y1="350" x2="600" y2="280"/>
+    <line x1="1200" y1="150" x2="1400" y2="300"/>
+    <line x1="1400" y1="300" x2="1600" y2="250"/>
+    <line x1="300" y1="700" x2="500" y2="850"/>
+    <line x1="1300" y1="700" x2="1500" y2="850"/>
+
+    <!-- Node Circles -->
+    <circle cx="200" cy="200" r="4" fill="#FF6B6B" opacity="0.6"/>
+    <circle cx="400" cy="350" r="4" fill="#4DA8FF" opacity="0.6"/>
+    <circle cx="600" cy="280" r="4" fill="#FFE066" opacity="0.6"/>
+    <circle cx="1200" cy="150" r="4" fill="#B8E986" opacity="0.6"/>
+    <circle cx="1400" cy="300" r="4" fill="#FF6B6B" opacity="0.6"/>
+    <circle cx="1600" cy="250" r="4" fill="#4DA8FF" opacity="0.6"/>
+    <circle cx="300" cy="700" r="4" fill="#FFE066" opacity="0.6"/>
+    <circle cx="500" cy="850" r="4" fill="#B8E986" opacity="0.6"/>
+    <circle cx="1300" cy="700" r="4" fill="#FF6B6B" opacity="0.6"/>
+    <circle cx="1500" cy="850" r="4" fill="#4DA8FF" opacity="0.6"/>
+  </g>
+</svg>

@@ -1,12 +1,865 @@
 ---
 title: "Changelog"
-description: "Documentation for Changelog"
+description: "Release history and updates for the eBay MCP Server"
+icon: "clock-rotate-left"
 ---
 
-# Changelog
+All notable changes to the eBay MCP Server are documented here.
 
-Documentation for this section is coming soon.
+The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
+- **Major versions** (x.0.0) include breaking changes
+- **Minor versions** (0.x.0) add new features (backward compatible)
+- **Patch versions** (0.0.x) include bug fixes and improvements
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
+<Tip>
+  Subscribe to releases on [GitHub](https://github.com/YosefHayim/ebay-mcp-server/releases) to get notified of new versions.
+</Tip>
+
+---
+
+## Latest Release
+
+### Version 1.4.2 - Critical OAuth Fix (2025-01-16) {#v1-4-2}
+
+<Card title="🔒 Critical OAuth Integration Fix" icon="shield-check">
+  Resolved persistent unauthorized_client errors with corrected eBay OAuth 2.0 endpoints and RuName implementation.
 </Card>
+
+#### What's Fixed
+
+**Critical Fixes:**
+- 🔧 **OAuth Endpoint Correction** - Changed from `auth.ebay.com` to `auth2.ebay.com`
+- 🔧 **Redirect URI Fix** - Implemented proper RuName identifier format (`YourName-AppName-xxxxx-xxxxxx`)
+- 🔧 **Resolved `unauthorized_client` errors** - Fixed persistent OAuth flow failures
+- 🔧 **Updated OAuth tests** - All 21 OAuth URL generation tests now validate correct endpoint and `hd` parameter
+
+**Changed:**
+- OAuth 2.0 implementation now requires RuName from eBay Developer Portal
+- RuName represents unique application identifier per environment (sandbox vs. production)
+
+#### Project Statistics
+
+<CardGroup cols={3}>
+  <Card title="API Coverage" icon="chart-line">
+    **99.1%** (110/111 endpoints)
+  </Card>
+
+  <Card title="Tests" icon="vial">
+    **870+** tests passing
+  </Card>
+
+  <Card title="Tools" icon="wrench">
+    **230+** eBay API tools
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card title="View on GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.4.2">
+    See full release notes
+  </Card>
+
+  <Card title="OAuth Setup Guide" icon="key" href="/authentication/oauth-setup">
+    Updated OAuth configuration
+  </Card>
+</CardGroup>
+
+---
+
+## Recent Releases
+
+### Version 1.4.0 - Documentation Consolidation (2025-01-15) {#v1-4-0}
+
+<AccordionGroup>
+  <Accordion title="📚 Release Notes - Comprehensive Documentation Update" icon="book">
+
+    #### Changed
+
+    **Documentation Improvements:**
+    - 📖 **Consolidated Documentation** - Merged all docs into single comprehensive README
+    - 📖 **Enhanced API Coverage** - Clearly documented 99.1% coverage (110/111 endpoints)
+    - 📖 **Improved Setup Instructions** - Better configuration and setup guidance
+    - 📖 **Updated Feature Docs** - Current capabilities and feature matrix
+
+    #### Added
+
+    - Comprehensive feature matrix in README
+    - Enhanced troubleshooting documentation
+    - Better examples for common use cases
+    - Clearer API reference documentation
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.4.0">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.3.0 - Interactive Setup Wizard (2025-01-14) {#v1-3-0}
+
+<AccordionGroup>
+  <Accordion title="🧙 Release Notes - Setup Wizard" icon="wand-magic-sparkles">
+
+    #### Added
+
+    **Interactive Setup:**
+    - ✨ **Setup Wizard** - New `npm run setup` command provides guided CLI configuration
+    - ✨ **Step-by-Step Process** - Interactive credential setup
+    - ✨ **Automatic Validation** - Validates credentials during setup
+    - ✨ **Environment Detection** - Automatically detects sandbox vs. production
+
+    #### Improved
+
+    - Developer experience for first-time setup
+    - Clearer error messages during configuration
+    - Better validation feedback
+    - Reduced setup time for new users
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.3.0">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.2.2 - eDelivery API Implementation (2025-01-12) {#v1-2-2}
+
+<AccordionGroup>
+  <Accordion title="🌍 Release Notes - International Shipping" icon="globe">
+
+    #### Added
+
+    **eDelivery API:**
+    - ✨ **24 New Endpoints** - Complete eDelivery API category coverage
+    - ✨ **International Shipping** - Cross-border trade operations
+    - ✨ **Shipping Management** - Enhanced international shipping tools
+    - ✨ **Comprehensive Tests** - Full test coverage for eDelivery endpoints
+
+    #### Impact
+
+    <CardGroup cols={2}>
+      <Card title="Global Reach" icon="earth-americas">
+        International shipping support
+      </Card>
+
+      <Card title="API Coverage" icon="chart-line">
+        Increased overall coverage
+      </Card>
+    </CardGroup>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.2.2">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Previous Releases
+
+### Version 1.1.7 - Documentation Improvements (2025-11-12) {#v1-1-7}
+
+<AccordionGroup>
+  <Accordion title="📚 Release Notes - Documentation & Compliance" icon="book">
+
+    #### Added
+
+    - ✨ **SECURITY.md** - Comprehensive security documentation
+    - ✨ **CODE_OF_CONDUCT.md** - Community standards (Contributor Covenant v2.1)
+    - ✨ **OAUTH-SETUP.md** - Detailed OAuth token flow instructions
+
+    #### Fixed
+
+    - 🔧 README now correctly states **140 tools** (not 137)
+    - 🔧 CLAUDE.md updated to show **8 API categories**
+
+    #### Removed
+
+    - GitHub Actions linting workflow (streamlined CI/CD)
+
+    <Card title="View on GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.7">
+      See full release notes
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Previous Releases
+
+### Version 1.1.4 - Comprehensive Enum Type System (2025-11-12) {#v1-1-4}
+
+<AccordionGroup>
+  <Accordion title="📋 Release Notes - Type-Safe Enum System" icon="code">
+
+    #### Added
+
+    **33 Native TypeScript Enums:**
+    - ✨ **MarketplaceId** enum with **41 global marketplace values**
+    - ✨ **Condition** enum with **17 product condition values**
+    - ✨ **OrderPaymentStatus** for payment tracking
+    - ✨ **CampaignStatus** for marketing campaigns
+    - ✨ **Measurement unit enums** for shipping and dimensions (currency, language codes)
+    - ✨ **86 new tests** for comprehensive enum validation
+
+    #### Changed
+
+    - 🔄 **Migrated 23 Zod schemas** from string literals to native enum validation
+    - 🔄 Enhanced **compile-time type safety** - catch invalid values before runtime
+    - 🔄 Improved **IDE auto-completion** for better developer experience
+
+    #### Developer Benefits
+
+    <CardGroup cols={3}>
+      <Card title="Type Safety" icon="shield-check">
+        Catch invalid enum values at compile time
+      </Card>
+
+      <Card title="IntelliSense" icon="sparkles">
+        Enhanced IDE auto-completion
+      </Card>
+
+      <Card title="Self-Documenting" icon="book">
+        Code documents available values
+      </Card>
+    </CardGroup>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.4">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.1.3 - Marketing Test Fixes & Automated Setup (2025-11-12) {#v1-1-3}
+
+<AccordionGroup>
+  <Accordion title="🔧 Release Notes - Test Fixes & Setup Automation" icon="wrench">
+
+    #### Fixed
+
+    **Marketing API Testing:**
+    - 🐛 Resolved **11 failing marketing API tests**
+    - 🐛 Fixed response type mismatches
+    - 🐛 Improved test reliability and stability
+
+    #### Added
+
+    **Automated MCP Client Configuration:**
+    - ✨ **setup-mcp-clients.sh** - Automated configuration script
+    - ✨ **mcp-setup.json** - Centralized credential management template
+    - ✨ **Multi-client support:**
+      - Claude Desktop
+      - Google Gemini
+      - ChatGPT
+
+    #### Benefits
+
+    <CardGroup cols={2}>
+      <Card title="Faster Setup" icon="rocket">
+        Automated configuration reduces setup time
+      </Card>
+
+      <Card title="Better Testing" icon="vial">
+        Improved test reliability
+      </Card>
+
+      <Card title="Multi-Client" icon="users">
+        Support for major AI platforms
+      </Card>
+
+      <Card title="Standardized" icon="check">
+        Centralized credential management
+      </Card>
+    </CardGroup>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.3">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.1.2 - Package Optimization (2025-11-12) {#v1-1-2}
+
+<AccordionGroup>
+  <Accordion title="⚡ Release Notes - Package Size Reduction" icon="bolt">
+
+    #### Changed
+
+    **Package Optimization:**
+    - ⚡ **46% package size reduction** (2.2MB → 1.2MB)
+    - ⚡ Optimized `package.json` files array
+    - ⚡ Enhanced `.npmignore` configuration
+
+    #### Excluded from Distribution
+
+    The following files are no longer included in npm packages:
+    - `docs/` - Documentation source files
+    - `tests/` - Test files and fixtures
+    - `scripts/` - Development scripts
+    - Development configuration files
+
+    #### Impact
+
+    <CardGroup cols={3}>
+      <Card title="Faster Install" icon="download">
+        Reduced installation time
+      </Card>
+
+      <Card title="Less Bandwidth" icon="network-wired">
+        Lower bandwidth usage
+      </Card>
+
+      <Card title="Smaller Footprint" icon="compress">
+        Smaller node_modules size
+      </Card>
+    </CardGroup>
+
+    <Note>
+      **No functionality changes** - This is a distribution optimization only.
+    </Note>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.2">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.1.1 - GitHub Repository URL Corrections (2025-11-12) {#v1-1-1}
+
+<AccordionGroup>
+  <Accordion title="🔧 Release Notes - Metadata Corrections" icon="link">
+
+    #### Fixed
+
+    **Metadata Updates:**
+    - 🔧 Corrected GitHub repository URLs in `package.json`
+    - 🔧 Updated documentation links
+    - 🔧 Fixed npm package metadata
+
+    <Info>
+      **Metadata-only release** - No API changes, dependency updates, or functionality impact.
+    </Info>
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.1">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.1.0 - CI/CD Pipeline & Dual Package Managers (2025-11-12) {#v1-1-0}
+
+<AccordionGroup>
+  <Accordion title="🚀 Release Notes - CI/CD Infrastructure" icon="gears">
+
+    #### Added
+
+    **GitHub Actions CI/CD Pipeline:**
+    - ✨ Automated testing across **Ubuntu, Windows, and macOS**
+    - ✨ **Test coverage enforcement:**
+      - **83%** line coverage
+      - **91%** function coverage
+      - **71%** branch coverage
+    - ✨ Automated test runs on every push
+    - ✨ ~5 minute build time
+
+    **Dual Package Manager Support:**
+    - ✨ **npm** support (primary)
+    - ✨ **pnpm** support (alternative)
+    - ✨ Automated dependency updates workflow
+
+    #### Quality Assurance
+
+    <CardGroup cols={3}>
+      <Card title="Multi-Platform" icon="desktop">
+        Ubuntu, Windows, macOS
+      </Card>
+
+      <Card title="870 Tests" icon="vial">
+        Across 26 test files
+      </Card>
+
+      <Card title="Automated Gates" icon="shield-check">
+        Coverage thresholds enforced
+      </Card>
+    </CardGroup>
+
+    #### CI/CD Features
+
+    - ✅ Automated test runs on every push
+    - ✅ Multi-platform compatibility verification
+    - ✅ Code coverage reporting
+    - ✅ Consistent build processes
+    - ✅ Cross-platform validation
+
+    <Card title="View Full Release" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.1.0">
+      See detailed changes on GitHub
+    </Card>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Version 1.0.0 - Initial Production Release (2025-11-12) {#v1-0-0}
+
+<Card title="🎉 First Stable Release" icon="party-horn">
+  The eBay MCP Server reaches production-ready status with comprehensive API coverage, robust testing, and enterprise-grade features.
+</Card>
+
+#### Core Features
+
+**API Integration:**
+- ✨ **170+ eBay Sell API tools** across **9 categories**
+- ✨ **OAuth 2.0/2.1 authentication** with automatic token refresh
+- ✨ **Dual transport modes:**
+  - **STDIO** - For local MCP clients
+  - **HTTP** - For remote deployments
+- ✨ **Client-side rate limiting** (5,000 requests/minute)
+
+**Security & Authentication:**
+- 🔐 **File-based token persistence** for secure storage
+- 🔐 **Two-tier authentication:**
+  - User tokens (10,000-50,000 requests/day)
+  - Application tokens (1,000 requests/day)
+- 🔐 **Automatic token refresh** to prevent expiration
+
+**Quality Assurance:**
+- ✅ **870 tests** across 26 test files
+- ✅ **99%+ function coverage**
+- ✅ **85%+ line coverage**
+- ✅ Comprehensive validation with Zod schemas
+
+#### API Categories
+
+<AccordionGroup>
+  <Accordion title="View All 9 API Categories" icon="layer-group">
+
+    | Category | Description |
+    |----------|-------------|
+    | **Account** | Seller account configuration and policies |
+    | **Inventory** | Item listings and product management |
+    | **Fulfillment** | Order processing and shipping |
+    | **Marketing** | Campaigns and promotions |
+    | **Analytics** | Business insights and reporting |
+    | **Communication** | Buyer messaging (future support) |
+    | **Metadata** | eBay marketplace data |
+    | **Taxonomy** | Category and aspect information |
+    | **Feed** | Bulk operations |
+
+  </Accordion>
+</AccordionGroup>
+
+#### Technology Stack
+
+<CardGroup cols={4}>
+  <Card title="TypeScript" icon="code">
+    Type-safe development
+  </Card>
+
+  <Card title="Node.js" icon="node-js">
+    Runtime environment
+  </Card>
+
+  <Card title="Zod" icon="shield-check">
+    Schema validation
+  </Card>
+
+  <Card title="Vitest" icon="vial">
+    Testing framework
+  </Card>
+</CardGroup>
+
+#### MCP Client Support
+
+**Tested and verified with:**
+- ✅ **Claude Desktop** - Fully supported
+- ✅ **Cursor** - Fully supported
+- ✅ **Cline** - Fully supported
+- ✅ **Any MCP-compatible client** - Standard protocol
+
+#### Developer Experience
+
+**Setup & Configuration:**
+- 🛠️ Interactive OAuth setup wizard
+- 🛠️ Automatic credential validation
+- 🛠️ Environment variable management
+- 🛠️ Clear error messages and logging
+
+**Documentation:**
+- 📚 Comprehensive guides
+- 📚 API reference
+- 📚 Troubleshooting support
+- 📚 Real-world examples
+
+<CardGroup cols={2}>
+  <Card title="View on GitHub" icon="github" href="https://github.com/YosefHayim/ebay-mcp-server/releases/tag/v1.0.0">
+    See full release notes
+  </Card>
+
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Get started with version 1.0.0
+  </Card>
+</CardGroup>
+
+---
+
+## Versioning Strategy
+
+The eBay MCP Server follows **Semantic Versioning 2.0.0**:
+
+### Major Version (x.0.0)
+
+Released when there are **breaking changes** that require user action:
+
+**Examples:**
+- API interface changes
+- Configuration format changes
+- Removed or renamed tools
+- Major dependency updates
+
+<Warning>
+  Always review release notes for major versions before upgrading.
+</Warning>
+
+### Minor Version (0.x.0)
+
+Released when adding **new features** that are backward compatible:
+
+**Examples:**
+- New API endpoints/tools
+- New configuration options
+- Enhanced functionality
+- Performance improvements
+
+<Info>
+  Minor version updates are safe to install without code changes.
+</Info>
+
+### Patch Version (0.0.x)
+
+Released for **bug fixes** and minor improvements:
+
+**Examples:**
+- Bug fixes
+- Documentation updates
+- Dependency patches
+- Small improvements
+
+<Check>
+  Patch versions are always safe to upgrade.
+</Check>
+
+---
+
+## Release Schedule
+
+**Stable Releases:**
+- **Major versions:** As needed (breaking changes)
+- **Minor versions:** Monthly (new features)
+- **Patch versions:** Weekly or as needed (bug fixes)
+
+**Beta/RC Releases:**
+- Released before major versions
+- Available for testing new features
+- May have known issues
+
+**Security Patches:**
+- Released immediately when needed
+- Always recommended to upgrade
+
+---
+
+## Upgrade Guide
+
+### General Upgrade Process
+
+**Steps:**
+
+<Steps>
+  <Step title="Backup Configuration">
+    ```bash
+    cp .env .env.backup
+    ```
+  </Step>
+
+  <Step title="Pull Latest Code">
+    ```bash
+    cd ebay-mcp-server
+    git pull origin main
+    ```
+  </Step>
+
+  <Step title="Update Dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+
+  <Step title="Rebuild">
+    ```bash
+    npm run build
+    ```
+  </Step>
+
+  <Step title="Test Configuration">
+    ```bash
+    npm run validate-config
+    npm test
+    ```
+  </Step>
+
+  <Step title="Restart MCP Server">
+    Restart your MCP client to load the new version.
+  </Step>
+</Steps>
+
+### Version-Specific Notes
+
+<AccordionGroup>
+  <Accordion title="Upgrading to v1.1.7" icon="arrow-up">
+    **No breaking changes** - Safe to upgrade from any 1.x version
+
+    **New Features:**
+    - Review SECURITY.md for vulnerability reporting process
+    - Check CODE_OF_CONDUCT.md for community guidelines
+    - See OAUTH-SETUP.md for detailed OAuth instructions
+
+    **Action Required:**
+    - None - all changes are documentation only
+  </Accordion>
+
+  <Accordion title="Upgrading to v1.1.4" icon="arrow-up">
+    **No breaking changes** - Safe to upgrade from any 1.x version
+
+    **New Features:**
+    - TypeScript enums improve type safety
+    - Better IDE auto-completion
+    - Enhanced compile-time validation
+
+    **Action Required:**
+    - None - enums are backward compatible
+    - Optional: Update your code to use new enum types
+  </Accordion>
+
+  <Accordion title="Upgrading to v1.1.0" icon="arrow-up">
+    **No breaking changes** - Safe to upgrade from v1.0.0
+
+    **New Features:**
+    - CI/CD pipeline (developer-facing only)
+    - Dual package manager support
+    - Multi-OS testing
+
+    **Action Required:**
+    - None - infrastructure improvements only
+  </Accordion>
+
+  <Accordion title="Upgrading to v1.0.0 from Beta" icon="arrow-up">
+    **Breaking changes possible** - Review carefully
+
+    **Changed:**
+    - API may have stabilized from beta versions
+    - Tool names may have changed
+    - Configuration format finalized
+
+    **Action Required:**
+    - Test thoroughly in Sandbox
+    - Review tool documentation
+    - Update any custom scripts
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Migration Guides
+
+### Migrating from Other eBay Integrations
+
+<Accordion title="From Direct eBay API Integration" icon="code">
+  **If you're currently using eBay APIs directly:**
+
+  **Benefits of switching:**
+  - Simplified authentication (OAuth handled automatically)
+  - Natural language interface via AI assistants
+  - Comprehensive tool coverage (170+ operations)
+  - Less code to maintain
+
+  **Migration steps:**
+
+  1. **Install eBay MCP Server:**
+     ```bash
+     git clone https://github.com/YosefHayim/ebay-mcp-server.git
+     cd ebay-mcp-server
+     npm install
+     npm run build
+     ```
+
+  2. **Use existing credentials:**
+     - Same Client ID and Secret work
+     - Run `npm run setup` to configure
+
+  3. **Replace API calls:**
+     - Instead of manual API calls, use natural language with your MCP client
+     - Example: "List my inventory items" instead of coding API requests
+
+  4. **Gradual migration:**
+     - Run both systems in parallel
+     - Migrate one feature at a time
+     - Verify functionality before switching completely
+</Accordion>
+
+<Accordion title="From eBay Official Tools" icon="store">
+  **If you're using eBay Seller Hub or other official tools:**
+
+  **Complementary usage:**
+  - eBay MCP Server works alongside official tools
+  - Use for automation and bulk operations
+  - Official tools remain useful for manual tasks
+
+  **Getting started:**
+
+  1. Set up server with existing seller account
+  2. Start with read-only operations (viewing inventory, orders)
+  3. Gradually add write operations (creating listings, fulfilling orders)
+  4. Use for repetitive tasks while keeping manual workflows
+</Accordion>
+
+---
+
+## Deprecation Policy
+
+When features need to be removed or changed:
+
+**Notice Period:**
+- **Major features:** 6 months minimum notice
+- **Minor features:** 3 months minimum notice
+- **Critical security issues:** Immediate (with migration guide)
+
+**Deprecation Process:**
+
+<Steps>
+  <Step title="Announcement">
+    Announced in:
+    - Changelog
+    - GitHub release notes
+    - Documentation updates
+  </Step>
+
+  <Step title="Warning Period">
+    - Feature marked as deprecated
+    - Warnings in server logs
+    - Migration guide provided
+  </Step>
+
+  <Step title="Removal">
+    - Feature removed in major version
+    - Breaking change clearly documented
+    - Alternative solution documented
+  </Step>
+</Steps>
+
+---
+
+## How to Stay Updated
+
+**GitHub Releases:**
+- Visit [Releases page](https://github.com/YosefHayim/ebay-mcp-server/releases)
+- Click "Watch" → "Custom" → "Releases"
+- Get email notifications
+
+**Changelog Page:**
+- Bookmark this page
+- Check periodically for updates
+- Subscribe to RSS feed (coming soon)
+
+**Community Channels:**
+- Join [GitHub Discussions](https://github.com/YosefHayim/ebay-mcp-server/discussions)
+- Follow project updates
+- Participate in beta testing
+
+**Checking Your Version:**
+```bash
+cd ebay-mcp-server
+npm run version
+# or
+cat package.json | grep version
+```
+
+---
+
+## Beta Testing
+
+Help shape future releases by testing beta versions:
+
+**How to join:**
+1. Join [GitHub Discussions](https://github.com/YosefHayim/ebay-mcp-server/discussions)
+2. Express interest in beta testing
+3. Follow beta release announcements
+
+**Beta channels:**
+- **Alpha:** Experimental features, may be unstable
+- **Beta:** Feature-complete, needs testing
+- **RC (Release Candidate):** Final testing before stable release
+
+**Benefits of beta testing:**
+- Try new features early
+- Influence development direction
+- Help improve stability
+- Get support priority
+
+<Card title="Join Beta Testing" icon="flask" href="https://github.com/YosefHayim/ebay-mcp-server/discussions">
+  Sign up for beta releases
+</Card>
+
+---
+
+## Reporting Issues
+
+Found a bug or have a feature request?
+
+<CardGroup cols={2}>
+  <Card title="Report Bug" icon="bug" href="https://github.com/YosefHayim/ebay-mcp-server/issues/new?template=bug_report.md">
+    File a bug report
+  </Card>
+
+  <Card title="Request Feature" icon="lightbulb" href="https://github.com/YosefHayim/ebay-mcp-server/issues/new?template=feature_request.md">
+    Suggest new features
+  </Card>
+
+  <Card title="Security Issues" icon="shield" href="https://github.com/YosefHayim/ebay-mcp-server/security">
+    Report security vulnerabilities
+  </Card>
+
+  <Card title="Ask Questions" icon="comments" href="https://github.com/YosefHayim/ebay-mcp-server/discussions">
+    Join the discussion
+  </Card>
+</CardGroup>
+
+---
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Install or upgrade the server
+  </Card>
+
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get started in 10 minutes
+  </Card>
+
+  <Card title="Troubleshooting" icon="wrench" href="/support/troubleshooting">
+    Common issues and solutions
+  </Card>
+
+  <Card title="FAQ" icon="circle-question" href="/support/faq">
+    Frequently asked questions
+  </Card>
+</CardGroup>

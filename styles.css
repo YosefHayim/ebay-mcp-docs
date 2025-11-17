@@ -222,9 +222,54 @@ a:hover {
 }
 
 /* Search Bar Styling */
-.search-input:focus {
+/* Target all possible search input selectors used by Mintlify */
+.search-input,
+input[type="search"],
+[role="search"] input,
+[class*="search"] input,
+[data-search-input] {
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+/* Hover state - ensures full width coverage */
+.search-input:hover,
+input[type="search"]:hover,
+[role="search"] input:hover,
+[class*="search"] input:hover,
+[data-search-input]:hover {
+  border-color: var(--ebay-blue);
+  box-shadow: 0 0 0 3px rgba(0, 100, 210, 0.08);
+  background-color: rgba(0, 100, 210, 0.02);
+}
+
+.dark .search-input:hover,
+.dark input[type="search"]:hover,
+.dark [role="search"] input:hover,
+.dark [class*="search"] input:hover,
+.dark [data-search-input]:hover {
+  border-color: var(--ebay-yellow);
+  box-shadow: 0 0 0 3px rgba(245, 175, 2, 0.08);
+  background-color: rgba(245, 175, 2, 0.02);
+}
+
+/* Focus state */
+.search-input:focus,
+input[type="search"]:focus,
+[role="search"] input:focus,
+[class*="search"] input:focus,
+[data-search-input]:focus {
   border-color: var(--ebay-blue);
   box-shadow: 0 0 0 3px rgba(0, 100, 210, 0.1);
+}
+
+.dark .search-input:focus,
+.dark input[type="search"]:focus,
+.dark [role="search"] input:focus,
+.dark [class*="search"] input:focus,
+.dark [data-search-input]:focus {
+  border-color: var(--ebay-yellow);
+  box-shadow: 0 0 0 3px rgba(245, 175, 2, 0.1);
 }
 
 /* Footer Styling */
@@ -237,13 +282,231 @@ footer {
   background: linear-gradient(180deg, var(--ebay-gray-900) 0%, var(--ebay-gray-800) 100%);
 }
 
-/* Sidebar Enhancements */
-.sidebar {
+/* Sidebar Enhancements with Color-Coded Navigation */
+.sidebar,
+aside[class*="sidebar"],
+nav[class*="sidebar"],
+[data-sidebar] {
   border-right: 1px solid var(--ebay-gray-200);
 }
 
-.dark .sidebar {
+.dark .sidebar,
+.dark aside[class*="sidebar"],
+.dark nav[class*="sidebar"],
+.dark [data-sidebar] {
   border-right-color: var(--ebay-gray-800);
+}
+
+/* Sidebar Navigation Items - Base Styles with Enhanced Targeting */
+.sidebar nav a,
+.sidebar nav button,
+.sidebar a,
+.sidebar button,
+aside[class*="sidebar"] a,
+aside[class*="sidebar"] button,
+nav[class*="sidebar"] a,
+nav[class*="sidebar"] button,
+[class*="sidebar"] nav a,
+[class*="sidebar"] nav button,
+[data-sidebar] a,
+[data-sidebar] button,
+nav ul li a,
+nav ol li a {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 3px solid transparent;
+  padding-left: 12px !important;
+  margin: 2px 0;
+  display: block;
+}
+
+/* Hover Effects - Colorful Rotation (Red, Blue, Yellow, Green) */
+/* Red - Every 1st in group of 4 */
+.sidebar a:nth-child(4n+1):hover,
+.sidebar button:nth-child(4n+1):hover,
+aside[class*="sidebar"] a:nth-child(4n+1):hover,
+nav[class*="sidebar"] a:nth-child(4n+1):hover,
+[data-sidebar] a:nth-child(4n+1):hover,
+nav ul li:nth-child(4n+1) a:hover,
+nav ol li:nth-child(4n+1) a:hover {
+  border-left-color: var(--ebay-red) !important;
+  background: linear-gradient(90deg, rgba(229, 50, 56, 0.12) 0%, transparent 100%) !important;
+  padding-left: 16px !important;
+  transform: translateX(2px);
+}
+
+/* Blue - Every 2nd in group of 4 */
+.sidebar a:nth-child(4n+2):hover,
+.sidebar button:nth-child(4n+2):hover,
+aside[class*="sidebar"] a:nth-child(4n+2):hover,
+nav[class*="sidebar"] a:nth-child(4n+2):hover,
+[data-sidebar] a:nth-child(4n+2):hover,
+nav ul li:nth-child(4n+2) a:hover,
+nav ol li:nth-child(4n+2) a:hover {
+  border-left-color: var(--ebay-blue) !important;
+  background: linear-gradient(90deg, rgba(0, 100, 210, 0.12) 0%, transparent 100%) !important;
+  padding-left: 16px !important;
+  transform: translateX(2px);
+}
+
+/* Yellow - Every 3rd in group of 4 */
+.sidebar a:nth-child(4n+3):hover,
+.sidebar button:nth-child(4n+3):hover,
+aside[class*="sidebar"] a:nth-child(4n+3):hover,
+nav[class*="sidebar"] a:nth-child(4n+3):hover,
+[data-sidebar] a:nth-child(4n+3):hover,
+nav ul li:nth-child(4n+3) a:hover,
+nav ol li:nth-child(4n+3) a:hover {
+  border-left-color: var(--ebay-yellow) !important;
+  background: linear-gradient(90deg, rgba(245, 175, 2, 0.12) 0%, transparent 100%) !important;
+  padding-left: 16px !important;
+  transform: translateX(2px);
+}
+
+/* Green - Every 4th in group of 4 */
+.sidebar a:nth-child(4n+4):hover,
+.sidebar button:nth-child(4n+4):hover,
+aside[class*="sidebar"] a:nth-child(4n+4):hover,
+nav[class*="sidebar"] a:nth-child(4n+4):hover,
+[data-sidebar] a:nth-child(4n+4):hover,
+nav ul li:nth-child(4n+4) a:hover,
+nav ol li:nth-child(4n+4) a:hover {
+  border-left-color: var(--ebay-green) !important;
+  background: linear-gradient(90deg, rgba(134, 184, 23, 0.12) 0%, transparent 100%) !important;
+  padding-left: 16px !important;
+  transform: translateX(2px);
+}
+
+/* Active/Selected State - Colorful with Enhanced Visibility */
+.sidebar a[aria-current="page"],
+.sidebar a.active,
+.sidebar button[aria-current="page"],
+.sidebar button.active,
+aside[class*="sidebar"] a[aria-current="page"],
+aside[class*="sidebar"] a.active,
+nav[class*="sidebar"] a[aria-current="page"],
+nav[class*="sidebar"] a.active,
+[data-sidebar] a[aria-current="page"],
+[data-sidebar] a.active,
+nav ul li a[aria-current="page"],
+nav ul li a.active {
+  font-weight: 600;
+}
+
+/* Active Red */
+.sidebar a:nth-child(4n+1)[aria-current="page"],
+.sidebar a:nth-child(4n+1).active,
+aside[class*="sidebar"] a:nth-child(4n+1)[aria-current="page"],
+nav[class*="sidebar"] a:nth-child(4n+1)[aria-current="page"],
+[data-sidebar] a:nth-child(4n+1)[aria-current="page"],
+nav ul li:nth-child(4n+1) a[aria-current="page"],
+nav ul li:nth-child(4n+1) a.active {
+  border-left-color: var(--ebay-red) !important;
+  background: linear-gradient(90deg, rgba(229, 50, 56, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-red) !important;
+  padding-left: 16px !important;
+}
+
+/* Active Blue */
+.sidebar a:nth-child(4n+2)[aria-current="page"],
+.sidebar a:nth-child(4n+2).active,
+aside[class*="sidebar"] a:nth-child(4n+2)[aria-current="page"],
+nav[class*="sidebar"] a:nth-child(4n+2)[aria-current="page"],
+[data-sidebar] a:nth-child(4n+2)[aria-current="page"],
+nav ul li:nth-child(4n+2) a[aria-current="page"],
+nav ul li:nth-child(4n+2) a.active {
+  border-left-color: var(--ebay-blue) !important;
+  background: linear-gradient(90deg, rgba(0, 100, 210, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-blue) !important;
+  padding-left: 16px !important;
+}
+
+/* Active Yellow */
+.sidebar a:nth-child(4n+3)[aria-current="page"],
+.sidebar a:nth-child(4n+3).active,
+aside[class*="sidebar"] a:nth-child(4n+3)[aria-current="page"],
+nav[class*="sidebar"] a:nth-child(4n+3)[aria-current="page"],
+[data-sidebar] a:nth-child(4n+3)[aria-current="page"],
+nav ul li:nth-child(4n+3) a[aria-current="page"],
+nav ul li:nth-child(4n+3) a.active {
+  border-left-color: var(--ebay-yellow) !important;
+  background: linear-gradient(90deg, rgba(245, 175, 2, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-yellow-dark) !important;
+  padding-left: 16px !important;
+}
+
+/* Active Green */
+.sidebar a:nth-child(4n+4)[aria-current="page"],
+.sidebar a:nth-child(4n+4).active,
+aside[class*="sidebar"] a:nth-child(4n+4)[aria-current="page"],
+nav[class*="sidebar"] a:nth-child(4n+4)[aria-current="page"],
+[data-sidebar] a:nth-child(4n+4)[aria-current="page"],
+nav ul li:nth-child(4n+4) a[aria-current="page"],
+nav ul li:nth-child(4n+4) a.active {
+  border-left-color: var(--ebay-green) !important;
+  background: linear-gradient(90deg, rgba(134, 184, 23, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-green-dark) !important;
+  padding-left: 16px !important;
+}
+
+/* Dark Mode Sidebar - Enhanced Contrast */
+.dark .sidebar a:hover,
+.dark aside[class*="sidebar"] a:hover,
+.dark nav[class*="sidebar"] a:hover,
+.dark [data-sidebar] a:hover,
+.dark nav ul li a:hover {
+  opacity: 0.95;
+}
+
+/* Dark Mode Active States with Better Visibility */
+.dark .sidebar a:nth-child(4n+1)[aria-current="page"],
+.dark .sidebar a:nth-child(4n+1).active {
+  color: #FF8B8F !important;
+}
+
+.dark .sidebar a:nth-child(4n+2)[aria-current="page"],
+.dark .sidebar a:nth-child(4n+2).active {
+  color: #5BA3FF !important;
+}
+
+.dark .sidebar a:nth-child(4n+3)[aria-current="page"],
+.dark .sidebar a:nth-child(4n+3).active {
+  color: #FFCA3A !important;
+}
+
+.dark .sidebar a:nth-child(4n+4)[aria-current="page"],
+.dark .sidebar a:nth-child(4n+4).active {
+  color: #A8D44D !important;
+}
+
+/* Sidebar Section Headers */
+.sidebar h3,
+.sidebar h4,
+aside[class*="sidebar"] h3,
+aside[class*="sidebar"] h4,
+[class*="sidebar"] h3,
+[class*="sidebar"] h4,
+[data-sidebar] h3,
+[data-sidebar] h4 {
+  color: var(--ebay-gray-700);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 12px;
+}
+
+.dark .sidebar h3,
+.dark .sidebar h4,
+.dark aside[class*="sidebar"] h3,
+.dark aside[class*="sidebar"] h4,
+.dark [class*="sidebar"] h3,
+.dark [class*="sidebar"] h4,
+.dark [data-sidebar] h3,
+.dark [data-sidebar] h4 {
+  color: var(--ebay-gray-400);
 }
 
 /* Tag/Chip Styling */
@@ -381,4 +644,626 @@ html {
 .dark ::selection {
   background-color: var(--ebay-yellow);
   color: var(--ebay-gray-900);
+}
+
+/* Enhanced Interactive Elements */
+/* Buttons with Sophisticated Hover Effects */
+button,
+[role="button"],
+.button {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ripple effect for buttons without animated borders - using ::after to avoid conflicts */
+button:not(.navbar button):not(.topbar button):not([class*="primary"] button):not([class*="cta"] button):not([data-theme-toggle]):not([aria-label*="theme"]):not([aria-label*="Theme"]):not(nav button):not(header button):not(.btn-get-started):not(.btn-special):not(.button-animated)::after,
+[role="button"]:not(.navbar *):not(.topbar *)::after,
+.button:not([class*="primary"]):not([class*="cta"])::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  pointer-events: none;
+  z-index: 0;
+}
+
+button:not(.navbar button):not(.topbar button):not([class*="primary"] button):not([class*="cta"] button):not([data-theme-toggle]):not([aria-label*="theme"]):not([aria-label*="Theme"]):not(nav button):not(header button):not(.btn-get-started):not(.btn-special):not(.button-animated):hover::after,
+[role="button"]:not(.navbar *):not(.topbar *):hover::after,
+.button:not([class*="primary"]):not([class*="cta"]):hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Tabs with Color Transitions */
+[role="tablist"] button,
+.tabs button {
+  border-bottom: 3px solid transparent;
+  border-radius: 0.5rem 0.5rem 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+[role="tablist"] button:hover:nth-child(4n+1),
+.tabs button:hover:nth-child(4n+1) {
+  border-bottom-color: var(--ebay-red);
+  color: var(--ebay-red);
+  background: linear-gradient(180deg, rgba(229, 50, 56, 0.05) 0%, transparent 100%);
+}
+
+[role="tablist"] button:hover:nth-child(4n+2),
+.tabs button:hover:nth-child(4n+2) {
+  border-bottom-color: var(--ebay-blue);
+  color: var(--ebay-blue);
+  background: linear-gradient(180deg, rgba(0, 100, 210, 0.05) 0%, transparent 100%);
+}
+
+[role="tablist"] button:hover:nth-child(4n+3),
+.tabs button:hover:nth-child(4n+3) {
+  border-bottom-color: var(--ebay-yellow);
+  color: var(--ebay-yellow);
+  background: linear-gradient(180deg, rgba(245, 175, 2, 0.05) 0%, transparent 100%);
+}
+
+[role="tablist"] button:hover:nth-child(4n+4),
+.tabs button:hover:nth-child(4n+4) {
+  border-bottom-color: var(--ebay-green);
+  color: var(--ebay-green);
+  background: linear-gradient(180deg, rgba(134, 184, 23, 0.05) 0%, transparent 100%);
+}
+
+/* Header/Navbar with Hover Effects */
+header a,
+nav a:not([class*="sidebar"]) {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+header a::after,
+nav a:not([class*="sidebar"])::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ebay-red), var(--ebay-blue), var(--ebay-yellow), var(--ebay-green));
+  transition: width 0.3s ease;
+}
+
+header a:hover::after,
+nav a:not([class*="sidebar"]):hover::after {
+  width: 100%;
+}
+
+/* Code Blocks with Enhanced Hover */
+pre:hover {
+  box-shadow: 0 4px 12px rgba(0, 100, 210, 0.15);
+  transform: translateY(-1px);
+}
+
+.dark pre:hover {
+  box-shadow: 0 4px 12px rgba(245, 175, 2, 0.15);
+}
+
+/* Copy Button in Code Blocks */
+pre button {
+  background: linear-gradient(135deg, var(--ebay-blue), var(--ebay-blue-dark));
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 0.375rem;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+pre button:hover {
+  background: linear-gradient(135deg, var(--ebay-red), var(--ebay-red-dark));
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(229, 50, 56, 0.35);
+}
+
+pre button:active {
+  transform: translateY(0) scale(1);
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Input Fields with Color Focus */
+input,
+textarea,
+select {
+  transition: all 0.3s ease;
+  border: 2px solid var(--ebay-gray-300);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--ebay-blue);
+  box-shadow: 0 0 0 4px rgba(0, 100, 210, 0.1);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--ebay-yellow);
+  box-shadow: 0 0 0 4px rgba(245, 175, 2, 0.1);
+}
+
+/* Tooltips */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--ebay-gray-900);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Scroll Progress Bar */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ebay-red), var(--ebay-blue), var(--ebay-yellow), var(--ebay-green));
+  transform-origin: left;
+  z-index: 9999;
+}
+
+/* Skeleton Loading States */
+.skeleton {
+  background: linear-gradient(90deg, var(--ebay-gray-200) 25%, var(--ebay-gray-100) 50%, var(--ebay-gray-200) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, var(--ebay-gray-800) 25%, var(--ebay-gray-700) 50%, var(--ebay-gray-800) 75%);
+  background-size: 200% 100%;
+}
+
+/* ============================================ */
+/* ROUNDED BUTTONS WITH ANIMATED EBAY BORDERS */
+/* ============================================ */
+
+/* Animated gradient border keyframes */
+@keyframes ebay-border-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes ebay-border-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Base rounded button styling - applies to all buttons */
+button,
+[role="button"],
+.button,
+a.button,
+input[type="button"],
+input[type="submit"] {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  position: relative;
+  z-index: 1;
+}
+
+/* Animated eBay Border for Primary Buttons and CTAs */
+/* This includes: Get Started button, Theme toggle, Primary action buttons */
+.navbar button,
+.topbar button,
+[class*="primary"] button,
+[class*="cta"] button,
+[data-theme-toggle],
+button[aria-label*="theme"],
+button[aria-label*="Theme"],
+nav button:not([class*="sidebar"]),
+header button {
+  position: relative;
+  border-radius: 0.5rem;
+  background: var(--ebay-gray-900);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  overflow: visible;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .navbar button,
+.dark .topbar button,
+.dark [class*="primary"] button,
+.dark [class*="cta"] button,
+.dark [data-theme-toggle],
+.dark button[aria-label*="theme"],
+.dark button[aria-label*="Theme"],
+.dark nav button:not([class*="sidebar"]),
+.dark header button {
+  background: white;
+  color: var(--ebay-gray-900);
+}
+
+/* Animated border using ::before pseudo-element */
+.navbar button::before,
+.topbar button::before,
+[class*="primary"] button::before,
+[class*="cta"] button::before,
+[data-theme-toggle]::before,
+button[aria-label*="theme"]::before,
+button[aria-label*="Theme"]::before,
+nav button:not([class*="sidebar"])::before,
+header button::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 0.6875rem; /* button radius (0.5rem/8px) + border width (3px) = 11px = 0.6875rem */
+  background: linear-gradient(
+    45deg,
+    var(--ebay-red) 0%,
+    var(--ebay-blue) 25%,
+    var(--ebay-yellow) 50%,
+    var(--ebay-green) 75%,
+    var(--ebay-red) 100%
+  );
+  background-size: 300% 300%;
+  z-index: -1;
+  animation: ebay-border-animation 4s ease-in-out infinite;
+  opacity: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effect - speed up animation */
+.navbar button:hover::before,
+.topbar button:hover::before,
+[class*="primary"] button:hover::before,
+[class*="cta"] button:hover::before,
+[data-theme-toggle]:hover::before,
+button[aria-label*="theme"]:hover::before,
+button[aria-label*="Theme"]:hover::before,
+nav button:not([class*="sidebar"]):hover::before,
+header button:hover::before {
+  animation: ebay-border-animation 1.5s ease-in-out infinite;
+  opacity: 1;
+}
+
+/* Button hover state */
+.navbar button:hover,
+.topbar button:hover,
+[class*="primary"] button:hover,
+[class*="cta"] button:hover,
+[data-theme-toggle]:hover,
+button[aria-label*="theme"]:hover,
+button[aria-label*="Theme"]:hover,
+nav button:not([class*="sidebar"]):hover,
+header button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(229, 50, 56, 0.25);
+}
+
+/* Active/pressed state for better UX */
+.navbar button:active,
+.topbar button:active,
+[class*="primary"] button:active,
+[class*="cta"] button:active,
+[data-theme-toggle]:active,
+button[aria-label*="theme"]:active,
+button[aria-label*="Theme"]:active,
+nav button:not([class*="sidebar"]):active,
+header button:active {
+  transform: translateY(0) scale(0.98);
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Specific styling for theme toggle button */
+[data-theme-toggle],
+button[aria-label*="theme"],
+button[aria-label*="Theme"] {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Get Started button (primary CTA) - enhanced styling */
+.navbar [class*="primary"],
+nav a[class*="primary"],
+.topbar [class*="primary"],
+a.button-primary,
+.btn-get-started {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: var(--ebay-gray-900);
+  color: white;
+  overflow: visible;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .navbar [class*="primary"],
+.dark nav a[class*="primary"],
+.dark .topbar [class*="primary"],
+.dark a.button-primary,
+.dark .btn-get-started {
+  background: white;
+  color: var(--ebay-gray-900);
+}
+
+/* Get Started animated border */
+.navbar [class*="primary"]::before,
+nav a[class*="primary"]::before,
+.topbar [class*="primary"]::before,
+a.button-primary::before,
+.btn-get-started::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 0.6875rem; /* button radius (0.5rem/8px) + border width (3px) = 11px = 0.6875rem */
+  background: linear-gradient(
+    45deg,
+    var(--ebay-red) 0%,
+    var(--ebay-blue) 25%,
+    var(--ebay-yellow) 50%,
+    var(--ebay-green) 75%,
+    var(--ebay-red) 100%
+  );
+  background-size: 300% 300%;
+  z-index: -1;
+  animation: ebay-border-animation 4s ease-in-out infinite;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar [class*="primary"]:hover::before,
+nav a[class*="primary"]:hover::before,
+.topbar [class*="primary"]:hover::before,
+a.button-primary:hover::before,
+.btn-get-started:hover::before {
+  animation: ebay-border-animation 1.5s ease-in-out infinite;
+}
+
+.navbar [class*="primary"]:hover,
+nav a[class*="primary"]:hover,
+.topbar [class*="primary"]:hover,
+a.button-primary:hover,
+.btn-get-started:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(229, 50, 56, 0.3);
+}
+
+/* Alternative rotating border effect for special buttons */
+.btn-special,
+.button-animated {
+  position: relative;
+  border-radius: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: transparent;
+  color: var(--ebay-gray-900);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  overflow: visible;
+}
+
+.btn-special::before,
+.button-animated::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0.5rem;
+  padding: 3px;
+  background: linear-gradient(
+    45deg,
+    var(--ebay-red),
+    var(--ebay-blue),
+    var(--ebay-yellow),
+    var(--ebay-green),
+    var(--ebay-red)
+  );
+  background-size: 400% 400%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: ebay-border-rotate 8s linear infinite, ebay-border-animation 3s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* Accessibility - maintain focus states */
+button:focus-visible,
+[role="button"]:focus-visible,
+.button:focus-visible {
+  outline: 3px solid var(--ebay-blue);
+  outline-offset: 3px;
+}
+
+/* Mobile responsiveness for animated buttons */
+@media (max-width: 768px) {
+  .navbar button,
+  .topbar button,
+  [class*="primary"] button,
+  nav a[class*="primary"] {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  [data-theme-toggle],
+  button[aria-label*="theme"],
+  button[aria-label*="Theme"] {
+    width: 2rem;
+    height: 2rem;
+    padding: 0.375rem;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .navbar button::before,
+  .topbar button::before,
+  [class*="primary"]::before,
+  [data-theme-toggle]::before,
+  button[aria-label*="theme"]::before,
+  .btn-special::before,
+  .button-animated::before {
+    animation: none;
+  }
+}
+
+/* ============================================ */
+/* GLOBAL ANCHOR BUTTONS - eBay Brand Colors */
+/* ============================================ */
+
+/* Target global anchors/navigation links */
+[class*="anchor"],
+[data-anchor],
+.anchors a,
+nav[class*="global"] a,
+[class*="global-anchor"] a,
+aside a[href^="https://"],
+.topbar a[href^="https://"],
+header a[href^="https://"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* GitHub Repository - Red hover (#E53238) */
+[class*="anchor"]:nth-child(1):hover,
+.anchors a:nth-child(1):hover,
+nav[class*="global"] a:nth-child(1):hover,
+a[href*="github.com/YosefHayim/ebay-mcp-server"]:hover,
+a[aria-label*="GitHub Repository"]:hover {
+  background-color: rgba(229, 50, 56, 0.1) !important;
+  color: var(--ebay-red) !important;
+  border-left: 3px solid var(--ebay-red);
+  transform: translateX(4px);
+}
+
+/* eBay Developer Portal - Blue hover (#0064D2) */
+[class*="anchor"]:nth-child(2):hover,
+.anchors a:nth-child(2):hover,
+nav[class*="global"] a:nth-child(2):hover,
+a[href*="developer.ebay.com"]:hover,
+a[aria-label*="eBay Developer Portal"]:hover {
+  background-color: rgba(0, 100, 210, 0.1) !important;
+  color: var(--ebay-blue) !important;
+  border-left: 3px solid var(--ebay-blue);
+  transform: translateX(4px);
+}
+
+/* MCP Documentation - Yellow hover (#F5AF02) */
+[class*="anchor"]:nth-child(3):hover,
+.anchors a:nth-child(3):hover,
+nav[class*="global"] a:nth-child(3):hover,
+a[href*="modelcontextprotocol.io"]:hover,
+a[aria-label*="MCP Documentation"]:hover {
+  background-color: rgba(245, 175, 2, 0.1) !important;
+  color: var(--ebay-yellow-dark) !important;
+  border-left: 3px solid var(--ebay-yellow);
+  transform: translateX(4px);
+}
+
+/* Dark mode adjustments for global anchors */
+.dark [class*="anchor"]:nth-child(1):hover,
+.dark a[href*="github.com/YosefHayim/ebay-mcp-server"]:hover {
+  background-color: rgba(229, 50, 56, 0.2) !important;
+  color: #FF8B8F !important;
+}
+
+.dark [class*="anchor"]:nth-child(2):hover,
+.dark a[href*="developer.ebay.com"]:hover {
+  background-color: rgba(0, 100, 210, 0.2) !important;
+  color: #5BA3FF !important;
+}
+
+.dark [class*="anchor"]:nth-child(3):hover,
+.dark a[href*="modelcontextprotocol.io"]:hover {
+  background-color: rgba(245, 175, 2, 0.2) !important;
+  color: #FFCA3A !important;
+}
+
+/* Icons within anchor links */
+[class*="anchor"] svg,
+.anchors a svg,
+nav[class*="global"] a svg {
+  transition: transform 0.3s ease;
+}
+
+[class*="anchor"]:hover svg,
+.anchors a:hover svg,
+nav[class*="global"] a:hover svg {
+  transform: scale(1.1);
 }

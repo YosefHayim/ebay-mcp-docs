@@ -1,12 +1,644 @@
 ---
 title: "Architecture"
-description: "Documentation for Architecture"
+description: "Deep dive into the eBay MCP Server architecture, design patterns, and implementation details"
 ---
 
 # Architecture
 
-Documentation for this section is coming soon.
+The eBay MCP Server is built with a layered, modular architecture that prioritizes type safety, maintainability, and extensibility. This guide provides a deep understanding of how the server is structured and how its components interact.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+## Overview
+
+The server implements the Model Context Protocol (MCP) specification to expose eBay's Sell APIs as tools that AI assistants can use. It follows a clean architecture pattern with clear separation of concerns.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     MCP Client Layer                         │
+│         (Claude Desktop, Cursor, etc.)                       │
+└──────────────────────┬──────────────────────────────────────┘
+                       │ STDIO Transport
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│                   MCP Server Layer                           │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Tool Registration & Execution                       │   │
+│  │  (230+ eBay API Tools)                              │   │
+│  └────────────┬────────────────────────────────────────┘   │
+└───────────────┼──────────────────────────────────────────────┘
+                │
+┌───────────────▼──────────────────────────────────────────────┐
+│                 Business Logic Layer                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐   │
+│  │   Account    │  │  Inventory   │  │   Fulfillment   │   │
+│  │     APIs     │  │     APIs     │  │      APIs       │   │
+│  └──────────────┘  └──────────────┘  └─────────────────┘   │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐   │
+│  │  Marketing   │  │  Analytics   │  │   Metadata      │   │
+│  │     APIs     │  │     APIs     │  │      APIs       │   │
+│  └──────────────┘  └──────────────┘  └─────────────────┘   │
+└───────────────┬──────────────────────────────────────────────┘
+                │
+┌───────────────▼──────────────────────────────────────────────┐
+│              Infrastructure Layer                             │
+│  ┌──────────────────────┐  ┌──────────────────────────┐     │
+│  │   HTTP Client        │  │   OAuth Manager          │     │
+│  │   - Interceptors     │  │   - Token Refresh        │     │
+│  │   - Rate Limiting    │  │   - Client Credentials   │     │
+│  │   - Retry Logic      │  │   - User Tokens          │     │
+│  └──────────────────────┘  └──────────────────────────┘     │
+└──────────────────────────────────────────────────────────────┘
+                       │
+                       ▼
+            eBay Sell API Endpoints
+```
+
+## Core Layers
+
+### 1. MCP Server Layer
+
+The server layer implements the Model Context Protocol specification using the `@modelcontextprotocol/sdk` package.
+
+**Key Components:**
+
+- **McpServer** (src/index.ts:16) - Main MCP server instance that handles tool registration and execution
+- **StdioServerTransport** (src/index.ts:104) - STDIO transport for communication with MCP clients
+- **Tool Registry** - Dynamic registration of all 230+ eBay API tools
+
+**Responsibilities:**
+- Accept incoming tool requests from MCP clients
+- Route requests to appropriate API implementations
+- Format responses according to MCP specification
+- Handle server lifecycle (startup, shutdown, error handling)
+
+```typescript
+// Example: Server initialization
+class EbayMcpServer {
+  private server: McpServer;
+  private api: EbaySellerApi;
+
+  constructor() {
+    this.server = new McpServer(mcpConfig);
+    this.api = new EbaySellerApi(getEbayConfig());
+    this.setupHandlers();
+    this.setupErrorHandling();
+  }
+
+  private setupHandlers(): void {
+    const tools = getToolDefinitions();
+
+    for (const toolDef of tools) {
+      this.server.registerTool(
+        toolDef.name,
+        {
+          description: toolDef.description,
+          inputSchema: toolDef.inputSchema,
+        },
+        async (args: Record<string, unknown>) => {
+          const result = await executeTool(this.api, toolDef.name, args);
+          return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        }
+      );
+    }
+  }
+}
+```
+
+### 2. Business Logic Layer
+
+The business logic layer contains domain-specific implementations of eBay APIs, organized by functional category.
+
+**Directory Structure:**
+
+```
+src/api/
+├── account-management/
+│   ├── fulfillment-policy.ts
+│   ├── payment-policy.ts
+│   ├── return-policy.ts
+│   └── program.ts
+├── listing-management/
+│   ├── inventory.ts
+│   ├── offer.ts
+│   └── location.ts
+├── order-management/
+│   ├── fulfillment.ts
+│   └── order.ts
+├── marketing-and-promotions/
+│   ├── campaign.ts
+│   ├── ad.ts
+│   └── promotion.ts
+├── analytics-and-reporting/
+│   └── analytics.ts
+├── metadata/
+│   └── metadata.ts
+└── index.ts  # API facade
+```
+
+**Key Principles:**
+- Each API category is self-contained with clear boundaries
+- All methods use Zod schemas for input validation
+- OpenAPI-generated types ensure type safety
+- Consistent error handling across all APIs
+
+### 3. Infrastructure Layer
+
+The infrastructure layer provides cross-cutting concerns like HTTP communication, authentication, and rate limiting.
+
+#### HTTP Client (src/api/client.ts)
+
+The `EbayApiClient` class handles all HTTP communication with eBay APIs.
+
+**Features:**
+- Request/response interceptors for authentication
+- Automatic token refresh on 401 errors
+- Client-side rate limiting
+- Exponential backoff retry logic for server errors
+- Rate limit header tracking
+
+```typescript
+class EbayApiClient {
+  private httpClient: AxiosInstance;
+  private authClient: EbayOAuthClient;
+  private rateLimitTracker: RateLimitTracker;
+
+  constructor(config: EbayConfig) {
+    this.httpClient = axios.create({
+      baseURL: this.baseUrl,
+      timeout: 30000,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+
+    // Request interceptor: inject auth token + check rate limits
+    this.httpClient.interceptors.request.use(async (config) => {
+      if (!this.rateLimitTracker.canMakeRequest()) {
+        throw new Error('Rate limit exceeded');
+      }
+
+      const token = await this.authClient.getAccessToken();
+      config.headers.Authorization = `Bearer ${token}`;
+      this.rateLimitTracker.recordRequest();
+
+      return config;
+    });
+
+    // Response interceptor: handle errors + retry logic
+    this.httpClient.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        // Handle 401: refresh token and retry
+        // Handle 429: rate limit exceeded
+        // Handle 5xx: exponential backoff retry
+      }
+    );
+  }
+}
+```
+
+#### OAuth Client (src/auth/oauth.ts)
+
+The `EbayOAuthClient` class manages OAuth 2.0 authentication with automatic token refresh.
+
+**Features:**
+- User token management with automatic refresh
+- Client credentials flow (app tokens) as fallback
+- Token expiry tracking
+- Environment variable integration
+
+**Token Priority:**
+1. Valid user access token (if available)
+2. Refresh user token (if access token expired)
+3. App access token from client credentials (fallback)
+
+```typescript
+class EbayOAuthClient {
+  private appAccessToken: string | null = null;
+  private userTokens: StoredTokenData | null = null;
+
+  async getAccessToken(): Promise<string> {
+    // Priority 1: User token
+    if (this.userTokens && !this.isUserAccessTokenExpired(this.userTokens)) {
+      return this.userTokens.userAccessToken;
+    }
+
+    // Priority 2: Refresh user token
+    if (this.userTokens && !this.isUserRefreshTokenExpired(this.userTokens)) {
+      await this.refreshUserToken();
+      return this.userTokens.userAccessToken;
+    }
+
+    // Priority 3: App access token (fallback)
+    await this.getOrRefreshAppAccessToken();
+    return this.appAccessToken!;
+  }
+}
+```
+
+## Project Structure
+
+```
+ebay-mcp-server/
+├── src/
+│   ├── index.ts                # STDIO MCP server entry point
+│   ├── server-http.ts          # HTTP MCP server (OAuth 2.1)
+│   ├── api/                    # Business logic layer
+│   │   ├── client.ts           # HTTP client with interceptors
+│   │   ├── index.ts            # API facade (EbaySellerApi)
+│   │   ├── account-management/
+│   │   ├── listing-management/
+│   │   ├── order-management/
+│   │   ├── marketing-and-promotions/
+│   │   ├── analytics-and-reporting/
+│   │   └── metadata/
+│   ├── auth/                   # OAuth & token management
+│   │   └── oauth.ts            # OAuth client with auto-refresh
+│   ├── tools/                  # MCP tool definitions
+│   │   ├── definitions/        # Modular tool schemas by category
+│   │   │   ├── account-tools.ts
+│   │   │   ├── inventory-tools.ts
+│   │   │   ├── order-tools.ts
+│   │   │   ├── marketing-tools.ts
+│   │   │   └── ...
+│   │   ├── index.ts            # Tool registry & dispatcher
+│   │   └── token-template.ts   # Token management tools
+│   ├── types/                  # TypeScript types
+│   │   ├── ebay.ts             # Core types
+│   │   ├── ebay-enums.ts       # 33+ native TypeScript enums
+│   │   └── sell_*.ts           # OpenAPI-generated types
+│   ├── utils/                  # Zod validation schemas
+│   │   ├── account-schemas.ts
+│   │   ├── inventory-schemas.ts
+│   │   └── ...
+│   └── config/                 # Environment configuration
+│       └── environment.ts
+├── tests/                      # Test suite
+│   ├── unit/                   # Unit tests
+│   │   ├── api/
+│   │   ├── auth/
+│   │   └── tools/
+│   ├── integration/            # Integration tests
+│   │   └── mcp-server/
+│   └── helpers/                # Test utilities
+├── docs/                       # OpenAPI specifications
+│   └── sell-apps/
+├── scripts/                    # Build and setup scripts
+├── build/                      # Compiled JavaScript
+├── .env.example                # Environment template
+├── package.json                # Dependencies & scripts
+├── tsconfig.json               # TypeScript configuration
+└── vitest.config.ts            # Test configuration
+```
+
+## Design Patterns
+
+### 1. Facade Pattern
+
+The `EbaySellerApi` class (src/api/index.ts) acts as a facade, providing a unified interface to all eBay API categories.
+
+```typescript
+export class EbaySellerApi {
+  private client: EbayApiClient;
+
+  // API categories
+  public readonly account: {
+    fulfillmentPolicy: EbayFulfillmentPolicyApi;
+    paymentPolicy: EbayPaymentPolicyApi;
+    returnPolicy: EbayReturnPolicyApi;
+    program: EbayProgramApi;
+  };
+
+  public readonly inventory: EbayInventoryApi;
+  public readonly fulfillment: EbayFulfillmentApi;
+  public readonly marketing: EbayMarketingApi;
+  public readonly analytics: EbayAnalyticsApi;
+
+  constructor(config: EbayConfig) {
+    this.client = new EbayApiClient(config);
+
+    // Initialize all API categories
+    this.account = {
+      fulfillmentPolicy: new EbayFulfillmentPolicyApi(this.client),
+      paymentPolicy: new EbayPaymentPolicyApi(this.client),
+      // ...
+    };
+  }
+}
+```
+
+**Benefits:**
+- Single entry point for all eBay APIs
+- Simplified dependency injection
+- Easy to mock for testing
+
+### 2. Interceptor Pattern
+
+Axios interceptors handle cross-cutting concerns like authentication and error handling.
+
+**Request Interceptor:**
+- Inject authentication token
+- Check rate limits before request
+- Record request timestamp
+
+**Response Interceptor:**
+- Extract rate limit headers
+- Handle authentication errors (401)
+- Implement retry logic for server errors (5xx)
+- Transform eBay-specific errors
+
+### 3. Strategy Pattern
+
+The OAuth client uses a strategy pattern for token management, automatically selecting the best authentication method.
+
+**Strategies:**
+1. **User Token Strategy** - Use valid user access token
+2. **Token Refresh Strategy** - Refresh expired user token
+3. **Client Credentials Strategy** - Fallback to app token
+
+### 4. Repository Pattern
+
+Each API category acts as a repository for its domain entities.
+
+```typescript
+class EbayInventoryApi {
+  constructor(private client: EbayApiClient) {}
+
+  async getInventoryItem(sku: string): Promise<InventoryItem> {
+    return this.client.get(`/sell/inventory/v1/inventory_item/${sku}`);
+  }
+
+  async createOrReplaceInventoryItem(
+    sku: string,
+    item: InventoryItemInput
+  ): Promise<void> {
+    return this.client.put(`/sell/inventory/v1/inventory_item/${sku}`, item);
+  }
+}
+```
+
+## Type Safety
+
+The server implements multiple layers of type safety:
+
+### 1. OpenAPI-Generated Types
+
+All eBay API request/response types are generated from OpenAPI specifications.
+
+```bash
+npm run generate:types
+```
+
+This generates TypeScript types in `src/types/sell_*.ts` files.
+
+### 2. Native TypeScript Enums
+
+33+ native TypeScript enums provide compile-time type checking for eBay constants.
+
+```typescript
+export enum MarketplaceId {
+  EBAY_US = 'EBAY_US',
+  EBAY_GB = 'EBAY_GB',
+  EBAY_DE = 'EBAY_DE',
+  // ... 20+ more marketplaces
+}
+
+export enum ListingDuration {
+  DAYS_1 = 'DAYS_1',
+  DAYS_3 = 'DAYS_3',
+  DAYS_5 = 'DAYS_5',
+  DAYS_7 = 'DAYS_7',
+  DAYS_10 = 'DAYS_10',
+  DAYS_30 = 'DAYS_30',
+  GTC = 'GTC', // Good 'Til Cancelled
+}
+```
+
+### 3. Zod Runtime Validation
+
+All external inputs (tool arguments, environment variables) are validated using Zod schemas.
+
+```typescript
+const createOfferSchema = z.object({
+  sku: z.string().min(1).describe('The seller-defined SKU'),
+  marketplaceId: z.nativeEnum(MarketplaceId),
+  format: z.nativeEnum(FormatType),
+  price: z.object({
+    value: z.string().regex(/^\d+(\.\d{1,2})?$/),
+    currency: z.string().length(3),
+  }),
+});
+```
+
+**Benefits:**
+- Catch invalid inputs at runtime
+- Automatic type inference
+- Clear error messages
+- Self-documenting code
+
+## Data Flow
+
+### Tool Execution Flow
+
+```
+1. MCP Client sends tool request
+   ↓
+2. MCP Server validates tool name
+   ↓
+3. Tool executor looks up tool definition
+   ↓
+4. Zod schema validates input arguments
+   ↓
+5. Business logic method is called
+   ↓
+6. HTTP Client checks rate limits
+   ↓
+7. OAuth Client provides access token
+   ↓
+8. HTTP request sent to eBay API
+   ↓
+9. Response interceptor handles errors
+   ↓
+10. Response data returned to MCP Client
+```
+
+### Authentication Flow
+
+```
+1. Client makes API request
+   ↓
+2. Request interceptor triggered
+   ↓
+3. OAuth Client checks token status
+   ↓
+4. If expired → Refresh token
+   ↓
+5. If refresh fails → Get app token
+   ↓
+6. Inject token in Authorization header
+   ↓
+7. If 401 response → Retry with refreshed token
+```
+
+## Configuration Management
+
+The server uses a centralized configuration system in `src/config/environment.ts`.
+
+```typescript
+export interface EbayConfig {
+  clientId: string;
+  clientSecret: string;
+  environment: 'sandbox' | 'production';
+  redirectUri: string;
+  scopes?: string[];
+}
+
+export function getEbayConfig(): EbayConfig {
+  const validation = validateEnvironmentConfig();
+
+  if (!validation.isValid) {
+    throw new Error('Invalid environment configuration');
+  }
+
+  return {
+    clientId: process.env.EBAY_CLIENT_ID!,
+    clientSecret: process.env.EBAY_CLIENT_SECRET!,
+    environment: (process.env.EBAY_ENVIRONMENT || 'sandbox') as 'sandbox' | 'production',
+    redirectUri: process.env.EBAY_REDIRECT_URI!,
+    scopes: process.env.EBAY_SCOPES?.split(' '),
+  };
+}
+```
+
+**Environment Variables:**
+- `EBAY_CLIENT_ID` - eBay application Client ID
+- `EBAY_CLIENT_SECRET` - eBay application Client Secret
+- `EBAY_ENVIRONMENT` - `sandbox` or `production`
+- `EBAY_REDIRECT_URI` - OAuth redirect URI (RuName)
+- `EBAY_USER_ACCESS_TOKEN` - Optional user access token
+- `EBAY_USER_REFRESH_TOKEN` - Optional user refresh token
+
+## Extensibility
+
+The architecture is designed for easy extensibility:
+
+### Adding New eBay APIs
+
+1. **Create API implementation** in appropriate category directory
+2. **Define Zod schemas** for input validation
+3. **Add TypeScript types** (or generate from OpenAPI)
+4. **Create tool definitions** in `src/tools/definitions/`
+5. **Register tools** in tool registry
+6. **Write tests** for new functionality
+
+### Adding New Tool Categories
+
+```typescript
+// 1. Create tool definitions
+export const newCategoryTools: ToolDefinition[] = [
+  {
+    name: 'ebay_new_operation',
+    description: 'Performs new operation',
+    inputSchema: newOperationSchema,
+    handler: 'newCategory.operation',
+  },
+];
+
+// 2. Add to tool registry
+export function getToolDefinitions(): ToolDefinition[] {
+  return [
+    ...accountTools,
+    ...inventoryTools,
+    ...newCategoryTools,  // Add new tools
+  ];
+}
+```
+
+## Performance Considerations
+
+### Rate Limit Management
+
+The server implements client-side rate limiting to prevent exceeding eBay's API limits:
+
+```typescript
+class RateLimitTracker {
+  private requestTimestamps: number[] = [];
+  private readonly windowMs = 60000; // 1 minute window
+  private readonly maxRequests = 5000; // Conservative limit
+
+  canMakeRequest(): boolean {
+    const now = Date.now();
+    this.requestTimestamps = this.requestTimestamps.filter(
+      timestamp => now - timestamp < this.windowMs
+    );
+    return this.requestTimestamps.length < this.maxRequests;
+  }
+}
+```
+
+### Connection Pooling
+
+Axios automatically manages HTTP connection pooling for improved performance.
+
+### Caching
+
+Currently, the server does not implement response caching, as eBay data can change frequently. Consider implementing caching for specific use cases:
+
+- Metadata API responses (category trees, policies)
+- Fulfillment/payment/return policies
+- Rate limit headers
+
+## Security
+
+### Credential Management
+
+- Credentials loaded from environment variables only
+- Never logged or exposed in error messages
+- Token storage in memory only (not persisted to disk)
+
+### Input Validation
+
+- All inputs validated with Zod schemas
+- SQL injection not applicable (REST API client)
+- No user-generated code execution
+
+### HTTPS Only
+
+All communication with eBay APIs uses HTTPS.
+
+## Monitoring and Observability
+
+### Logging
+
+The server uses `console.error` for logging to stderr:
+- Server startup/shutdown events
+- Authentication events (token refresh, expiry)
+- Rate limit warnings
+- Error conditions
+
+### Error Context
+
+All errors include context for debugging:
+- Original eBay API error messages
+- Suggested remediation steps
+- Request/response details (in development)
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Error Handling" icon="triangle-exclamation" href="/advanced/error-handling">
+    Learn how errors are handled and recovered
+  </Card>
+
+  <Card title="Rate Limits" icon="gauge-high" href="/advanced/rate-limits">
+    Understand rate limiting strategies
+  </Card>
+
+  <Card title="Testing" icon="flask" href="/advanced/testing">
+    Explore the testing strategy and tools
+  </Card>
+
+  <Card title="Contributing" icon="code-pull-request" href="/advanced/contributing">
+    Contribute to the project
+  </Card>
+</CardGroup>

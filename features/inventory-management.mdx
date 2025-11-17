@@ -1,12 +1,543 @@
 ---
 title: "Inventory Management"
-description: "Documentation for Inventory Management"
+description: "Manage your eBay inventory with 32 powerful tools for items, offers, locations, and bulk operations"
 ---
 
-# Inventory Management
+The eBay MCP Server provides comprehensive inventory management capabilities through the **Inventory API**, giving you full control over your product catalog with 32 specialized tools.
 
-Documentation for this section is coming soon.
+## Overview
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+The Inventory API uses a seller-defined **SKU** (Stock Keeping Unit) system to manage your items. This approach gives you complete control over your inventory tracking and simplifies bulk operations.
+
+<Info>
+**Key Concept:** The Inventory API workflow follows three steps:
+1. Create inventory items with your SKUs
+2. Create offers to list items on marketplaces
+3. Publish offers to make them live on eBay
+</Info>
+
+## Core Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Inventory Items" icon="box">
+    Create and manage product inventory with custom SKUs
+  </Card>
+  <Card title="Offers & Publishing" icon="tags">
+    Create offers and publish listings to eBay marketplaces
+  </Card>
+  <Card title="Inventory Locations" icon="location-dot">
+    Manage warehouses and fulfillment centers
+  </Card>
+  <Card title="Bulk Operations" icon="layer-group">
+    Update thousands of items efficiently
+  </Card>
+</CardGroup>
+
+## Inventory Items
+
+Inventory items represent the products you sell. Each item is identified by a unique SKU that you define.
+
+### Managing Individual Items
+
+<Steps>
+  <Step title="Create an Inventory Item">
+    Define your product with SKU, title, description, and condition:
+
+    ```typescript
+    // Create a new inventory item
+    {
+      "sku": "LAPTOP-XPS13-001",
+      "inventoryItem": {
+        "product": {
+          "title": "Dell XPS 13 Laptop - 16GB RAM, 512GB SSD",
+          "description": "Brand new Dell XPS 13 with latest specs...",
+          "aspects": {
+            "Brand": ["Dell"],
+            "Model": ["XPS 13"],
+            "RAM Size": ["16 GB"],
+            "Storage Type": ["SSD"]
+          },
+          "imageUrls": [
+            "https://example.com/images/laptop-front.jpg",
+            "https://example.com/images/laptop-side.jpg"
+          ]
+        },
+        "condition": "NEW",
+        "availability": {
+          "shipToLocationAvailability": {
+            "quantity": 10
+          }
+        }
+      }
+    }
+    ```
+
+    **Available Tools:**
+    - `ebay_create_inventory_item` - Create or replace an inventory item
+    - `ebay_get_inventory_item` - Get item details by SKU
+    - `ebay_get_inventory_items` - List all your inventory items
+    - `ebay_delete_inventory_item` - Remove an inventory item
+  </Step>
+
+  <Step title="Update Inventory Details">
+    Modify product information, quantity, or condition:
+
+    ```typescript
+    // Update existing inventory item
+    {
+      "sku": "LAPTOP-XPS13-001",
+      "inventoryItem": {
+        "availability": {
+          "shipToLocationAvailability": {
+            "quantity": 15  // Updated quantity
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+### Bulk Inventory Operations
+
+For managing large catalogs, use bulk operations to update multiple items in a single request:
+
+<Tabs>
+  <Tab title="Bulk Create">
+    ```typescript
+    // Create multiple inventory items at once
+    {
+      "requests": [
+        {
+          "sku": "LAPTOP-XPS13-001",
+          "inventoryItem": { /* item details */ }
+        },
+        {
+          "sku": "LAPTOP-XPS15-001",
+          "inventoryItem": { /* item details */ }
+        }
+      ]
+    }
+    ```
+
+    **Tool:** `ebay_bulk_create_or_replace_inventory_item`
+  </Tab>
+
+  <Tab title="Bulk Get">
+    ```typescript
+    // Retrieve multiple inventory items
+    {
+      "requests": {
+        "requests": [
+          { "sku": "LAPTOP-XPS13-001" },
+          { "sku": "LAPTOP-XPS15-001" }
+        ]
+      }
+    }
+    ```
+
+    **Tool:** `ebay_bulk_get_inventory_item`
+  </Tab>
+
+  <Tab title="Bulk Update Price/Quantity">
+    ```typescript
+    // Update pricing and stock levels
+    {
+      "requests": [
+        {
+          "offerId": "12345",
+          "shipToLocationAvailability": {
+            "quantity": 20
+          },
+          "pricingSummary": {
+            "price": {
+              "value": "999.99",
+              "currency": "USD"
+            }
+          }
+        }
+      ]
+    }
+    ```
+
+    **Tool:** `ebay_bulk_update_price_quantity`
+  </Tab>
+</Tabs>
+
+## Offers and Publishing
+
+Offers connect your inventory items to eBay marketplaces with pricing and policy information.
+
+### Creating and Publishing Offers
+
+<Steps>
+  <Step title="Create an Offer">
+    Link an inventory item to a marketplace with pricing:
+
+    ```typescript
+    {
+      "offer": {
+        "sku": "LAPTOP-XPS13-001",
+        "marketplaceId": "EBAY_US",
+        "format": "FIXED_PRICE",
+        "availableQuantity": 10,
+        "pricingSummary": {
+          "price": {
+            "value": "1299.99",
+            "currency": "USD"
+          }
+        },
+        "listingPolicies": {
+          "fulfillmentPolicyId": "your-fulfillment-policy-id",
+          "paymentPolicyId": "your-payment-policy-id",
+          "returnPolicyId": "your-return-policy-id"
+        },
+        "categoryId": "175672"
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_create_offer` - Create a new offer
+    - `ebay_get_offer` - Get offer details
+    - `ebay_get_offers` - List all offers
+    - `ebay_update_offer` - Modify an existing offer
+    - `ebay_delete_offer` - Remove an offer
+  </Step>
+
+  <Step title="Publish the Offer">
+    Make your listing live on eBay:
+
+    ```typescript
+    {
+      "offerId": "12345678"
+    }
+    ```
+
+    **Tools:**
+    - `ebay_publish_offer` - Publish a single offer
+    - `ebay_withdraw_offer` - End a live listing
+    - `ebay_bulk_publish_offer` - Publish multiple offers at once
+  </Step>
+
+  <Step title="Preview Listing Fees">
+    Calculate fees before publishing:
+
+    ```typescript
+    {
+      "offers": [
+        {
+          "offerId": "12345678"
+        }
+      ]
+    }
+    ```
+
+    **Tool:** `ebay_get_listing_fees`
+  </Step>
+</Steps>
+
+### Bulk Offer Operations
+
+<CardGroup cols={2}>
+  <Card title="Bulk Create Offers" icon="plus">
+    `ebay_bulk_create_offer` - Create multiple offers simultaneously
+  </Card>
+  <Card title="Bulk Publish Offers" icon="rocket">
+    `ebay_bulk_publish_offer` - Publish up to 25 offers at once
+  </Card>
+</CardGroup>
+
+## Inventory Item Groups (Variations)
+
+Create variation listings where multiple similar items (different sizes, colors) are grouped together.
+
+<Accordion title="Creating Variation Listings">
+
+**Step 1:** Create individual inventory items for each variation:
+
+```typescript
+// Blue, Small T-Shirt
+{
+  "sku": "TSHIRT-BLUE-S",
+  "inventoryItem": {
+    "product": {
+      "title": "Cotton T-Shirt",
+      "aspects": {
+        "Color": ["Blue"],
+        "Size": ["Small"]
+      }
+    }
+  }
+}
+
+// Blue, Medium T-Shirt
+{
+  "sku": "TSHIRT-BLUE-M",
+  "inventoryItem": { /* similar structure */ }
+}
+```
+
+**Step 2:** Create an inventory item group:
+
+```typescript
+{
+  "inventoryItemGroupKey": "TSHIRT-GROUP-001",
+  "inventoryItemGroup": {
+    "title": "Cotton T-Shirt",
+    "description": "Comfortable cotton t-shirt available in multiple colors and sizes",
+    "imageUrls": ["https://example.com/tshirt.jpg"],
+    "variantSKUs": [
+      "TSHIRT-BLUE-S",
+      "TSHIRT-BLUE-M",
+      "TSHIRT-RED-S",
+      "TSHIRT-RED-M"
+    ],
+    "variesBy": {
+      "specifications": [
+        {
+          "name": "Color",
+          "values": ["Blue", "Red"]
+        },
+        {
+          "name": "Size",
+          "values": ["Small", "Medium"]
+        }
+      ]
+    }
+  }
+}
+```
+
+**Available Tools:**
+- `ebay_create_or_replace_inventory_item_group`
+- `ebay_get_inventory_item_group`
+- `ebay_delete_inventory_item_group`
+- `ebay_publish_offer_by_inventory_item_group`
+- `ebay_withdraw_offer_by_inventory_item_group`
+
+</Accordion>
+
+## Inventory Locations
+
+Manage warehouses, stores, and fulfillment centers where you store inventory.
+
+### Location Management
+
+<Steps>
+  <Step title="Create a Location">
+    ```typescript
+    {
+      "merchantLocationKey": "warehouse-nyc-001",
+      "location": {
+        "name": "New York Warehouse",
+        "locationType": "WAREHOUSE",
+        "locationTypes": ["WAREHOUSE"],
+        "address": {
+          "addressLine1": "123 Industrial Blvd",
+          "city": "Brooklyn",
+          "stateOrProvince": "NY",
+          "postalCode": "11201",
+          "country": "US"
+        },
+        "phone": "+1-555-0123"
+      }
+    }
+    ```
+
+    **Tools:**
+    - `ebay_create_or_replace_inventory_location`
+    - `ebay_get_inventory_location`
+    - `ebay_get_inventory_locations`
+  </Step>
+
+  <Step title="Enable/Disable Locations">
+    Control location availability:
+
+    **Tools:**
+    - `ebay_enable_inventory_location` - Activate a location
+    - `ebay_disable_inventory_location` - Temporarily deactivate
+    - `ebay_delete_inventory_location` - Permanently remove
+  </Step>
+
+  <Step title="Update Location Details">
+    Modify address, hours, or contact information:
+
+    **Tool:** `ebay_update_location_details`
+  </Step>
+</Steps>
+
+## Product Compatibility
+
+For automotive parts and other compatibility-based products, specify which vehicles or products your item works with.
+
+<Accordion title="Managing Product Compatibility">
+
+```typescript
+{
+  "sku": "BRAKE-PAD-001",
+  "compatibility": {
+    "compatibilityProperties": [
+      {
+        "name": "Year",
+        "value": "2018"
+      },
+      {
+        "name": "Make",
+        "value": "Honda"
+      },
+      {
+        "name": "Model",
+        "value": "Accord"
+      }
+    ]
+  }
+}
+```
+
+**Available Tools:**
+- `ebay_create_or_replace_product_compatibility` - Set compatibility
+- `ebay_get_product_compatibility` - View compatibility data
+- `ebay_delete_product_compatibility` - Remove compatibility
+
+</Accordion>
+
+## Listing Migration
+
+Migrate legacy Trading API listings to the modern Inventory API model.
+
+<Warning>
+**Important:** Migration is a one-way process. Once migrated, listings can only be managed through the Inventory API.
+</Warning>
+
+```typescript
+{
+  "requests": [
+    {
+      "listingId": "123456789012"
+    }
+  ]
+}
+```
+
+**Tool:** `ebay_bulk_migrate_listing`
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Create Your First Listing">
+    **Complete workflow from scratch:**
+
+    1. Create inventory item with `ebay_create_inventory_item`
+    2. Create offer with `ebay_create_offer`
+    3. Preview fees with `ebay_get_listing_fees`
+    4. Publish with `ebay_publish_offer`
+
+    See the [Creating Your First Listing](/guides/first-listing) guide for detailed steps.
+  </Accordion>
+
+  <Accordion title="Update Prices Across Multiple Listings">
+    **Bulk price update:**
+
+    1. Get all offers with `ebay_get_offers`
+    2. Use `ebay_bulk_update_price_quantity` to update pricing
+    3. Changes take effect immediately on live listings
+  </Accordion>
+
+  <Accordion title="Manage Out of Stock Items">
+    **Two approaches:**
+
+    **Option 1:** Update quantity to 0 (listing stays active)
+    ```typescript
+    // Use ebay_bulk_update_price_quantity
+    { "quantity": 0 }
+    ```
+
+    **Option 2:** Withdraw the offer (ends listing)
+    ```typescript
+    // Use ebay_withdraw_offer
+    { "offerId": "12345" }
+    ```
+  </Accordion>
+
+  <Accordion title="Multi-Warehouse Inventory">
+    1. Create location for each warehouse with `ebay_create_or_replace_inventory_location`
+    2. Assign inventory items to specific locations
+    3. eBay automatically calculates shipping from nearest location
+  </Accordion>
+</AccordionGroup>
+
+## Tool Reference
+
+### Inventory Items (7 tools)
+- `ebay_create_inventory_item` - Create/update item
+- `ebay_get_inventory_item` - Get item by SKU
+- `ebay_get_inventory_items` - List all items
+- `ebay_delete_inventory_item` - Delete item
+- `ebay_bulk_create_or_replace_inventory_item` - Bulk create/update
+- `ebay_bulk_get_inventory_item` - Bulk retrieve
+- `ebay_get_listing_locations` - Get item locations
+
+### Offers (11 tools)
+- `ebay_create_offer` - Create offer
+- `ebay_get_offer` - Get offer details
+- `ebay_get_offers` - List offers
+- `ebay_update_offer` - Update offer
+- `ebay_delete_offer` - Delete offer
+- `ebay_publish_offer` - Publish listing
+- `ebay_withdraw_offer` - End listing
+- `ebay_bulk_create_offer` - Bulk create
+- `ebay_bulk_publish_offer` - Bulk publish
+- `ebay_bulk_update_price_quantity` - Bulk price/quantity update
+- `ebay_get_listing_fees` - Preview fees
+
+### Locations (7 tools)
+- `ebay_create_or_replace_inventory_location` - Create/update location
+- `ebay_get_inventory_location` - Get location
+- `ebay_get_inventory_locations` - List locations
+- `ebay_update_location_details` - Update details
+- `ebay_enable_inventory_location` - Enable location
+- `ebay_disable_inventory_location` - Disable location
+- `ebay_delete_inventory_location` - Delete location
+
+### Item Groups (4 tools)
+- `ebay_create_or_replace_inventory_item_group` - Create variation group
+- `ebay_get_inventory_item_group` - Get group details
+- `ebay_delete_inventory_item_group` - Delete group
+- `ebay_publish_offer_by_inventory_item_group` - Publish variations
+- `ebay_withdraw_offer_by_inventory_item_group` - End variations
+
+### Product Compatibility (3 tools)
+- `ebay_create_or_replace_product_compatibility` - Set compatibility
+- `ebay_get_product_compatibility` - Get compatibility
+- `ebay_delete_product_compatibility` - Remove compatibility
+
+### Migration (1 tool)
+- `ebay_bulk_migrate_listing` - Migrate legacy listings
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create Your First Listing" href="/guides/first-listing" icon="rocket">
+    Step-by-step guide to list your first item
+  </Card>
+  <Card title="Bulk Operations Guide" href="/guides/bulk-operations" icon="layer-group">
+    Learn efficient bulk update strategies
+  </Card>
+  <Card title="Inventory API Reference" href="/api-reference/inventory/overview" icon="book">
+    Complete API documentation
+  </Card>
+  <Card title="Order Fulfillment" href="/features/order-fulfillment" icon="truck">
+    Process orders and shipments
+  </Card>
+</CardGroup>
+
+## Rate Limits
+
+<Info>
+**User Tokens:** 10,000-50,000 requests/day depending on seller tier
+
+**Client Credentials:** 1,000 requests/day (not recommended for inventory operations)
+</Info>
+
+See [Rate Limits](/advanced/rate-limits) for detailed information.

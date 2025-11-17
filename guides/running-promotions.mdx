@@ -1,12 +1,690 @@
 ---
 title: "Running Promotions"
-description: "Documentation for Running Promotions"
+description: "Complete guide to eBay marketing campaigns, promoted listings, item promotions, and ad optimization"
+icon: "bullhorn"
 ---
 
 # Running Promotions
 
-Documentation for this section is coming soon.
+Learn how to increase your eBay sales with marketing campaigns, promoted listings ads, item promotions, and strategic optimization using the eBay MCP Server.
 
-<Card title="Back to Home" href="/" icon="home">
-  Return to the documentation homepage
-</Card>
+<Note>
+  **Prerequisites**
+  - eBay MCP Server with user OAuth token
+  - `sell.marketing` scope (write) or `sell.marketing.readonly` (read-only)
+  - Active eBay listings to promote
+  - Advertising account approved (check eBay Seller Hub > Marketing)
+</Note>
+
+## Marketing Strategies Overview
+
+The eBay MCP Server provides three main marketing tools:
+
+<CardGroup cols={3}>
+  <Card title="Promoted Listings" icon="megaphone">
+    Pay-per-sale ads that boost listing visibility in search results
+  </Card>
+
+  <Card title="Item Promotions" icon="tags">
+    Discounts and sales events (10% off, Buy 2 Get 1, etc.)
+  </Card>
+
+  <Card title="Campaign Analytics" icon="chart-line">
+    Performance tracking and optimization insights
+  </Card>
+</CardGroup>
+
+## Promoted Listings Campaigns
+
+### Understanding Promoted Listings
+
+Promoted Listings is eBay's pay-per-sale advertising platform:
+- **Cost**: Only pay when item sells (ad fee percentage)
+- **Placement**: Higher visibility in search results and category pages
+- **Control**: Set ad rates per item or campaign-wide
+- **Performance**: Track impressions, clicks, and conversions
+
+<Info>
+Ad fees typically range from 2% to 20% of the sale price. eBay recommends starting at 5-8% and adjusting based on performance.
+</Info>
+
+### Create Your First Campaign
+
+<Steps>
+  <Step title="Create Campaign">
+    Set up campaign structure with name, marketplace, and budget
+  </Step>
+
+  <Step title="Create Ad Group">
+    Organize ads by category, price range, or product type
+  </Step>
+
+  <Step title="Add Products">
+    Select listings to promote with individual or bulk ad creation
+  </Step>
+
+  <Step title="Set Bids">
+    Configure ad rates (percentage of sale price)
+  </Step>
+
+  <Step title="Launch Campaign">
+    Activate and monitor performance
+  </Step>
+</Steps>
+
+### Step 1: Create Campaign
+
+<Accordion title="Ask your AI assistant">
+```
+Create a new promoted listings campaign:
+- Name: "Summer Electronics Sale 2024"
+- Marketplace: EBAY_US
+- Status: RUNNING
+- Budget: $500 monthly cap
+```
+</Accordion>
+
+The server uses `ebay_create_campaign` to establish your campaign foundation. You'll receive a campaign ID for adding ads and ad groups.
+
+### Step 2: Create Ad Group
+
+Ad groups help organize your ads by theme or strategy:
+
+<Accordion title="Ask your AI assistant">
+```
+For my "Summer Electronics Sale 2024" campaign, create an ad group:
+- Name: "Laptops - High Value"
+- Default bid: 8%
+- Target products: Laptops priced $800+
+```
+</Accordion>
+
+<Tip>
+Use ad groups to test different bid strategies. For example, one group for high-margin products at 10% ad rate, another for competitive products at 5%.
+</Tip>
+
+### Step 3: Add Products to Campaign
+
+You can add products individually or in bulk:
+
+<Tabs>
+  <Tab title="Individual Ads">
+    For precise control over each listing:
+
+    ```
+    Add these SKUs to my campaign with custom ad rates:
+    - LAPTOP-001: 10% ad rate (high margin)
+    - LAPTOP-002: 6% ad rate (competitive category)
+    - LAPTOP-003: 8% ad rate (medium competition)
+    ```
+
+    The server uses `ebay_create_ad` for each listing
+  </Tab>
+
+  <Tab title="Bulk Ads">
+    For large catalogs:
+
+    ```
+    Add all my laptop listings (50+ SKUs) to the campaign
+    Use 7% ad rate for all items
+    ```
+
+    The server uses `ebay_bulk_create_ad_by_inventory_reference` for efficient batch creation
+  </Tab>
+
+  <Tab title="Listing ID Method">
+    For published listings without SKUs:
+
+    ```
+    Add these listing IDs to my campaign:
+    - 110123456789: 8% ad rate
+    - 110123456790: 7% ad rate
+    ```
+
+    The server uses `ebay_create_ad_by_listing_id`
+  </Tab>
+</Tabs>
+
+### Monitor Campaign Performance
+
+Track how your ads are performing:
+
+<Accordion title="Ask your AI assistant">
+```
+Show me performance metrics for my "Summer Electronics Sale 2024" campaign:
+- Total impressions and clicks
+- Conversion rate
+- Total ad fees paid
+- Revenue generated
+- Return on ad spend (ROAS)
+```
+</Accordion>
+
+The server retrieves campaign reports showing:
+- **Impressions**: How many times your ads appeared
+- **Clicks**: Buyer engagement with your ads
+- **Sales**: Purchases attributed to ads
+- **Ad Fee**: Total cost of advertising
+- **Revenue**: Sales generated from ads
+
+## Keyword Targeting
+
+### Understanding Keywords
+
+Keywords determine when your promoted listings appear in search results:
+- **Broad Match**: Variants and related terms (e.g., "laptop" matches "gaming laptop", "laptop computer")
+- **Phrase Match**: Exact phrase with additional words (e.g., "Dell laptop" matches "new Dell laptop")
+- **Exact Match**: Precise term only (e.g., "Dell XPS 15" matches only "Dell XPS 15")
+
+<Note>
+eBay automatically targets relevant keywords based on your listing titles and categories. Manual keyword management provides additional control and optimization opportunities.
+</Note>
+
+### Add Keywords to Ad Group
+
+<Accordion title="Ask your AI assistant">
+```
+For my "Laptops - High Value" ad group, add these keywords:
+- "gaming laptop" (Broad match, 9% bid)
+- "Dell XPS laptop" (Phrase match, 8% bid)
+- "MacBook Pro 16 inch" (Exact match, 10% bid)
+```
+</Accordion>
+
+The server uses `ebay_create_keyword` with match type specifications.
+
+### Bulk Keyword Management
+
+Add multiple keywords efficiently:
+
+<Accordion title="Ask your AI assistant">
+```
+Bulk add 20 laptop-related keywords to my ad group:
+- All with Broad match type
+- Default bid: 7%
+- Include terms: ultrabook, notebook, laptop computer, portable computer, etc.
+```
+</Accordion>
+
+The server uses `ebay_bulk_create_keyword` for batch operations.
+
+### Negative Keywords
+
+Prevent ads from showing for irrelevant searches:
+
+<Tabs>
+  <Tab title="Campaign-Level">
+    Apply negative keywords across entire campaign:
+
+    ```
+    Add these negative keywords to my campaign:
+    - "broken"
+    - "parts only"
+    - "for parts"
+    - "not working"
+    - "refurbished" (if selling new only)
+    ```
+
+    Saves budget by filtering out unprofitable searches
+  </Tab>
+
+  <Tab title="Ad Group-Level">
+    Fine-tune specific ad groups:
+
+    ```
+    For my premium laptop ad group, add negative keywords:
+    - "cheap"
+    - "budget"
+    - "under $300"
+    ```
+
+    Targets only relevant, high-value searches
+  </Tab>
+</Tabs>
+
+The server provides 16 tools for comprehensive negative keyword management at both campaign and ad group levels.
+
+## Item Promotions (Discounts & Sales)
+
+### Types of Promotions
+
+eBay supports multiple promotion formats:
+
+<AccordionGroup>
+  <Accordion title="Order Discount">
+    Percentage or dollar amount off orders meeting criteria
+
+    **Examples:**
+    - 10% off purchases over $50
+    - $5 off any order
+    - 15% off for first-time buyers
+  </Accordion>
+
+  <Accordion title="Markdown Sale">
+    Temporary price reductions on specific items
+
+    **Examples:**
+    - 20% off all electronics (event sale)
+    - Flash sale: 30% off for 24 hours
+    - Seasonal clearance: 25% off winter items
+  </Accordion>
+
+  <Accordion title="Volume Pricing">
+    Discounts for buying multiple items
+
+    **Examples:**
+    - Buy 2, get 10% off
+    - Buy 3, get 1 free
+    - Tiered: 5% off 2 items, 10% off 3+
+  </Accordion>
+
+  <Accordion title="Shipping Discounts">
+    Reduced or free shipping promotions
+
+    **Examples:**
+    - Free shipping on orders over $25
+    - 50% off shipping for all items
+    - Free expedited shipping (limited time)
+  </Accordion>
+</AccordionGroup>
+
+### Create Item Promotion
+
+<Accordion title="Ask your AI assistant">
+```
+Create a promotion:
+- Type: Order discount
+- Offer: 15% off orders over $100
+- Duration: 7 days starting tomorrow
+- Apply to: All electronics category listings
+- Promotion name: "Electronics Week Sale"
+```
+</Accordion>
+
+The server uses `ebay_create_item_promotion` with detailed rules:
+- Discount amount and type (percentage or fixed)
+- Minimum purchase requirements
+- Eligible items (by category, SKU, or listing ID)
+- Start and end dates
+- Priority (if multiple promotions apply)
+
+### Manage Active Promotions
+
+View and modify your promotions:
+
+<Tabs>
+  <Tab title="List Promotions">
+    ```
+    Show me all my active promotions
+    ```
+
+    Returns all RUNNING, SCHEDULED, and PAUSED promotions
+  </Tab>
+
+  <Tab title="Update Promotion">
+    ```
+    Extend my "Electronics Week Sale" promotion by 3 days
+    ```
+
+    Modify end date, discount amount, or eligible items
+  </Tab>
+
+  <Tab title="End Promotion">
+    ```
+    Stop my "Electronics Week Sale" promotion immediately
+    ```
+
+    Terminate early if needed
+  </Tab>
+</Tabs>
+
+### Promotion Performance Reports
+
+Track promotion effectiveness:
+
+<Accordion title="Ask your AI assistant">
+```
+Show me performance data for my "Electronics Week Sale" promotion:
+- Total orders using promotion
+- Revenue generated
+- Average order value with vs. without promotion
+- Discount amount paid
+```
+</Accordion>
+
+Use insights to optimize future promotions and identify which discount strategies work best for your products.
+
+## Advanced Campaign Optimization
+
+### Bid Suggestions
+
+Get eBay's recommended bid rates:
+
+<Accordion title="Ask your AI assistant">
+```
+What bid rate does eBay recommend for these keywords in my laptop ad group?
+- "gaming laptop"
+- "Dell XPS"
+- "MacBook Pro"
+```
+</Accordion>
+
+The server uses `ebay_get_bid_recommendation` to retrieve:
+- Suggested bid percentage
+- Estimated impressions at that bid
+- Competitive landscape data
+- Expected performance metrics
+
+<Tip>
+eBay's bid suggestions are based on competitor bids and category performance. Start with recommendations and adjust based on your actual results and profit margins.
+</Tip>
+
+### Listing Recommendations
+
+Improve listing quality for better ad performance:
+
+<Accordion title="Ask your AI assistant">
+```
+Get optimization recommendations for my promoted listings
+```
+</Accordion>
+
+eBay may suggest:
+- Adding more photos
+- Improving title keywords
+- Updating item specifics
+- Adjusting pricing
+- Enabling Best Offer
+
+### Campaign Lifecycle Management
+
+<Tabs>
+  <Tab title="Pause Campaign">
+    Temporarily stop all ads:
+
+    ```
+    Pause my "Summer Electronics Sale 2024" campaign
+    ```
+
+    Useful during inventory shortages or to adjust strategy
+  </Tab>
+
+  <Tab title="Resume Campaign">
+    Restart paused campaign:
+
+    ```
+    Resume my "Summer Electronics Sale 2024" campaign
+    ```
+
+    All previous settings and ads reactivate
+  </Tab>
+
+  <Tab title="End Campaign">
+    Permanently conclude campaign:
+
+    ```
+    End my "Summer Electronics Sale 2024" campaign
+    ```
+
+    Campaign stops; can't be restarted (but can be cloned)
+  </Tab>
+
+  <Tab title="Archive Campaign">
+    Remove from active lists:
+
+    ```
+    Archive my completed "Summer Electronics Sale 2024" campaign
+    ```
+
+    Moves to archived status for historical reference
+  </Tab>
+</Tabs>
+
+### Clone Successful Campaigns
+
+Replicate what works:
+
+<Accordion title="Ask your AI assistant">
+```
+Clone my "Summer Electronics Sale 2024" campaign:
+- New name: "Fall Electronics Sale 2024"
+- Same ad groups, keywords, and bids
+- Update start date to October 1st
+```
+</Accordion>
+
+The server uses `ebay_clone_campaign` to duplicate entire campaign structure, saving setup time.
+
+## Performance Reporting
+
+### Generate Campaign Reports
+
+Create detailed performance analysis:
+
+<Accordion title="Ask your AI assistant">
+```
+Generate a campaign performance report for the past 30 days:
+- Include all active campaigns
+- Dimensions: Campaign, Ad Group, Keyword
+- Metrics: Impressions, clicks, sales, ad fees, ROAS
+```
+</Accordion>
+
+The server uses `ebay_create_report_task` to generate asynchronous reports with:
+- **Campaign metrics**: Overall campaign performance
+- **Listing metrics**: Per-item ad performance
+- **Keyword metrics**: Search term effectiveness
+- **Account metrics**: Portfolio-wide advertising data
+
+<Note>
+Report generation is asynchronous. Large reports may take several minutes. Use `ebay_get_report` to retrieve completed reports.
+</Note>
+
+### Key Metrics to Monitor
+
+<CardGroup cols={2}>
+  <Card title="Click-Through Rate (CTR)" icon="hand-pointer">
+    **Formula:** (Clicks / Impressions) × 100
+
+    **Good CTR:** 0.5% - 2%
+
+    Low CTR suggests poor ad relevance or uncompetitive pricing
+  </Card>
+
+  <Card title="Conversion Rate" icon="chart-line">
+    **Formula:** (Sales / Clicks) × 100
+
+    **Good Rate:** 5% - 15%
+
+    Low conversion suggests listing quality issues
+  </Card>
+
+  <Card title="Return on Ad Spend (ROAS)" icon="dollar-sign">
+    **Formula:** Revenue / Ad Fees
+
+    **Good ROAS:** 5:1 or higher
+
+    Target varies by profit margin (higher margin = lower ROAS acceptable)
+  </Card>
+
+  <Card title="Cost per Sale" icon="receipt">
+    **Formula:** Total Ad Fees / Total Sales
+
+    **Monitor:** Against profit margin
+
+    Ensure ad costs don't exceed your profit
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+### Campaign Structure
+
+<Steps>
+  <Step title="Organize by Category">
+    Create separate campaigns for distinct product categories (Electronics, Clothing, Home Goods) to track performance independently
+  </Step>
+
+  <Step title="Use Ad Groups Strategically">
+    Within campaigns, group similar items (High-End Laptops, Budget Laptops) to optimize bids by price point or margin
+  </Step>
+
+  <Step title="Test Bid Strategies">
+    Run small test campaigns with different bid rates to find optimal ad spend before scaling
+  </Step>
+
+  <Step title="Monitor Daily">
+    Check performance at least weekly; adjust underperforming ads or increase bids on winners
+  </Step>
+</Steps>
+
+### Budget Management
+
+<Warning>
+Set monthly budgets to prevent overspending. Ad fees are charged when items sell, which can accumulate quickly during high-sales periods.
+</Warning>
+
+<Accordion title="Budget allocation strategy">
+```
+Total Monthly Marketing Budget: $1,000
+
+Allocation:
+- 60% ($600): Proven campaigns (consistent ROAS > 5:1)
+- 30% ($300): Growing campaigns (ROAS 3-5:1, room for optimization)
+- 10% ($100): Experimental campaigns (new products, keywords, strategies)
+
+Review and rebalance monthly based on performance
+```
+</Accordion>
+
+### Keyword Strategy
+
+1. **Start Broad**: Use broad match to discover what buyers search for
+2. **Analyze Performance**: Review keyword reports after 2-3 weeks
+3. **Refine**: Convert high-performing broad terms to phrase or exact match
+4. **Add Negatives**: Filter out unprofitable or irrelevant searches
+5. **Test Continuously**: Add new keywords based on search trends and competitor analysis
+
+### Seasonal Promotions
+
+Plan promotions around key shopping events:
+
+<Tabs>
+  <Tab title="Q1 (Jan-Mar)">
+    - New Year sales (clearance)
+    - Valentine's Day (gifts, jewelry)
+    - Spring cleaning (home goods)
+  </Tab>
+
+  <Tab title="Q2 (Apr-Jun)">
+    - Easter (seasonal items)
+    - Mother's Day / Father's Day (gifts)
+    - Summer preparation (outdoor gear)
+  </Tab>
+
+  <Tab title="Q3 (Jul-Sep)">
+    - Back-to-school (electronics, supplies)
+    - Summer clearance
+    - Labor Day sales
+  </Tab>
+
+  <Tab title="Q4 (Oct-Dec)">
+    - Halloween (costumes, decor)
+    - Black Friday / Cyber Monday (everything)
+    - Holiday shopping (gifts)
+    - Year-end clearance
+  </Tab>
+</Tabs>
+
+## Common Issues and Solutions
+
+<AccordionGroup>
+  <Accordion title="Low impressions despite high bids">
+    **Problem:** Ads not showing despite competitive bid rates
+
+    **Solution:**
+    - Verify listings are active and in-stock
+    - Improve listing quality (photos, titles, item specifics)
+    - Check if category is eligible for promoted listings
+    - Ensure campaign and ad group status is RUNNING
+    - Review negative keywords (may be blocking relevant searches)
+  </Accordion>
+
+  <Accordion title="High ad spend, low sales">
+    **Problem:** Many clicks but few conversions
+
+    **Solution:**
+    - Review pricing (may be too high vs. competitors)
+    - Improve listing photos and descriptions
+    - Check shipping costs (high shipping deters buyers)
+    - Analyze keywords (attracting browsers, not buyers)
+    - Add negative keywords to filter bargain hunters
+    - Ensure inventory is actually available
+  </Accordion>
+
+  <Accordion title="Campaign won't start">
+    **Problem:** Campaign status stuck in PAUSED or won't activate
+
+    **Solution:**
+    - Verify ad account is approved (check Seller Hub)
+    - Ensure payment method is valid
+    - Check for policy violations on listed items
+    - Confirm at least one ad exists in campaign
+    - Review eBay marketing account standing
+  </Accordion>
+
+  <Accordion title="Error: Ad already exists">
+    **Problem:** Attempting to promote already-promoted listing
+
+    **Solution:**
+    - Check existing campaigns for this listing
+    - Update existing ad bid instead of creating new one
+    - Remove from old campaign before adding to new one
+    - Use `ebay_get_ads` to find where listing is promoted
+  </Accordion>
+</AccordionGroup>
+
+## Automation Ideas
+
+Leverage AI assistants for hands-free marketing:
+
+<Accordion title="Weekly optimization routine">
+```
+Every Monday at 9 AM:
+1. Generate performance report for all campaigns (past 7 days)
+2. Identify ads with ROAS < 3:1
+3. Reduce bids by 1% on underperformers
+4. Identify ads with ROAS > 7:1
+5. Increase bids by 1% on top performers (up to 15% max)
+6. Check for new keyword suggestions
+7. Add top 5 suggested keywords to each ad group
+8. Review and add negative keywords from search term reports
+```
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="First Listing" icon="list" href="/guides/first-listing">
+    Create listings to promote
+  </Card>
+
+  <Card title="Bulk Operations" icon="layer-group" href="/guides/bulk-operations">
+    Scale your advertising with bulk ad creation
+  </Card>
+
+  <Card title="Marketing API Reference" icon="book-open" href="/api-reference/marketing/overview">
+    Complete marketing tool documentation
+  </Card>
+
+  <Card title="Analytics & Reporting" icon="chart-bar" href="/features/analytics-reporting">
+    Deep dive into performance analytics
+  </Card>
+</CardGroup>
+
+## Related Topics
+
+- [Marketing Campaigns Features](/features/marketing-campaigns) - Detailed marketing documentation
+- [Rate Limits](/advanced/rate-limits) - Optimize bulk ad operations
+- [OAuth Setup](/authentication/oauth-setup) - Configure marketing scopes
+- [Troubleshooting](/support/troubleshooting) - Common marketing errors
