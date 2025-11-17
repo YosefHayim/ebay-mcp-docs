@@ -95,7 +95,7 @@ The eBay MCP Server works with two types of OAuth tokens:
 **Format in `.env`:**
 ```bash
 EBAY_USER_TOKEN_EXPIRY=2024-12-31T14:30:45.000Z
-```
+```markdown
 
 <Info>
   The expiry timestamp is in ISO 8601 format with UTC timezone (the `Z` suffix).
@@ -218,7 +218,7 @@ View your current token information:
 
 ```bash
 cat .env | grep EBAY_USER
-```
+```markdown
 
 This shows:
 - Current access token
@@ -231,7 +231,7 @@ Ensure your tokens are valid:
 
 ```bash
 npm run validate-config
-```
+```markdown
 
 This checks:
 - ✅ Tokens exist
@@ -247,13 +247,13 @@ This checks:
 
 The MCP server logs token-related events:
 
-```
+```text
 [INFO] User tokens loaded successfully
 [INFO] Access token expires at: 2024-12-31T14:30:45.000Z
 [INFO] Access token refreshed successfully
 [WARN] Access token expired, refreshing...
 [ERROR] Token refresh failed: invalid_grant
-```
+```markdown
 
 <Tip>
   Set `LOG_LEVEL=debug` in `.env` to see detailed token management logs.
@@ -269,7 +269,7 @@ Force a token refresh:
 
 ```bash
 npm run refresh-tokens
-```
+```yaml
 
 This:
 1. Uses current refresh token
@@ -286,7 +286,7 @@ If tokens are corrupted or invalid, regenerate them:
 
 ```bash
 npm run setup
-```
+```markdown
 
 This starts the OAuth flow from scratch:
 1. Opens browser for authorization
@@ -648,7 +648,7 @@ The server can refresh tokens before they expire:
 ```bash
 # Refresh token when <5 minutes remaining (default)
 TOKEN_REFRESH_BUFFER=300
-```
+```markdown
 
 **Benefits:**
 - Prevents mid-request expiry
@@ -664,7 +664,7 @@ Managing tokens across environments:
 .env.sandbox        # Sandbox tokens
 .env.production     # Production tokens
 .env               # Current environment
-```
+```markdown
 
 **Switching environments:**
 ```bash
@@ -673,7 +673,7 @@ cp .env.sandbox .env
 
 # Switch to production
 cp .env.production .env
-```
+```bash
 
 <Warning>
   Never mix Sandbox and Production tokens in the same `.env` file!

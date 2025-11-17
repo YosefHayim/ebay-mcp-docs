@@ -43,13 +43,13 @@ Learn how to efficiently manage large-scale eBay operations using bulk tools for
 Upload large product catalogs efficiently:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 I have a CSV file with 500 products. Create inventory items for all of them:
 - Each row has: SKU, Title, Description, Brand, Condition, Price, Quantity
 - All items are NEW condition
 - Default package weight: 1 lb
 - Default package dimensions: 10x8x3 inches
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_bulk_create_or_replace_inventory_item` to:
@@ -67,7 +67,7 @@ The server uses `ebay_bulk_create_or_replace_inventory_item` to:
 Fetch details for multiple SKUs:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Retrieve inventory details for these 100 SKUs:
 LAPTOP-001 through LAPTOP-100
 
@@ -75,7 +75,7 @@ Show me:
 - Current availability and quantity
 - Product condition
 - Package dimensions and weight
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_bulk_get_inventory_item` to retrieve multiple items efficiently.
@@ -86,7 +86,7 @@ Seasonal pricing updates made easy:
 
 <Tabs>
   <Tab title="Holiday Sale">
-    ```
+    ```text
     Update pricing for my entire electronics catalog (200+ items):
     - Reduce all prices by 15%
     - Keep quantities unchanged
@@ -96,7 +96,7 @@ Seasonal pricing updates made easy:
   </Tab>
 
   <Tab title="Inventory Sync">
-    ```
+    ```text
     Sync quantities from my warehouse system:
     - Update 500 SKUs with new quantity values
     - Don't change prices
@@ -106,7 +106,7 @@ Seasonal pricing updates made easy:
   </Tab>
 
   <Tab title="Price Increase">
-    ```
+    ```text
     Increase prices for all items in category "Electronics":
     - Add 10% to current price
     - Update effective immediately
@@ -127,7 +127,7 @@ Price changes take effect immediately. Always verify your pricing data before bu
 Convert inventory items to active listings at scale:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Create offers for 100 inventory items:
 - SKUs: ELECTRONICS-001 through ELECTRONICS-100
 - Marketplace: EBAY_US
@@ -136,7 +136,7 @@ Create offers for 100 inventory items:
 - Use my default payment policy
 - Use my default return policy
 - Quantity: Match inventory availability
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_bulk_create_offer` to generate multiple offers simultaneously.
@@ -146,12 +146,12 @@ The server uses `ebay_bulk_create_offer` to generate multiple offers simultaneou
 Launch multiple listings at once:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Publish all unpublished offers for my summer collection:
 - 50 offers across various categories
 - All using SKU-based inventory references
 - Publish to EBAY_US marketplace
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_bulk_publish_offer` to activate multiple listings in one operation.
@@ -165,13 +165,13 @@ The server uses `ebay_bulk_publish_offer` to activate multiple listings in one o
 Modernize old listings to the Inventory API:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Migrate my 200 legacy fixed-price listings to the Inventory API:
 - Preserve all listing data (title, description, photos)
 - Maintain current pricing
 - Assign new SKUs based on listing IDs
 - Keep listings active during migration
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_bulk_migrate_listing` to convert old-format listings to modern Inventory API structure.
@@ -187,12 +187,12 @@ Migration is a one-way operation. Once migrated, listings must be managed throug
 Promote your entire catalog:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Add all my electronics listings (300+ SKUs) to my "Q4 Holiday Campaign":
 - Ad Group: "Electronics - All Products"
 - Ad rate: 7% for all items
 - Use SKU-based inventory references
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_bulk_create_ad_by_inventory_reference` for efficient ad creation.
@@ -202,11 +202,11 @@ The server uses `ebay_bulk_create_ad_by_inventory_reference` for efficient ad cr
 Remove underperforming ads quickly:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Remove all ads from my "Summer Sale" campaign that have:
 - ROAS < 2:1
 - Less than 5 sales in the past 30 days
-```
+```yaml
 </Accordion>
 
 After identifying low performers, the server uses `ebay_bulk_delete_ad` to remove them from your campaign.
@@ -217,7 +217,7 @@ Optimize ad spend across your catalog:
 
 <Tabs>
   <Tab title="Increase Winners">
-    ```
+    ```text
     For all ads with ROAS > 8:1, increase bid by 2%
     (Currently 50 high-performing ads)
     ```
@@ -226,7 +226,7 @@ Optimize ad spend across your catalog:
   </Tab>
 
   <Tab title="Reduce Losers">
-    ```
+    ```text
     For all ads with ROAS < 3:1, decrease bid by 1%
     (Currently 75 underperforming ads)
     ```
@@ -235,7 +235,7 @@ Optimize ad spend across your catalog:
   </Tab>
 
   <Tab title="Seasonal Adjustment">
-    ```
+    ```text
     During Black Friday week:
     - Increase all ad bids by 3%
     - Applies to 500+ active ads
@@ -253,7 +253,7 @@ Manage keywords across campaigns:
 
 <AccordionGroup>
   <Accordion title="Bulk Create Keywords">
-    ```
+    ```text
     Add these 50 keywords to all my laptop ad groups (10 ad groups):
     - Common laptop search terms
     - All with Broad match type
@@ -266,7 +266,7 @@ Manage keywords across campaigns:
   </Accordion>
 
   <Accordion title="Bulk Delete Keywords">
-    ```
+    ```text
     Remove all keywords with:
     - CTR < 0.2%
     - Zero sales after 30 days
@@ -278,7 +278,7 @@ Manage keywords across campaigns:
   </Accordion>
 
   <Accordion title="Bulk Update Keyword Bids">
-    ```
+    ```text
     Adjust bids for high-performing keywords:
     - Find keywords with conversion rate > 10%
     - Increase bids by 2% each
@@ -296,7 +296,7 @@ Filter unprofitable searches at scale:
 
 <Tabs>
   <Tab title="Campaign-Level">
-    ```
+    ```text
     Add these 30 negative keywords to all my campaigns (5 campaigns):
     - Common terms that attract browsers but not buyers
     - Terms: "free", "cheap", "broken", "parts", etc.
@@ -308,7 +308,7 @@ Filter unprofitable searches at scale:
   </Tab>
 
   <Tab title="Ad Group-Level">
-    ```
+    ```text
     For each premium ad group, add negative keywords:
     - "budget", "discount", "under $X"
     - Apply to 15 premium ad groups
@@ -327,13 +327,13 @@ Filter unprofitable searches at scale:
 Configure sales tax for all jurisdictions:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Set up sales tax for all US states:
 - CA: 7.25%, Tax shipping: Yes
 - NY: 4%, Tax shipping: No
 - TX: 6.25%, Tax shipping: Yes
 - [Continue for all 50 states]
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_create_or_replace_sales_tax_table` to configure tax rates for multiple jurisdictions simultaneously.
@@ -483,7 +483,7 @@ Optimize timing for different operation types:
 ### New Product Launch
 
 <Accordion title="Complete workflow for launching 100-item collection">
-```
+```text
 Step 1: Bulk create inventory items (100 items)
 - Upload product catalog with SKUs, titles, descriptions, images
 - Set condition, brand, MPN for all items
@@ -509,13 +509,13 @@ Step 5: Bulk create ads (100 ads)
 
 Total time: ~30 minutes (vs. 8+ hours individually)
 Total API calls: ~15 (vs. 500+ individually)
-```
+```bash
 </Accordion>
 
 ### Seasonal Price Update
 
 <Accordion title="Holiday sale pricing workflow">
-```
+```text
 Step 1: Export current pricing
 - Retrieve all inventory items (500 SKUs)
 - Save current prices for rollback
@@ -542,13 +542,13 @@ Step 6: Post-sale rollback
 - Restore normal ad bid rates
 
 Total time: ~1 hour (vs. 10+ hours manually)
-```
+```bash
 </Accordion>
 
 ### Inventory Synchronization
 
 <Accordion title="Daily warehouse sync workflow">
-```
+```text
 Daily at 8 AM:
 
 Step 1: Export warehouse inventory (1000 SKUs)
@@ -574,7 +574,7 @@ Step 5: Generate sync report
 - Restock notifications
 
 Automation friendly: Can run via cron job or scheduled AI assistant task
-```
+```bash
 </Accordion>
 
 ## Monitoring and Reporting
@@ -618,14 +618,14 @@ Automation friendly: Can run via cron job or scheduled AI assistant task
 ### Generate Bulk Operation Reports
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Generate a report of all my bulk operations from the past week:
 - Total items processed
 - Success vs. failure rates
 - Most common errors
 - API calls used
 - Time saved vs. individual operations
-```
+```bash
 </Accordion>
 
 ## Common Issues and Solutions

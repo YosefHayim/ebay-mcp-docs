@@ -39,7 +39,7 @@ console.log('Available Programs:');
 programs.programs.forEach(program => {
   console.log(`${program.programType}: ${program.programStatus}`);
 });
-```
+```bash
 
 ### Opt In to a Program
 
@@ -55,7 +55,7 @@ const response = await mcp.useTool('account_optInToProgram', {
 if (response.programStatus === 'OPTED_IN') {
   console.log('✅ Successfully enrolled in Out of Stock Control');
 }
-```
+```bash
 
 ### Opt Out of a Program
 
@@ -68,7 +68,7 @@ await mcp.useTool('account_optOutOfProgram', {
 });
 
 console.log('Opted out of program');
-```
+```bash
 
 ## Program Types
 
@@ -107,7 +107,7 @@ await mcp.useTool('inventory_updateInventoryItem', {
     }
   }
 });
-```
+```bash
 
 ### 2. Top Rated Seller Program
 
@@ -142,7 +142,7 @@ const trsProgram = programs.programs.find(
 
 console.log(`Top Rated Status: ${trsProgram.programStatus}`);
 console.log(`Eligible: ${trsProgram.waiveOverride ? 'Yes' : 'No'}`);
-```
+```bash
 
 ### 3. eBay Guaranteed Delivery
 
@@ -181,7 +181,7 @@ if (egdProgram.programStatus === 'ELIGIBLE') {
     program_type: 'EBAY_GUARANTEED_DELIVERY'
   });
 }
-```
+```bash
 
 ### 4. Global Shipping Program
 
@@ -211,7 +211,7 @@ await mcp.useTool('account_optInToProgram', {
 
 // Your fulfillment policy automatically applies to international buyers
 // You only ship domestically to eBay's shipping center
-```
+```bash
 
 ### 5. Promoted Listings Standard
 
@@ -246,7 +246,7 @@ if (plProgram.programStatus !== 'OPTED_IN') {
     program_type: 'PROMOTED_LISTINGS_STANDARD'
   });
 }
-```
+```bash
 
 ## Program Status Values
 
@@ -315,7 +315,7 @@ async function manageSellerPrograms() {
 }
 
 await manageSellerPrograms();
-```
+```bash
 
 ## Program Optimization Tips
 
@@ -420,7 +420,7 @@ if (!program) {
   console.error('You do not meet the requirements for this program');
   console.error('Reason:', program.ineligibilityReasons);
 }
-```
+```bash
 
 ### Opt-In Failed
 
@@ -437,7 +437,7 @@ try {
     console.log('Already enrolled in this program');
   }
 }
-```
+```bash
 
 ## Next Steps
 

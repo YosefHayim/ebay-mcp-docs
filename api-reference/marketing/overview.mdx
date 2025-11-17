@@ -55,7 +55,7 @@ await mcp.useTool('marketing_updateAdRate', {
   campaign_id: campaign.campaignId,
   ad_rate: 8 // 8% ad rate
 });
-```
+```bash
 
 ## Promotions & Sales
 
@@ -81,7 +81,7 @@ const promotion = await mcp.useTool('marketing_createItemPromotion', {
 });
 
 console.log(`✅ Promotion created: ${promotion.promotionId}`);
-```
+```bash
 
 ## Campaign Performance
 
@@ -96,7 +96,7 @@ console.log(`Impressions: ${report.metrics.impression}`);
 console.log(`Clicks: ${report.metrics.click}`);
 console.log(`Sales: ${report.metrics.sale}`);
 console.log(`Ad Revenue: ${report.metrics.adRevenue.value}`);
-```
+```bash
 
 ## Next Steps
 

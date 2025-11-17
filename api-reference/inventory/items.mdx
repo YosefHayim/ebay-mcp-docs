@@ -72,7 +72,7 @@ const item = await mcp.useTool('inventory_createOrReplaceInventoryItem', {
 });
 
 console.log(`✅ Inventory item created: ${item.sku}`);
-```
+```bash
 
 ### Bulk Upload
 
@@ -103,7 +103,7 @@ const result = await mcp.useTool('inventory_bulkCreateOrReplaceInventoryItem', {
 
 const successful = result.responses.filter(r => r.statusCode === 200).length;
 console.log(`✅ Created ${successful}/${items.length} items`);
-```
+```bash
 
 ## Item Parameters
 
@@ -129,7 +129,7 @@ aspects: {
   'Carrier': ['Unlocked'],
   'Operating System': ['iOS']
 }
-```
+```markdown
 
 **Finding Required Aspects:**
 Use eBay's taxonomy to find required aspects for your category:
@@ -142,7 +142,7 @@ const aspects = await mcp.useTool('taxonomy_getCategoryAspects', {
 });
 
 console.log('Required aspects:', aspects.aspects.filter(a => a.aspectConstraint.aspectRequired));
-```
+```bash
 
 ### Condition Values
 
@@ -173,7 +173,7 @@ const item = await mcp.useTool('inventory_getInventoryItem', {
 console.log(`Title: ${item.product.title}`);
 console.log(`Quantity: ${item.availability.shipToLocationAvailability.quantity}`);
 console.log(`Condition: ${item.condition}`);
-```
+```bash
 
 ### Get All Items
 
@@ -195,7 +195,7 @@ while (true) {
 }
 
 console.log(`Total inventory items: ${allItems.length}`);
-```
+```bash
 
 ### Update Quantity
 
@@ -223,7 +223,7 @@ await mcp.useTool('inventory_bulkUpdatePriceQuantity', {
     }
   ]
 });
-```
+```bash
 
 ### Delete Item
 
@@ -233,7 +233,7 @@ await mcp.useTool('inventory_deleteInventoryItem', {
 });
 
 console.log('✅ Item deleted');
-```
+```bash
 
 ## Product Variations
 
@@ -291,7 +291,7 @@ const group = await mcp.useTool('inventory_createOrReplaceInventoryItemGroup', {
 });
 
 console.log('✅ Variation group created with', colors.length * sizes.length, 'variations');
-```
+```bash
 
 ## Best Practices
 
@@ -299,7 +299,7 @@ console.log('✅ Variation group created with', colors.length * sizes.length, 'v
   <Accordion title="SKU Naming Strategy">
     Use a consistent, descriptive format:
 
-    ```
+    ```yaml
     Format: [CATEGORY]-[BRAND]-[MODEL]-[VARIANT]
 
     Examples:

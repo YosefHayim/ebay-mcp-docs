@@ -38,7 +38,7 @@ const report = await mcp.useTool('analytics_getTrafficReport', {
 console.log(`Total Impressions: ${report.records[0].listing_impression}`);
 console.log(`Total Views: ${report.records[0].listing_views}`);
 console.log(`Click-Through Rate: ${report.records[0].click_through_rate}%`);
-```
+```bash
 
 ## Seller Standards
 
@@ -52,7 +52,7 @@ const standards = await mcp.useTool('analytics_getSellerStandardsProfile', {
 console.log(`Transaction Defect Rate: ${standards.defectRate}%`);
 console.log(`Late Shipment Rate: ${standards.lateShipmentRate}%`);
 console.log(`Cases Closed Without Resolution: ${standards.casesClosedWithoutResolution}%`);
-```
+```bash
 
 ## Available Metrics
 

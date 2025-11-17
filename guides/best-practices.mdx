@@ -85,7 +85,7 @@ https://api.ebay.com/oauth/api_scope/sell.finances
 https://api.ebay.com/oauth/api_scope/sell.payment.dispute
 https://api.ebay.com/oauth/api_scope/sell.item.draft
 https://api.ebay.com/oauth/api_scope/sell.item
-```
+```yaml
 
 <Info>
 Grant only the scopes you need. For read-only operations, use `readonly` variants (e.g., `sell.inventory.readonly`) to minimize security risk.
@@ -111,7 +111,7 @@ Grant only the scopes you need. For read-only operations, use `readonly` variant
 
   <Step title="Token Validation">
     Check token status regularly:
-    ```
+    ```text
     Ask your AI: "Check my eBay OAuth token status"
     ```
   </Step>
@@ -176,7 +176,7 @@ Grant only the scopes you need. For read-only operations, use `readonly` variant
 
 <AccordionGroup>
   <Accordion title="Good: Bulk update 100 prices">
-    ```
+    ```yaml
     API Calls: 4 (4 batches of 25 items)
     Time: ~20 seconds
     Rate limit impact: 0.04% of daily limit (10K tier)
@@ -188,7 +188,7 @@ Grant only the scopes you need. For read-only operations, use `readonly` variant
   </Accordion>
 
   <Accordion title="Bad: Update 100 prices individually">
-    ```
+    ```yaml
     API Calls: 100 (1 per item)
     Time: ~5 minutes
     Rate limit impact: 1% of daily limit (10K tier)
@@ -200,7 +200,7 @@ Grant only the scopes you need. For read-only operations, use `readonly` variant
   </Accordion>
 
   <Accordion title="Good: Daily inventory sync">
-    ```
+    ```yaml
     Daily at 8 AM:
     1. Bulk fetch all inventory (1 API call for metadata)
     2. Compare with warehouse data (0 API calls - local processing)
@@ -213,7 +213,7 @@ Grant only the scopes you need. For read-only operations, use `readonly` variant
   </Accordion>
 
   <Accordion title="Bad: Real-time per-item checks">
-    ```
+    ```markdown
     For each sale:
     1. Get inventory item (1 API call)
     2. Update quantity (1 API call)
@@ -240,7 +240,7 @@ Grant only the scopes you need. For read-only operations, use `readonly` variant
     - Revoked app credentials
 
     **Solutions:**
-    ```
+    ```text
     Ask your AI: "Check my eBay token status"
 
     If expired:
@@ -327,7 +327,7 @@ Grant only the scopes you need. For read-only operations, use `readonly` variant
 ### Development Testing
 
 <Accordion title="Sandbox testing workflow">
-```
+```markdown
 Before ANY production deployment:
 
 1. Configure sandbox environment
@@ -360,7 +360,7 @@ Before ANY production deployment:
    - Duplicate data
 
 6. Switch to production ONLY after perfect sandbox performance
-```
+```bash
 </Accordion>
 
 ### Automated Testing
@@ -380,7 +380,7 @@ npm run test:endpoints
 
 # Use MCP Inspector for interactive testing
 npx @modelcontextprotocol/inspector node build/index.js
-```
+```yaml
 
 <Tip>
 Run tests before every deployment and after any configuration changes. Tests catch issues before they affect your eBay account.
@@ -483,7 +483,7 @@ Falling below eBay seller standards can result in search suppression, seller fee
 
 <Tabs>
   <Tab title="Recommended Format">
-    ```
+    ```yaml
     Format: CATEGORY-BRAND-MODEL-VARIANT
 
     Examples:
@@ -500,7 +500,7 @@ Falling below eBay seller standards can result in search suppression, seller fee
   </Tab>
 
   <Tab title="Avoid These">
-    ```
+    ```yaml
     ❌ Sequential numbers only: SKU001, SKU002
     Reason: No product information
 
@@ -584,7 +584,7 @@ Falling below eBay seller standards can result in search suppression, seller fee
 ### Daily Checklist
 
 <Accordion title="Daily seller operations">
-```
+```text
 Morning (8-9 AM):
 ☐ Check for new orders (unfulfilled)
 ☐ Review inventory levels for popular items
@@ -614,13 +614,13 @@ Weekly (Friday afternoon):
 ☐ Analyze best-selling products
 ☐ Plan inventory reorders
 ☐ Update promotional campaigns
-```
+```bash
 </Accordion>
 
 ### Marketing Optimization Routine
 
 <Accordion title="Weekly marketing review workflow">
-```
+```yaml
 Every Monday at 10 AM:
 
 1. Generate campaign performance report (past 7 days)
@@ -651,7 +651,7 @@ Every Monday at 10 AM:
    - Track bid adjustments
    - Note campaign modifications
    - Set goals for next week
-```
+```bash
 </Accordion>
 
 ## Compliance and Policies
@@ -764,7 +764,7 @@ EBAY_DEBUG=true
 - Performance metrics
 
 ⚠️ DISABLE in production (contains sensitive data)
-```
+```bash
 </Accordion>
 
 <Warning>

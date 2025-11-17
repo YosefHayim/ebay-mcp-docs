@@ -47,7 +47,7 @@ Before installing the server, you need eBay API credentials.
   <Step title="Configure OAuth Settings">
     1. In your application settings, scroll to **"OAuth Redirect URIs"**
     2. Add the following redirect URI:
-       ```
+       ```yaml
        http://localhost:3000/callback
        ```
     3. Click **"Save"** and note your credentials:
@@ -263,17 +263,17 @@ The most popular option - here's a quick guide:
     The config file location depends on your OS:
 
     **macOS:**
-    ```
+    ```text
     ~/Library/Application Support/Claude/claude_desktop_config.json
     ```
 
     **Windows:**
-    ```
+    ```text
     %APPDATA%\Claude\claude_desktop_config.json
     ```
 
     **Linux:**
-    ```
+    ```text
     ~/.config/Claude/claude_desktop_config.json
     ```
   </Step>

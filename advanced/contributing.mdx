@@ -127,13 +127,13 @@ npm run format
 
 # Generate types from OpenAPI specs
 npm run generate:types
-```
+```bash
 
 ## Project Structure
 
 Understanding the project structure helps you navigate and contribute effectively:
 
-```
+```text
 ebay-mcp-server/
 ├── src/
 │   ├── api/              # eBay API implementations
@@ -151,7 +151,7 @@ ebay-mcp-server/
 │   └── helpers/          # Test utilities
 ├── docs/                 # OpenAPI specifications
 └── scripts/              # Build and setup scripts
-```
+```bash
 
 See [Architecture](/advanced/architecture) for detailed information.
 
@@ -165,7 +165,7 @@ git checkout -b feature/amazing-feature
 
 # Or for bug fixes
 git checkout -b fix/bug-description
-```
+```bash
 
 ### Branch Naming Conventions
 
@@ -209,7 +209,7 @@ import { EbayOAuthClient } from '@/auth/oauth.js';
 
 // ✅ Good: Include file extensions in imports
 import { validateSKU } from '@/utils/validation.js';
-```
+```javascript
 
 **Code Quality:**
 
@@ -279,7 +279,7 @@ describe('EbayInventoryApi', () => {
     });
   });
 });
-```
+```bash
 
 #### 3. Documentation
 
@@ -305,13 +305,13 @@ Update this documentation site if needed
 
 We follow [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
 
 [optional footer(s)]
-```
+```markdown
 
 **Types:**
 - `feat:` - A new feature
@@ -335,10 +335,10 @@ docs(readme): update OAuth setup instructions
 test(marketing): add campaign status validation tests
 
 chore(deps): update @modelcontextprotocol/sdk to 1.21.1
-```
+```markdown
 
 **Good Commit Message:**
-```
+```markdown
 feat(inventory): add support for inventory item groups
 
 Implement getInventoryItemGroup and related operations:
@@ -349,7 +349,7 @@ Implement getInventoryItemGroup and related operations:
 - Add unit and integration tests
 
 Closes #123
-```
+```bash
 
 ## Submitting Changes
 
@@ -438,7 +438,7 @@ Describe the tests you ran to verify your changes
 
 ## Related Issues
 Closes #(issue number)
-```
+```bash
 
 ### Review Process
 
@@ -595,7 +595,7 @@ npm update
 
 # After updating, run tests
 npm test
-```
+```bash
 
 ### Generating Types from OpenAPI
 
@@ -607,7 +607,7 @@ npm run generate:types
 
 # Verify generated types
 npm run typecheck
-```
+```bash
 
 ### Debugging
 
@@ -620,7 +620,7 @@ npm run dev -- --inspect
 
 # Enable debug logging
 DEBUG=* npm run dev
-```
+```bash
 
 ## Getting Help
 

@@ -38,13 +38,13 @@ When using user access tokens (OAuth 2.0 with user authorization):
 **Rate Window:** 24 hours (rolling window)
 
 **Scopes:**
-```
+```yaml
 https://api.ebay.com/oauth/api_scope/sell.account
 https://api.ebay.com/oauth/api_scope/sell.inventory
 https://api.ebay.com/oauth/api_scope/sell.fulfillment
 https://api.ebay.com/oauth/api_scope/sell.marketing
 https://api.ebay.com/oauth/api_scope/sell.analytics.readonly
-```
+```bash
 
 ### Client Credentials Limits (Fallback)
 
@@ -74,7 +74,7 @@ HTTP/1.1 200 OK
 X-eBay-C-RateLimit-Limit: 5000
 X-eBay-C-RateLimit-Remaining: 4523
 X-eBay-C-RateLimit-Reset: 2025-11-16T00:00:00Z
-```
+```markdown
 
 | Header | Description | Example |
 |--------|-------------|---------|
@@ -134,7 +134,7 @@ class RateLimitTracker {
     };
   }
 }
-```
+```bash
 
 ### How It Works
 
@@ -197,7 +197,7 @@ if (error.response?.status === 429) {
     `Consider reducing request frequency or upgrading to user tokens for higher limits.`
   );
 }
-```
+```markdown
 
 **Response includes:**
 - Exact wait time from `Retry-After` header
@@ -224,14 +224,14 @@ this.httpClient.interceptors.response.use(
     return response;
   }
 );
-```
+```markdown
 
 **Output Example:**
-```
+```text
 eBay Rate Limit: 4523/5000 remaining
 eBay Rate Limit: 4522/5000 remaining
 eBay Rate Limit: 4521/5000 remaining
-```
+```bash
 
 ### Statistics API
 
@@ -246,7 +246,7 @@ console.log(stats);
 //   max: 5000,
 //   windowMs: 60000
 // }
-```
+```bash
 
 ## Rate Limiting Strategies
 
@@ -267,7 +267,7 @@ EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
 npm run auto-setup
 
 # Restart server
-```
+```bash
 
 See [OAuth Setup](/authentication/oauth-setup) for detailed instructions.
 
@@ -283,7 +283,7 @@ for (const sku of skus) {
 
 // ✅ Good: Batch call (uses 1 request)
 await api.inventory.bulkGetInventoryItem({ skus });
-```
+```markdown
 
 **Available Batch Operations:**
 - `bulkCreateOrReplaceInventoryItem` - Create/update multiple inventory items
@@ -312,7 +312,7 @@ async function getCategoryTree(categoryTreeId: string) {
 
   return data;
 }
-```
+```markdown
 
 **Good Candidates for Caching:**
 - Category trees
@@ -374,7 +374,7 @@ const throttler = new RequestThrottler(10); // 10 requests/second
 for (const sku of skus) {
   await throttler.add(() => api.inventory.getInventoryItem(sku));
 }
-```
+```bash
 
 ### 5. Exponential Backoff
 
@@ -403,7 +403,7 @@ async function retryWithBackoff<T>(
 
 // Usage
 const item = await retryWithBackoff(() => api.inventory.getInventoryItem(sku));
-```
+```bash
 
 ### 6. Prioritize Critical Operations
 
@@ -438,7 +438,7 @@ class PriorityQueue {
     }
   }
 }
-```
+```bash
 
 ## Rate Limit Best Practices
 
@@ -516,11 +516,11 @@ class PriorityQueue {
 ### Symptom: Rate Limit Warnings in Logs
 
 **Example:**
-```
+```text
 eBay Rate Limit: 47/5000 remaining
 eBay Rate Limit: 46/5000 remaining
 eBay Rate Limit: 45/5000 remaining
-```
+```markdown
 
 **Causes:**
 Approaching daily or hourly limit
@@ -628,7 +628,7 @@ async function updateLargeInventory(items: InventoryItem[]) {
 
   return results;
 }
-```
+```bash
 
 **This approach:**
 - Uses batch API (25 items per request)

@@ -32,7 +32,7 @@ await mcp.useTool('marketing_updateAdRate', {
   campaign_id: campaign.campaignId,
   ad_rate: 10 // 10% ad rate
 });
-```
+```bash
 
 ## Ad Rate Recommendations
 
@@ -56,7 +56,7 @@ const campaigns = await mcp.useTool('marketing_getCampaigns', {
 campaigns.campaigns.forEach(campaign => {
   console.log(`${campaign.campaignName}: ${campaign.campaignStatus}`);
 });
-```
+```bash
 
 ### Pause/Resume Campaign
 
@@ -70,7 +70,7 @@ await mcp.useTool('marketing_pauseCampaign', {
 await mcp.useTool('marketing_resumeCampaign', {
   campaign_id: 'campaign_id_here'
 });
-```
+```bash
 
 ## Best Practices
 

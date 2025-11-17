@@ -46,9 +46,9 @@ Learn how to efficiently manage your eBay orders from receipt through fulfillmen
 View all orders with basic filtering:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Show me all my eBay orders from the past 30 days
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_get_orders` to retrieve orders with configurable filters:
@@ -66,21 +66,21 @@ Focus on orders requiring action:
 
 <Tabs>
   <Tab title="Unfulfilled Orders">
-    ```
+    ```text
     Show me all orders that need shipping (status: NOT_STARTED or IN_PROGRESS)
     ```
     Use this to prioritize fulfillment tasks
   </Tab>
 
   <Tab title="Shipped Orders">
-    ```
+    ```text
     Show me all orders I've marked as shipped in the past week
     ```
     Useful for tracking completed fulfillments
   </Tab>
 
   <Tab title="Cancelled Orders">
-    ```
+    ```text
     Show me cancelled orders from the past month
     ```
     Review cancellations and refund status
@@ -92,9 +92,9 @@ Focus on orders requiring action:
 View complete information for a specific order:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Get full details for order ID "12-34567-89012"
-```
+```markdown
 </Accordion>
 
 The `ebay_get_order` tool returns comprehensive data:
@@ -123,10 +123,10 @@ For orders with multiple items, you can create partial fulfillments by shipping 
 Ship an order and add tracking information:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Mark order "12-34567-89012" as shipped via USPS with tracking number "9405511899223456789012"
 Include all line items in this shipment
-```
+```markdown
 </Accordion>
 
 The server will:
@@ -140,11 +140,11 @@ The server will:
 Ship items separately when needed:
 
 <Accordion title="Example: Multi-item order">
-```
+```text
 For order "12-34567-89012":
 1. Ship line item 1 via UPS tracking "1Z999AA10123456784"
 2. Keep line item 2 for separate shipment later
-```
+```yaml
 </Accordion>
 
 Benefits of partial fulfillment:
@@ -177,7 +177,7 @@ The eBay MCP Server supports all major carriers:
 
   <Tab title="Custom Carriers">
     If your carrier isn't listed, use:
-    ```
+    ```text
     Carrier: OTHER
     Tracking: [your tracking number]
     ```
@@ -190,9 +190,9 @@ The eBay MCP Server supports all major carriers:
 View all fulfillments for an order:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Show me all shipping fulfillments for order "12-34567-89012"
-```
+```markdown
 </Accordion>
 
 The `ebay_get_shipping_fulfillments` tool returns:
@@ -217,10 +217,10 @@ Common refund scenarios:
 Refund the entire order amount:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Issue a full refund for order "12-34567-89012"
 Reason: Item out of stock
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_issue_order_refund` with:
@@ -237,12 +237,12 @@ Refunds are final and cannot be reversed through the API. Double-check order ID 
 Refund specific items or amounts:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 For order "12-34567-89012", issue a partial refund:
 - Refund line item 1 (damaged during shipping)
 - Keep line item 2 active
 - Include a $5 shipping refund for the inconvenience
-```
+```markdown
 </Accordion>
 
 Partial refunds are useful for:
@@ -300,9 +300,9 @@ Disputes are separate from eBay's Money Back Guarantee cases. The eBay MCP Serve
 View all active disputes:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Show me all open payment disputes for my account
-```
+```markdown
 </Accordion>
 
 Filter options:
@@ -318,7 +318,7 @@ You have two options when responding to disputes:
   <Tab title="Accept Dispute">
     Agree with the buyer's claim and process refund:
 
-    ```
+    ```text
     Accept the dispute for order "12-34567-89012"
     Issue full refund to buyer
     ```
@@ -332,7 +332,7 @@ You have two options when responding to disputes:
   <Tab title="Contest Dispute">
     Challenge the claim with evidence:
 
-    ```
+    ```text
     Contest the dispute for order "12-34567-89012"
     I have proof of delivery and the buyer confirmed receipt
     ```
@@ -349,12 +349,12 @@ You have two options when responding to disputes:
 Provide documentation to support your case:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 For dispute ID "5051234567", upload evidence:
 - Tracking shows delivered to buyer's address on [date]
 - Buyer sent message confirming receipt
 - Photos of item condition before shipping
-```
+```markdown
 </Accordion>
 
 Accepted evidence types:
@@ -370,9 +370,9 @@ The server uses `ebay_add_dispute_evidence` to attach files and descriptions.
 View complete dispute history:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Show me all activity for dispute ID "5051234567"
-```
+```markdown
 </Accordion>
 
 Returns chronological log of:
@@ -407,14 +407,14 @@ Returns chronological log of:
 Consider automating routine tasks:
 
 <Accordion title="Daily order processing workflow">
-```
+```text
 Daily at 9 AM:
 1. Get all unfulfilled orders from the past 24 hours
 2. For each order, retrieve full details
 3. Generate packing slips with line items
 4. Update internal inventory system
 5. At 5 PM, sync tracking numbers for shipped orders
-```
+```bash
 </Accordion>
 
 The eBay MCP Server integrates seamlessly with automation tools and AI assistants for hands-free order management.
@@ -470,7 +470,7 @@ Use the eBay MCP Server to monitor:
 
 <Tabs>
   <Tab title="Order Defect Rate">
-    ```
+    ```text
     What is my current seller defect rate?
     ```
 
@@ -483,7 +483,7 @@ Use the eBay MCP Server to monitor:
   </Tab>
 
   <Tab title="Late Shipment Rate">
-    ```
+    ```text
     How many orders did I ship late this month?
     ```
 
@@ -493,7 +493,7 @@ Use the eBay MCP Server to monitor:
   </Tab>
 
   <Tab title="Cancellation Rate">
-    ```
+    ```text
     What percentage of my orders were cancelled?
     ```
 

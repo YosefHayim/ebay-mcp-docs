@@ -95,13 +95,13 @@ export default defineConfig({
     hookTimeout: 10000,
   },
 });
-```
+```bash
 
 ## Test Structure
 
 ### Directory Organization
 
-```
+```text
 tests/
 ├── unit/                   # Unit tests
 │   ├── api/               # API implementation tests
@@ -117,7 +117,7 @@ tests/
     ├── mock-client.ts     # Mock HTTP client
     ├── mock-data.ts       # Test data generators
     └── test-utils.ts      # Common test utilities
-```
+```bash
 
 ### Test Types
 
@@ -177,7 +177,7 @@ describe('EbayOAuthClient', () => {
     });
   });
 });
-```
+```bash
 
 #### 2. Integration Tests
 
@@ -232,7 +232,7 @@ describe('EbayInventoryApi Integration', () => {
     });
   });
 });
-```
+```bash
 
 #### 3. MCP Server Tests
 
@@ -264,7 +264,7 @@ describe('MCP Tool Execution', () => {
     ).rejects.toThrow('Validation failed');
   });
 });
-```
+```bash
 
 ## Running Tests
 
@@ -282,7 +282,7 @@ npm run test:coverage
 
 # Run tests with UI dashboard
 npm run test:ui
-```
+```bash
 
 ### Watch Mode
 
@@ -290,7 +290,7 @@ Watch mode automatically re-runs tests when files change:
 
 ```bash
 npm run test:watch
-```
+```markdown
 
 **Features:**
 - Automatic test re-execution on file changes
@@ -304,10 +304,10 @@ Generate detailed coverage reports:
 
 ```bash
 npm run test:coverage
-```
+```markdown
 
 **Output:**
-```
+```text
  % Coverage report from v8
 -----------------------|---------|----------|---------|---------|-------------------
 File                   | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
@@ -318,7 +318,7 @@ All files              |   85.23 |    71.45 |   99.12 |   83.67 |
   index.ts             |   88.45 |    74.23 |  100.00 |   87.91 | 78-85,102
  auth                  |   96.78 |    85.12 |  100.00 |   95.45 |
   oauth.ts             |   96.78 |    85.12 |  100.00 |   95.45 | 203-207
-```
+```markdown
 
 **Coverage Files:**
 - `coverage/index.html` - Interactive HTML report
@@ -331,7 +331,7 @@ Launch an interactive test dashboard:
 
 ```bash
 npm run test:ui
-```
+```markdown
 
 **Features:**
 - Visual test runner
@@ -360,7 +360,7 @@ describe('ComponentName', () => {
     });
   });
 });
-```
+```markdown
 
 **Guidelines:**
 - Use `describe` for grouping related tests
@@ -394,7 +394,7 @@ it('should create inventory item successfully', async () => {
     item
   );
 });
-```
+```bash
 
 ### Mocking
 
@@ -416,7 +416,7 @@ mockGet.mockResolvedValue({ data: 'test' });
 // Verify mock was called
 expect(mockGet).toHaveBeenCalledWith('/endpoint');
 expect(mockGet).toHaveBeenCalledTimes(1);
-```
+```bash
 
 #### Mocking Time
 
@@ -431,7 +431,7 @@ vi.advanceTimersByTime(1000); // 1 second
 
 // Clear timers
 vi.clearAllTimers();
-```
+```bash
 
 #### Mocking Environment Variables
 
@@ -447,7 +447,7 @@ afterEach(() => {
   delete process.env.EBAY_CLIENT_SECRET;
   delete process.env.EBAY_ENVIRONMENT;
 });
-```
+```bash
 
 ### Testing Async Code
 
@@ -467,7 +467,7 @@ it('should resolve promise', () => {
 it('should reject with error', () => {
   return expect(api.getInvalidData()).rejects.toThrow('Error message');
 });
-```
+```bash
 
 ### Testing Error Handling
 
@@ -487,7 +487,7 @@ it('should handle API errors gracefully', async () => {
     inventoryApi.getInventoryItem('nonexistent')
   ).rejects.toThrow('eBay API Error: Not found');
 });
-```
+```bash
 
 ## Testing Best Practices
 
@@ -512,7 +512,7 @@ it('should handle tokens', async () => {
   expect(oauthClient.hasUserTokens()).toBe(true);
   // ... more assertions
 });
-```
+```bash
 
 ### 2. Use Descriptive Names
 
@@ -527,7 +527,7 @@ it('should refresh access token when expired', async () => {});
 // ❌ Bad: Vague or unclear
 it('should work', async () => {});
 it('test token refresh', async () => {});
-```
+```bash
 
 ### 3. Avoid Test Interdependence
 
@@ -563,7 +563,7 @@ it('should create item', async () => {
 it('should get created item', async () => {
   await getItem(createdSku); // Depends on previous test
 });
-```
+```bash
 
 ### 4. Keep Tests Simple
 
@@ -585,7 +585,7 @@ it('should validate various inputs', () => {
     // Complex logic
   });
 });
-```
+```bash
 
 ### 5. Use Test Fixtures
 
@@ -613,7 +613,7 @@ it('should create inventory item', async () => {
     validInventoryItem
   );
 });
-```
+```bash
 
 ## Coverage Requirements
 
@@ -646,7 +646,7 @@ npm run test:coverage
 
 # Open HTML report in browser
 open coverage/index.html
-```
+```bash
 
 ## Continuous Integration
 
@@ -682,7 +682,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage/lcov.info
-```
+```bash
 
 ## Debugging Tests
 
@@ -697,7 +697,7 @@ npm run test -- tests/unit/auth/oauth.test.ts
 
 # Run tests matching pattern
 npm run test -- -t "should refresh token"
-```
+```bash
 
 ### Using Debugger
 
@@ -711,12 +711,12 @@ describe('MyTest', () => {
     expect(result).toBe(expected);
   });
 });
-```
+```text
 
 Run with debugger:
 ```bash
 node --inspect-brk ./node_modules/vitest/vitest.mjs run
-```
+```bash
 
 ### VSCode Debugging
 
@@ -736,7 +736,7 @@ node --inspect-brk ./node_modules/vitest/vitest.mjs run
     }
   ]
 }
-```
+```bash
 
 ## Related Topics
 

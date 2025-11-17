@@ -59,7 +59,7 @@ const returnPolicy = await mcp.useTool('account_createReturnPolicy', {
 });
 
 console.log(`Return policy created with ID: ${returnPolicy.returnPolicyId}`);
-```
+```bash
 
 ### Return Policy Parameters
 
@@ -101,7 +101,7 @@ const updated = await mcp.useTool('account_updateReturnPolicy', {
 await mcp.useTool('account_deleteReturnPolicy', {
   return_policy_id: 'policy_id_here'
 });
-```
+```bash
 
 ## Payment Policies
 
@@ -137,7 +137,7 @@ const paymentPolicy = await mcp.useTool('account_createPaymentPolicy', {
 });
 
 console.log(`Payment policy created: ${paymentPolicy.paymentPolicyId}`);
-```
+```bash
 
 ### Payment Policy Parameters
 
@@ -248,7 +248,7 @@ const fulfillmentPolicy = await mcp.useTool('account_createFulfillmentPolicy', {
 });
 
 console.log(`Fulfillment policy created: ${fulfillmentPolicy.fulfillmentPolicyId}`);
-```
+```bash
 
 ### Fulfillment Policy Parameters
 
@@ -362,7 +362,7 @@ console.log(`Fulfillment policy created: ${fulfillmentPolicy.fulfillmentPolicyId
     - Review and update policies quarterly
 
     **Organization example:**
-    ```
+    ```markdown
     Return Policies:
     - "High-Value Items - 60Day Free Returns"
     - "Standard Items - 30Day Buyer Pays"
@@ -440,7 +440,7 @@ async function setupSellerPolicies() {
 
 // Use these IDs when creating listings
 const policyIds = await setupSellerPolicies();
-```
+```bash
 
 ## Next Steps
 

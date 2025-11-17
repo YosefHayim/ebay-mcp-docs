@@ -181,7 +181,7 @@ async function listSingleItem() {
 }
 
 await listSingleItem();
-```
+```bash
 
 ### Bulk Inventory Upload
 
@@ -224,7 +224,7 @@ async function bulkUploadInventory(products) {
 
   return results;
 }
-```
+```bash
 
 ### Variation Listing (Multiple SKUs)
 
@@ -308,7 +308,7 @@ async function createVariationListing() {
   console.log(`✅ Variation listing published! ${variations.length} variations`);
   return listing;
 }
-```
+```bash
 
 ## Best Practices
 
@@ -319,7 +319,7 @@ async function createVariationListing() {
     - ❌ Bad: `SKU1`, `TEMP123`
 
     **SKU naming conventions:**
-    ```
+    ```yaml
     [CATEGORY]-[ATTRIBUTE]-[IDENTIFIER]
     Examples:
     - SHOE-NIKE-AIR-MAX-10.5
@@ -454,7 +454,7 @@ async function syncInventoryDaily() {
     console.log('✅ Inventory is in sync');
   }
 }
-```
+```bash
 
 ### Seasonal Price Adjustments
 
@@ -498,7 +498,7 @@ async function seasonalPriceAdjustment(discountPercentage) {
 
 // Apply 20% off for holiday sale
 await seasonalPriceAdjustment(20);
-```
+```bash
 
 ## Next Steps
 

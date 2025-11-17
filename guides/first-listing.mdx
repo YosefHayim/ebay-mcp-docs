@@ -39,7 +39,7 @@ eBay's modern Inventory API uses a three-step process:
 An inventory item represents the physical product you're selling. Each item is uniquely identified by a SKU (Stock Keeping Unit).
 
 <Accordion title="Ask your AI assistant">
-```
+```markdown
 Create an inventory item with SKU "LAPTOP-001" for a Dell XPS 15 laptop.
 The product is in new condition, with the following details:
 - Title: Dell XPS 15 9520 Laptop - Intel i7, 16GB RAM, 512GB SSD
@@ -51,7 +51,7 @@ The product is in new condition, with the following details:
 - Package weight: 5 lbs
 - Package dimensions: 18x12x3 inches
 - Availability: 5 units available
-```
+```markdown
 </Accordion>
 
 <Info>
@@ -71,7 +71,7 @@ When you request inventory item creation, the server:
 An offer connects your inventory item to eBay's marketplace with pricing and policies.
 
 <Accordion title="Ask your AI assistant">
-```
+```markdown
 Create an offer for SKU "LAPTOP-001" with these settings:
 - Marketplace: EBAY_US
 - Format: FIXED_PRICE
@@ -80,7 +80,7 @@ Create an offer for SKU "LAPTOP-001" with these settings:
 - Use my default fulfillment policy
 - Use my default payment policy
 - Use my default return policy
-```
+```typescript
 </Accordion>
 
 <Note>
@@ -95,7 +95,7 @@ You can configure different pricing models:
   <Tab title="Fixed Price">
     Most common for new listings. Set a single price buyers pay immediately.
 
-    ```
+    ```yaml
     Format: FIXED_PRICE
     Price: $1299.99
     ```
@@ -104,7 +104,7 @@ You can configure different pricing models:
   <Tab title="Best Offer Enabled">
     Allow buyers to negotiate. You can set minimum acceptable prices.
 
-    ```
+    ```yaml
     Format: FIXED_PRICE
     Price: $1299.99
     Best Offer: Enabled
@@ -123,9 +123,9 @@ You can configure different pricing models:
 Before publishing, check what eBay will charge for this listing.
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 What are the listing fees for the offer I just created for SKU "LAPTOP-001"?
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_get_listing_fees` to retrieve:
@@ -142,9 +142,9 @@ Listing fees vary by category, seller tier, and marketplace. Always preview fees
 Make your listing live on eBay.
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Publish the offer for SKU "LAPTOP-001" to eBay
-```
+```markdown
 </Accordion>
 
 The server will:
@@ -161,9 +161,9 @@ The server will:
 After publishing, verify everything looks correct:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Show me details for my published offer with SKU "LAPTOP-001"
-```
+```yaml
 </Accordion>
 
 The server will retrieve complete offer details including:
@@ -180,7 +180,7 @@ The server will retrieve complete offer details including:
     **Problem:** You don't have required fulfillment, payment, or return policies
 
     **Solution:** Create default policies first
-    ```
+    ```text
     Ask your AI: "Create default business policies for my eBay account"
     ```
     Or specify policy IDs if you have existing ones
@@ -199,7 +199,7 @@ The server will retrieve complete offer details including:
     **Problem:** Your OAuth token lacks `sell.inventory` scope
 
     **Solution:** Regenerate your OAuth token with proper scopes
-    ```
+    ```text
     Ask your AI: "Generate a new OAuth authorization URL with inventory scopes"
     ```
     Then complete the OAuth flow and update your `.env` file
@@ -221,14 +221,14 @@ The server will retrieve complete offer details including:
 For products with multiple variants (size, color, etc.), use inventory item groups:
 
 <Accordion title="Example: T-Shirt with sizes">
-```
+```markdown
 Create an inventory item group for a t-shirt with these variations:
 - SKU Base: TSHIRT-001
 - Variants: Small, Medium, Large, XL
 - Colors: Black, White, Blue
 - Create individual SKUs for each combination
 - Price: $19.99 for all variants
-```
+```text
 </Accordion>
 
 The server will:

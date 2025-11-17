@@ -74,7 +74,7 @@ The easiest way to set up OAuth - a beautiful CLI wizard that handles everything
 
 ```bash
 npm run setup
-```
+```bash
 
 This launches an interactive wizard with eBay brand colors and clear instructions.
 
@@ -92,11 +92,11 @@ Select your eBay environment:
 
 The wizard will prompt you for:
 
-```
+```text
 eBay Client ID: YourAppName-YourApp-SBX-1234abcd-567890ab
 eBay Client Secret: SBX-1234abcd-5678-90ab-cdef-1234
 Redirect URI: http://localhost:3000/callback
-```
+```yaml
 
 <Info>
   Get these credentials from your [eBay Developer Portal](https://developer.ebay.com) application settings.
@@ -185,7 +185,7 @@ For advanced users who want complete control:
 
     This outputs an authorization URL like:
 
-    ```
+    ```yaml
     https://auth.ebay.com/oauth2/authorize?client_id=...&redirect_uri=...&response_type=code&scope=...
     ```
 
@@ -198,7 +198,7 @@ For advanced users who want complete control:
     3. Review the scopes and click "Agree"
     4. After authorization, eBay redirects to:
 
-    ```
+    ```yaml
     http://localhost:3000/callback?code=v^1.1#i^1#...&expires_in=299
     ```
 
@@ -212,7 +212,7 @@ For advanced users who want complete control:
   <Step title="Extract Authorization Code">
     From the redirect URL, copy the value after `code=` (everything before `&expires_in`):
 
-    ```
+    ```text
     v^1.1#i^1#...your_authorization_code_here...
     ```
   </Step>
@@ -387,7 +387,7 @@ Verify your `.env` file contains all required variables:
 
 ```bash
 cat .env | grep EBAY
-```
+```text
 
 Expected output:
 ```bash
@@ -398,7 +398,7 @@ EBAY_REDIRECT_URI=http://localhost:3000/callback
 EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#...
 EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#...
 EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
-```
+```bash
 
 ### 2. Validate Configuration
 
@@ -406,7 +406,7 @@ Run the validation script:
 
 ```bash
 npm run validate-config
-```
+```markdown
 
 This checks:
 - ✅ All required variables present
@@ -418,15 +418,15 @@ This checks:
 
 ```bash
 npm start
-```
+```text
 
 Check the startup logs for:
-```
+```text
 ✅ User tokens loaded
 ✅ Authentication: OAuth 2.0 (User Tokens)
 ✅ Rate limit: 10,000-50,000 requests/day
 ✅ 230+ tools registered
-```
+```markdown
 
 <Check>
   If you see these messages, your OAuth setup is working correctly!
@@ -446,7 +446,7 @@ Understanding how tokens work helps you troubleshoot issues:
 
 ```bash
 EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#r^1#...
-```
+```bash
 
 ### Refresh Token
 
@@ -458,7 +458,7 @@ EBAY_USER_ACCESS_TOKEN=v^1.1#i^1#r^1#...
 
 ```bash
 EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#r^1#...
-```
+```markdown
 
 <Info>
   Each time you refresh an access token, eBay also provides a new refresh token, effectively making refresh tokens never expire as long as you use the MCP server regularly.
@@ -468,7 +468,7 @@ EBAY_USER_REFRESH_TOKEN=v^1.1#i^1#r^1#...
 
 ```bash
 EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
-```
+```bash
 
 **Format:** ISO 8601 timestamp
 
@@ -483,7 +483,7 @@ EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
 <AccordionGroup>
   <Accordion title="Redirect URI Mismatch Error">
     **Error message:**
-    ```
+    ```text
     redirect_uri_mismatch
     ```
 
@@ -503,7 +503,7 @@ EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
 
   <Accordion title="Invalid Client ID/Secret">
     **Error message:**
-    ```
+    ```text
     invalid_client
     ```
 
@@ -518,7 +518,7 @@ EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
 
   <Accordion title="Authorization Code Expired">
     **Error message:**
-    ```
+    ```text
     authorization_code_expired or invalid_grant
     ```
 
@@ -542,7 +542,7 @@ EBAY_USER_TOKEN_EXPIRY=2024-12-31T23:59:59.000Z
 
   <Accordion title="Invalid Scope Error">
     **Error message:**
-    ```
+    ```text
     invalid_scope
     ```
 
@@ -577,7 +577,7 @@ If you need to use a different redirect URI:
 <Steps>
   <Step title="Update eBay Developer Portal">
     Add your custom URI to OAuth Redirect URIs:
-    ```
+    ```yaml
     https://yourdomain.com/oauth/callback
     ```
   </Step>
@@ -643,7 +643,7 @@ When moving to production:
     ```
 
     Ensure it shows:
-    ```
+    ```yaml
     Environment: production
     Authentication: OAuth 2.0 (User Tokens)
     ```

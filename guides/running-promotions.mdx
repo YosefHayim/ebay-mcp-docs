@@ -75,13 +75,13 @@ Ad fees typically range from 2% to 20% of the sale price. eBay recommends starti
 ### Step 1: Create Campaign
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Create a new promoted listings campaign:
 - Name: "Summer Electronics Sale 2024"
 - Marketplace: EBAY_US
 - Status: RUNNING
 - Budget: $500 monthly cap
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_create_campaign` to establish your campaign foundation. You'll receive a campaign ID for adding ads and ad groups.
@@ -91,12 +91,12 @@ The server uses `ebay_create_campaign` to establish your campaign foundation. Yo
 Ad groups help organize your ads by theme or strategy:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 For my "Summer Electronics Sale 2024" campaign, create an ad group:
 - Name: "Laptops - High Value"
 - Default bid: 8%
 - Target products: Laptops priced $800+
-```
+```markdown
 </Accordion>
 
 <Tip>
@@ -111,7 +111,7 @@ You can add products individually or in bulk:
   <Tab title="Individual Ads">
     For precise control over each listing:
 
-    ```
+    ```text
     Add these SKUs to my campaign with custom ad rates:
     - LAPTOP-001: 10% ad rate (high margin)
     - LAPTOP-002: 6% ad rate (competitive category)
@@ -124,7 +124,7 @@ You can add products individually or in bulk:
   <Tab title="Bulk Ads">
     For large catalogs:
 
-    ```
+    ```text
     Add all my laptop listings (50+ SKUs) to the campaign
     Use 7% ad rate for all items
     ```
@@ -135,7 +135,7 @@ You can add products individually or in bulk:
   <Tab title="Listing ID Method">
     For published listings without SKUs:
 
-    ```
+    ```text
     Add these listing IDs to my campaign:
     - 110123456789: 8% ad rate
     - 110123456790: 7% ad rate
@@ -150,14 +150,14 @@ You can add products individually or in bulk:
 Track how your ads are performing:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Show me performance metrics for my "Summer Electronics Sale 2024" campaign:
 - Total impressions and clicks
 - Conversion rate
 - Total ad fees paid
 - Revenue generated
 - Return on ad spend (ROAS)
-```
+```markdown
 </Accordion>
 
 The server retrieves campaign reports showing:
@@ -183,12 +183,12 @@ eBay automatically targets relevant keywords based on your listing titles and ca
 ### Add Keywords to Ad Group
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 For my "Laptops - High Value" ad group, add these keywords:
 - "gaming laptop" (Broad match, 9% bid)
 - "Dell XPS laptop" (Phrase match, 8% bid)
 - "MacBook Pro 16 inch" (Exact match, 10% bid)
-```
+```typescript
 </Accordion>
 
 The server uses `ebay_create_keyword` with match type specifications.
@@ -198,12 +198,12 @@ The server uses `ebay_create_keyword` with match type specifications.
 Add multiple keywords efficiently:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Bulk add 20 laptop-related keywords to my ad group:
 - All with Broad match type
 - Default bid: 7%
 - Include terms: ultrabook, notebook, laptop computer, portable computer, etc.
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_bulk_create_keyword` for batch operations.
@@ -216,7 +216,7 @@ Prevent ads from showing for irrelevant searches:
   <Tab title="Campaign-Level">
     Apply negative keywords across entire campaign:
 
-    ```
+    ```text
     Add these negative keywords to my campaign:
     - "broken"
     - "parts only"
@@ -231,7 +231,7 @@ Prevent ads from showing for irrelevant searches:
   <Tab title="Ad Group-Level">
     Fine-tune specific ad groups:
 
-    ```
+    ```text
     For my premium laptop ad group, add negative keywords:
     - "cheap"
     - "budget"
@@ -291,14 +291,14 @@ eBay supports multiple promotion formats:
 ### Create Item Promotion
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Create a promotion:
 - Type: Order discount
 - Offer: 15% off orders over $100
 - Duration: 7 days starting tomorrow
 - Apply to: All electronics category listings
 - Promotion name: "Electronics Week Sale"
-```
+```typescript
 </Accordion>
 
 The server uses `ebay_create_item_promotion` with detailed rules:
@@ -314,7 +314,7 @@ View and modify your promotions:
 
 <Tabs>
   <Tab title="List Promotions">
-    ```
+    ```text
     Show me all my active promotions
     ```
 
@@ -322,7 +322,7 @@ View and modify your promotions:
   </Tab>
 
   <Tab title="Update Promotion">
-    ```
+    ```text
     Extend my "Electronics Week Sale" promotion by 3 days
     ```
 
@@ -330,7 +330,7 @@ View and modify your promotions:
   </Tab>
 
   <Tab title="End Promotion">
-    ```
+    ```text
     Stop my "Electronics Week Sale" promotion immediately
     ```
 
@@ -343,13 +343,13 @@ View and modify your promotions:
 Track promotion effectiveness:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Show me performance data for my "Electronics Week Sale" promotion:
 - Total orders using promotion
 - Revenue generated
 - Average order value with vs. without promotion
 - Discount amount paid
-```
+```markdown
 </Accordion>
 
 Use insights to optimize future promotions and identify which discount strategies work best for your products.
@@ -361,12 +361,12 @@ Use insights to optimize future promotions and identify which discount strategie
 Get eBay's recommended bid rates:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 What bid rate does eBay recommend for these keywords in my laptop ad group?
 - "gaming laptop"
 - "Dell XPS"
 - "MacBook Pro"
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_get_bid_recommendation` to retrieve:
@@ -384,9 +384,9 @@ eBay's bid suggestions are based on competitor bids and category performance. St
 Improve listing quality for better ad performance:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Get optimization recommendations for my promoted listings
-```
+```markdown
 </Accordion>
 
 eBay may suggest:
@@ -402,7 +402,7 @@ eBay may suggest:
   <Tab title="Pause Campaign">
     Temporarily stop all ads:
 
-    ```
+    ```text
     Pause my "Summer Electronics Sale 2024" campaign
     ```
 
@@ -412,7 +412,7 @@ eBay may suggest:
   <Tab title="Resume Campaign">
     Restart paused campaign:
 
-    ```
+    ```text
     Resume my "Summer Electronics Sale 2024" campaign
     ```
 
@@ -422,7 +422,7 @@ eBay may suggest:
   <Tab title="End Campaign">
     Permanently conclude campaign:
 
-    ```
+    ```text
     End my "Summer Electronics Sale 2024" campaign
     ```
 
@@ -432,7 +432,7 @@ eBay may suggest:
   <Tab title="Archive Campaign">
     Remove from active lists:
 
-    ```
+    ```text
     Archive my completed "Summer Electronics Sale 2024" campaign
     ```
 
@@ -445,12 +445,12 @@ eBay may suggest:
 Replicate what works:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Clone my "Summer Electronics Sale 2024" campaign:
 - New name: "Fall Electronics Sale 2024"
 - Same ad groups, keywords, and bids
 - Update start date to October 1st
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_clone_campaign` to duplicate entire campaign structure, saving setup time.
@@ -462,12 +462,12 @@ The server uses `ebay_clone_campaign` to duplicate entire campaign structure, sa
 Create detailed performance analysis:
 
 <Accordion title="Ask your AI assistant">
-```
+```text
 Generate a campaign performance report for the past 30 days:
 - Include all active campaigns
 - Dimensions: Campaign, Ad Group, Keyword
 - Metrics: Impressions, clicks, sales, ad fees, ROAS
-```
+```markdown
 </Accordion>
 
 The server uses `ebay_create_report_task` to generate asynchronous reports with:
@@ -545,7 +545,7 @@ Set monthly budgets to prevent overspending. Ad fees are charged when items sell
 </Warning>
 
 <Accordion title="Budget allocation strategy">
-```
+```text
 Total Monthly Marketing Budget: $1,000
 
 Allocation:
@@ -554,7 +554,7 @@ Allocation:
 - 10% ($100): Experimental campaigns (new products, keywords, strategies)
 
 Review and rebalance monthly based on performance
-```
+```bash
 </Accordion>
 
 ### Keyword Strategy
@@ -649,7 +649,7 @@ Plan promotions around key shopping events:
 Leverage AI assistants for hands-free marketing:
 
 <Accordion title="Weekly optimization routine">
-```
+```text
 Every Monday at 9 AM:
 1. Generate performance report for all campaigns (past 7 days)
 2. Identify ads with ROAS < 3:1
@@ -659,7 +659,7 @@ Every Monday at 9 AM:
 6. Check for new keyword suggestions
 7. Add top 5 suggested keywords to each ad group
 8. Review and add negative keywords from search term reports
-```
+```bash
 </Accordion>
 
 ## Next Steps

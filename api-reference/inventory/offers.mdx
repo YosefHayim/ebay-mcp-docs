@@ -49,7 +49,7 @@ const offer = await mcp.useTool('inventory_createOffer', {
 });
 
 console.log(`Offer created: ${offer.offerId}`);
-```
+```bash
 
 ## Publishing Offers
 
@@ -61,7 +61,7 @@ const listing = await mcp.useTool('inventory_publishOffer', {
 
 console.log(`✅ Published! Listing ID: ${listing.listingId}`);
 console.log(`View at: https://www.ebay.com/itm/${listing.listingId}`);
-```
+```bash
 
 ## Offer Parameters
 
@@ -87,7 +87,7 @@ await mcp.useTool('inventory_updateOffer', {
   },
   available_quantity: 100 // Restocked
 });
-```
+```bash
 
 ### Withdraw (End) Listing
 
@@ -97,7 +97,7 @@ await mcp.useTool('inventory_withdrawOffer', {
 });
 
 console.log('✅ Listing ended');
-```
+```bash
 
 ### Delete Offer
 
@@ -105,7 +105,7 @@ console.log('✅ Listing ended');
 await mcp.useTool('inventory_deleteOffer', {
   offer_id: 'offer_id_here'
 });
-```
+```bash
 
 ## Next Steps
 

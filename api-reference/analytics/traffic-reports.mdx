@@ -25,7 +25,7 @@ report.records.forEach(record => {
   console.log(`  Sales: ${record.transaction}`);
   console.log(`  Conversion: ${(record.transaction / record.listing_views * 100).toFixed(2)}%`);
 });
-```
+```bash
 
 ## Available Dimensions
 
@@ -122,7 +122,7 @@ async function weeklyPerformanceReport() {
 }
 
 await weeklyPerformanceReport();
-```
+```bash
 
 ## Next Steps
 

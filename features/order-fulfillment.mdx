@@ -123,7 +123,7 @@ Retrieve and monitor orders across all your eBay listings.
     }
   ]
 }
-```
+```bash
 
 </Accordion>
 
@@ -220,7 +220,7 @@ For orders with multiple items shipped separately:
     "trackingNumber": "779876543210"
   }
 }
-```
+```markdown
 
 **Result:** Order status becomes `FULFILLED` after all items are shipped.
 
@@ -374,7 +374,7 @@ When you agree with the buyer's claim:
   },
   "revisionNumber": 1
 }
-```
+```markdown
 
 **When to Accept:**
 - Item was not received and you can't prove delivery
@@ -399,7 +399,7 @@ When you disagree with the buyer's claim:
   },
   "revisionNumber": 1
 }
-```
+```markdown
 
 **When to Contest:**
 - You have proof of delivery (tracking shows delivered)
@@ -484,7 +484,7 @@ Review evidence files submitted to disputes:
   "evidenceId": "evidence_123",
   "fileId": "file_456"
 }
-```
+```bash
 
 **Tool:** `ebay_fetch_payment_dispute_evidence_content`
 

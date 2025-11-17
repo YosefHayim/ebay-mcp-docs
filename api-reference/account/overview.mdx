@@ -101,7 +101,7 @@ const returnPolicy = await mcp.useTool('account_createReturnPolicy', {
 });
 
 console.log(`Return policy created: ${returnPolicy.returnPolicyId}`);
-```
+```bash
 
 ### 2. Configuring Payment Policies
 
@@ -116,7 +116,7 @@ const paymentPolicy = await mcp.useTool('account_createPaymentPolicy', {
   ],
   immediate_pay: true
 });
-```
+```bash
 
 ### 3. Managing Fulfillment Policies
 
@@ -143,7 +143,7 @@ const fulfillmentPolicy = await mcp.useTool('account_createFulfillmentPolicy', {
   ],
   handling_time: { value: 1, unit: 'BUSINESS_DAY' }
 });
-```
+```bash
 
 ## Tool Categories
 
@@ -227,7 +227,7 @@ try {
     console.error('Return period must be between 14-60 days');
   }
 }
-```
+```bash
 
 ## Next Steps
 

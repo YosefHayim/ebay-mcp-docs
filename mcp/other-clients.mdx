@@ -244,7 +244,7 @@ Most MCP clients use this configuration structure:
     }
   }
 }
-```
+```bash
 
 ### Environment Variables
 
@@ -264,7 +264,7 @@ You can reference environment variables instead of hardcoding credentials:
     }
   }
 }
-```
+```text
 
 Then set environment variables in your shell:
 
@@ -272,7 +272,7 @@ Then set environment variables in your shell:
 export EBAY_CLIENT_ID="YourAppId-12345"
 export EBAY_CLIENT_SECRET="YourCertId-67890"
 export EBAY_ENVIRONMENT="sandbox"
-```
+```bash
 
 ---
 
@@ -740,7 +740,7 @@ async def check_orders(ack, command, say):
             await say(f"Recent orders: {result}")
 
 app.start(3000)
-```
+```bash
 
 ---
 

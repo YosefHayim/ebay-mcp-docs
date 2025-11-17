@@ -11,7 +11,7 @@ The eBay MCP Server is built with a layered, modular architecture that prioritiz
 
 The server implements the Model Context Protocol (MCP) specification to expose eBay's Sell APIs as tools that AI assistants can use. It follows a clean architecture pattern with clear separation of concerns.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     MCP Client Layer                         │
 │         (Claude Desktop, Cursor, etc.)                       │
@@ -50,7 +50,7 @@ The server implements the Model Context Protocol (MCP) specification to expose e
                        │
                        ▼
             eBay Sell API Endpoints
-```
+```bash
 
 ## Core Layers
 
@@ -101,7 +101,7 @@ class EbayMcpServer {
     }
   }
 }
-```
+```bash
 
 ### 2. Business Logic Layer
 
@@ -109,7 +109,7 @@ The business logic layer contains domain-specific implementations of eBay APIs, 
 
 **Directory Structure:**
 
-```
+```text
 src/api/
 ├── account-management/
 │   ├── fulfillment-policy.ts
@@ -132,7 +132,7 @@ src/api/
 ├── metadata/
 │   └── metadata.ts
 └── index.ts  # API facade
-```
+```typescript
 
 **Key Principles:**
 - Each API category is self-contained with clear boundaries
@@ -195,7 +195,7 @@ class EbayApiClient {
     );
   }
 }
-```
+```bash
 
 #### OAuth Client (src/auth/oauth.ts)
 
@@ -234,11 +234,11 @@ class EbayOAuthClient {
     return this.appAccessToken!;
   }
 }
-```
+```bash
 
 ## Project Structure
 
-```
+```text
 ebay-mcp-server/
 ├── src/
 │   ├── index.ts                # STDIO MCP server entry point
@@ -289,7 +289,7 @@ ebay-mcp-server/
 ├── package.json                # Dependencies & scripts
 ├── tsconfig.json               # TypeScript configuration
 └── vitest.config.ts            # Test configuration
-```
+```bash
 
 ## Design Patterns
 
@@ -325,7 +325,7 @@ export class EbaySellerApi {
     };
   }
 }
-```
+```markdown
 
 **Benefits:**
 - Single entry point for all eBay APIs
@@ -375,7 +375,7 @@ class EbayInventoryApi {
     return this.client.put(`/sell/inventory/v1/inventory_item/${sku}`, item);
   }
 }
-```
+```bash
 
 ## Type Safety
 
@@ -387,7 +387,7 @@ All eBay API request/response types are generated from OpenAPI specifications.
 
 ```bash
 npm run generate:types
-```
+```bash
 
 This generates TypeScript types in `src/types/sell_*.ts` files.
 
@@ -412,7 +412,7 @@ export enum ListingDuration {
   DAYS_30 = 'DAYS_30',
   GTC = 'GTC', // Good 'Til Cancelled
 }
-```
+```bash
 
 ### 3. Zod Runtime Validation
 
@@ -428,7 +428,7 @@ const createOfferSchema = z.object({
     currency: z.string().length(3),
   }),
 });
-```
+```typescript
 
 **Benefits:**
 - Catch invalid inputs at runtime
@@ -440,7 +440,7 @@ const createOfferSchema = z.object({
 
 ### Tool Execution Flow
 
-```
+```markdown
 1. MCP Client sends tool request
    ↓
 2. MCP Server validates tool name
@@ -460,11 +460,11 @@ const createOfferSchema = z.object({
 9. Response interceptor handles errors
    ↓
 10. Response data returned to MCP Client
-```
+```bash
 
 ### Authentication Flow
 
-```
+```markdown
 1. Client makes API request
    ↓
 2. Request interceptor triggered
@@ -478,7 +478,7 @@ const createOfferSchema = z.object({
 6. Inject token in Authorization header
    ↓
 7. If 401 response → Retry with refreshed token
-```
+```bash
 
 ## Configuration Management
 
@@ -508,7 +508,7 @@ export function getEbayConfig(): EbayConfig {
     scopes: process.env.EBAY_SCOPES?.split(' '),
   };
 }
-```
+```markdown
 
 **Environment Variables:**
 - `EBAY_CLIENT_ID` - eBay application Client ID
@@ -552,7 +552,7 @@ export function getToolDefinitions(): ToolDefinition[] {
     ...newCategoryTools,  // Add new tools
   ];
 }
-```
+```bash
 
 ## Performance Considerations
 
@@ -574,7 +574,7 @@ class RateLimitTracker {
     return this.requestTimestamps.length < this.maxRequests;
   }
 }
-```
+```bash
 
 ### Connection Pooling
 

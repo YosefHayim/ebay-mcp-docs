@@ -27,7 +27,7 @@ const location = await mcp.useTool('inventory_createInventoryLocation', {
 });
 
 console.log(`✅ Location created: ${location.merchantLocationKey}`);
-```
+```bash
 
 ## Location Types
 
@@ -46,7 +46,7 @@ const locations = await mcp.useTool('inventory_getInventoryLocations', {
 locations.locations.forEach(loc => {
   console.log(`${loc.name}: ${loc.merchantLocationStatus}`);
 });
-```
+```bash
 
 ### Update Location
 
@@ -63,7 +63,7 @@ await mcp.useTool('inventory_updateInventoryLocation', {
     }
   }
 });
-```
+```bash
 
 ### Disable/Enable Location
 
@@ -75,7 +75,7 @@ await mcp.useTool('inventory_disableInventoryLocation', {
 await mcp.useTool('inventory_enableInventoryLocation', {
   merchant_location_key: 'warehouse-temp'
 });
-```
+```bash
 
 ## Next Steps
 

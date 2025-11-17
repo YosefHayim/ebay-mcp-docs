@@ -332,7 +332,7 @@ this.server.registerTool(
 ### 1. Missing Access Token
 
 **Error:**
-```
+```text
 Access token is missing. Please provide your access token and refresh token by calling ebay_set_user_tokens tool in order to perform API requests.
 ```
 
@@ -356,7 +356,7 @@ No user tokens configured.
   </Tab>
 
   <Tab title="Via MCP Tool">
-    ```
+    ```text
     Use the ebay_set_user_tokens_with_expiry tool with:
     - accessToken: Your user access token
     - refreshToken: Your user refresh token
@@ -367,7 +367,7 @@ No user tokens configured.
   </Tab>
 
   <Tab title="Generate New Tokens">
-    ```
+    ```text
     1. Use ebay_get_oauth_url tool to generate authorization URL
     2. Open URL in browser and authorize
     3. Exchange authorization code for tokens
@@ -379,7 +379,7 @@ No user tokens configured.
 ### 2. Expired Refresh Token
 
 **Error:**
-```
+```text
 User authorization expired. Please update EBAY_USER_REFRESH_TOKEN in .env with a new refresh token.
 ```
 
@@ -395,7 +395,7 @@ Refresh token has expired (typically after 18 months).
 ### 3. Invalid SKU Format
 
 **Error:**
-```
+```text
 eBay API Error: The SKU 'test sku' contains invalid characters. SKUs must be alphanumeric.
 ```
 
@@ -417,7 +417,7 @@ sku: "TESTSKU001"
 ### 4. Rate Limit Exceeded
 
 **Error:**
-```
+```text
 Rate limit exceeded: 5000/5000 requests in 60000ms window. Please wait before making more requests.
 ```
 
@@ -433,7 +433,7 @@ Too many requests in short time period.
 ### 5. Network Timeout
 
 **Error:**
-```
+```text
 timeout of 30000ms exceeded
 ```
 
@@ -448,7 +448,7 @@ Request took longer than 30 seconds.
 ### 6. Validation Errors
 
 **Error:**
-```
+```text
 Validation failed: Invalid type: expected string, received number at "price.value"
 ```
 
