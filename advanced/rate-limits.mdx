@@ -1,13 +1,13 @@
 ---
 title: "Rate Limits"
-description: "Understanding eBay API rate limits, client-side rate limiting strategies, and best practices for high-volume operations"
+description: "Understanding eBay Sell APIs rate limits, client-side rate limiting strategies, and best practices for high-volume operations"
 ---
 
 # Rate Limits
 
 eBay enforces rate limits on API requests to ensure fair usage and system stability. Understanding these limits and implementing appropriate strategies is critical for building reliable applications. This guide covers eBay's rate limit policies, the server's rate limiting implementation, and best practices.
 
-## eBay API Rate Limits
+## eBay Sell APIs Rate Limits
 
 eBay implements different rate limits based on your authentication method and marketplace.
 
@@ -184,7 +184,7 @@ The 5,000 requests per minute limit is conservative. For user tokens with 10,000
 
 ## Server-Side Rate Limit Handling
 
-When eBay API returns a 429 (Too Many Requests) status, the server provides clear guidance:
+When eBay Sell APIs returns a 429 (Too Many Requests) status, the server provides clear guidance:
 
 ```typescript
 // Response interceptor (src/api/client.ts:168-176)
@@ -193,7 +193,7 @@ if (error.response?.status === 429) {
   const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 60000;
 
   throw new Error(
-    `eBay API rate limit exceeded. Retry after ${waitTime / 1000} seconds. ` +
+    `eBay Sell APIs rate limit exceeded. Retry after ${waitTime / 1000} seconds. ` +
     `Consider reducing request frequency or upgrading to user tokens for higher limits.`
   );
 }
