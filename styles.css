@@ -314,13 +314,13 @@ nav ul li a,
 nav ol li a {
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-left: 3px solid transparent;
   padding-left: 12px !important;
-  margin: 2px 0;
+  margin: 8px 0;
   display: block;
+  text-decoration: none !important;
 }
 
-/* Hover Effects - Colorful Rotation (Red, Blue, Yellow, Green) */
+/* Hover Effects - Colorful Rotation (Red, Blue, Yellow, Green) with Bold Text */
 /* Red - Every 1st in group of 4 */
 .sidebar a:nth-child(4n+1):hover,
 .sidebar button:nth-child(4n+1):hover,
@@ -329,10 +329,11 @@ nav[class*="sidebar"] a:nth-child(4n+1):hover,
 [data-sidebar] a:nth-child(4n+1):hover,
 nav ul li:nth-child(4n+1) a:hover,
 nav ol li:nth-child(4n+1) a:hover {
-  border-left-color: var(--ebay-red) !important;
-  background: linear-gradient(90deg, rgba(229, 50, 56, 0.12) 0%, transparent 100%) !important;
-  padding-left: 16px !important;
+  background: linear-gradient(90deg, rgba(229, 50, 56, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-red) !important;
+  font-weight: 700 !important;
   transform: translateX(2px);
+  text-decoration: none !important;
 }
 
 /* Blue - Every 2nd in group of 4 */
@@ -343,10 +344,11 @@ nav[class*="sidebar"] a:nth-child(4n+2):hover,
 [data-sidebar] a:nth-child(4n+2):hover,
 nav ul li:nth-child(4n+2) a:hover,
 nav ol li:nth-child(4n+2) a:hover {
-  border-left-color: var(--ebay-blue) !important;
-  background: linear-gradient(90deg, rgba(0, 100, 210, 0.12) 0%, transparent 100%) !important;
-  padding-left: 16px !important;
+  background: linear-gradient(90deg, rgba(0, 100, 210, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-blue) !important;
+  font-weight: 700 !important;
   transform: translateX(2px);
+  text-decoration: none !important;
 }
 
 /* Yellow - Every 3rd in group of 4 */
@@ -357,10 +359,11 @@ nav[class*="sidebar"] a:nth-child(4n+3):hover,
 [data-sidebar] a:nth-child(4n+3):hover,
 nav ul li:nth-child(4n+3) a:hover,
 nav ol li:nth-child(4n+3) a:hover {
-  border-left-color: var(--ebay-yellow) !important;
-  background: linear-gradient(90deg, rgba(245, 175, 2, 0.12) 0%, transparent 100%) !important;
-  padding-left: 16px !important;
+  background: linear-gradient(90deg, rgba(245, 175, 2, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-yellow-dark) !important;
+  font-weight: 700 !important;
   transform: translateX(2px);
+  text-decoration: none !important;
 }
 
 /* Green - Every 4th in group of 4 */
@@ -371,10 +374,11 @@ nav[class*="sidebar"] a:nth-child(4n+4):hover,
 [data-sidebar] a:nth-child(4n+4):hover,
 nav ul li:nth-child(4n+4) a:hover,
 nav ol li:nth-child(4n+4) a:hover {
-  border-left-color: var(--ebay-green) !important;
-  background: linear-gradient(90deg, rgba(134, 184, 23, 0.12) 0%, transparent 100%) !important;
-  padding-left: 16px !important;
+  background: linear-gradient(90deg, rgba(134, 184, 23, 0.15) 0%, transparent 100%) !important;
+  color: var(--ebay-green-dark) !important;
+  font-weight: 700 !important;
   transform: translateX(2px);
+  text-decoration: none !important;
 }
 
 /* Active/Selected State - Colorful with Enhanced Visibility */
@@ -401,10 +405,9 @@ nav[class*="sidebar"] a:nth-child(4n+1)[aria-current="page"],
 [data-sidebar] a:nth-child(4n+1)[aria-current="page"],
 nav ul li:nth-child(4n+1) a[aria-current="page"],
 nav ul li:nth-child(4n+1) a.active {
-  border-left-color: var(--ebay-red) !important;
-  background: linear-gradient(90deg, rgba(229, 50, 56, 0.15) 0%, transparent 100%) !important;
+  background: linear-gradient(90deg, rgba(229, 50, 56, 0.2) 0%, transparent 100%) !important;
   color: var(--ebay-red) !important;
-  padding-left: 16px !important;
+  font-weight: 700 !important;
 }
 
 /* Active Blue */
@@ -415,10 +418,9 @@ nav[class*="sidebar"] a:nth-child(4n+2)[aria-current="page"],
 [data-sidebar] a:nth-child(4n+2)[aria-current="page"],
 nav ul li:nth-child(4n+2) a[aria-current="page"],
 nav ul li:nth-child(4n+2) a.active {
-  border-left-color: var(--ebay-blue) !important;
-  background: linear-gradient(90deg, rgba(0, 100, 210, 0.15) 0%, transparent 100%) !important;
+  background: linear-gradient(90deg, rgba(0, 100, 210, 0.2) 0%, transparent 100%) !important;
   color: var(--ebay-blue) !important;
-  padding-left: 16px !important;
+  font-weight: 700 !important;
 }
 
 /* Active Yellow */
@@ -429,10 +431,9 @@ nav[class*="sidebar"] a:nth-child(4n+3)[aria-current="page"],
 [data-sidebar] a:nth-child(4n+3)[aria-current="page"],
 nav ul li:nth-child(4n+3) a[aria-current="page"],
 nav ul li:nth-child(4n+3) a.active {
-  border-left-color: var(--ebay-yellow) !important;
-  background: linear-gradient(90deg, rgba(245, 175, 2, 0.15) 0%, transparent 100%) !important;
+  background: linear-gradient(90deg, rgba(245, 175, 2, 0.2) 0%, transparent 100%) !important;
   color: var(--ebay-yellow-dark) !important;
-  padding-left: 16px !important;
+  font-weight: 700 !important;
 }
 
 /* Active Green */
@@ -443,10 +444,9 @@ nav[class*="sidebar"] a:nth-child(4n+4)[aria-current="page"],
 [data-sidebar] a:nth-child(4n+4)[aria-current="page"],
 nav ul li:nth-child(4n+4) a[aria-current="page"],
 nav ul li:nth-child(4n+4) a.active {
-  border-left-color: var(--ebay-green) !important;
-  background: linear-gradient(90deg, rgba(134, 184, 23, 0.15) 0%, transparent 100%) !important;
+  background: linear-gradient(90deg, rgba(134, 184, 23, 0.2) 0%, transparent 100%) !important;
   color: var(--ebay-green-dark) !important;
-  padding-left: 16px !important;
+  font-weight: 700 !important;
 }
 
 /* Dark Mode Sidebar - Enhanced Contrast */

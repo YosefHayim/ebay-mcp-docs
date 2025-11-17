@@ -147,12 +147,12 @@
         {
           "anchor": "eBay Developer Portal",
           "href": "https://developer.ebay.com",
-          "icon": "globe"
+          "icon": "shopping-cart"
         },
         {
           "anchor": "MCP Documentation",
           "href": "https://modelcontextprotocol.io",
-          "icon": "book-open"
+          "icon": "puzzle-piece"
         }
       ]
     }
